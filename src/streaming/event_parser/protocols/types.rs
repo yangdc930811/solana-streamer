@@ -9,9 +9,11 @@ use solana_sdk::pubkey::Pubkey;
 use crate::streaming::event_parser::protocols::meteora_damm_v2::parser::METEORA_DAMM_V2_PROGRAM_ID;
 use crate::streaming::event_parser::protocols::meteora_dlmm::parser::METEORA_DLMM_PROGRAM_ID;
 use crate::streaming::event_parser::protocols::orca::parser::ORCA_PROGRAM_ID;
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /// 支持的协议
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, Clone, PartialEq, Eq, Hash, Default)]
+#[repr(u8)]
 pub enum Protocol {
     #[default]
     PumpSwap,
