@@ -4,13 +4,14 @@ use crate::streaming::event_parser::protocols::{
     raydium_clmm::parser::RAYDIUM_CLMM_PROGRAM_ID, raydium_cpmm::parser::RAYDIUM_CPMM_PROGRAM_ID,
 };
 use anyhow::{anyhow, Result};
+use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
 use crate::streaming::event_parser::protocols::meteora_damm_v2::parser::METEORA_DAMM_V2_PROGRAM_ID;
 use crate::streaming::event_parser::protocols::meteora_dlmm::parser::METEORA_DLMM_PROGRAM_ID;
 use crate::streaming::event_parser::protocols::orca::parser::ORCA_PROGRAM_ID;
 
 /// 支持的协议
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 pub enum Protocol {
     #[default]
     PumpSwap,

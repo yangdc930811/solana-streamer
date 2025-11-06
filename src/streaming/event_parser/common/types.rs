@@ -46,11 +46,14 @@ lazy_static::lazy_static! {
 pub enum ProtocolType {
     #[default]
     PumpSwap,
-    PumpFun,
-    Bonk,
     RaydiumCpmm,
     RaydiumClmm,
     RaydiumAmmV4,
+    MeteoraDammv2,
+    MeteoraDlmm,
+    Orca,
+    Bonk,
+    PumpFun,
     Common,
 }
 
