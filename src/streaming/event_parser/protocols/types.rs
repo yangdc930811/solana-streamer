@@ -5,16 +5,23 @@ use crate::streaming::event_parser::protocols::{
 };
 use anyhow::{anyhow, Result};
 use solana_sdk::pubkey::Pubkey;
+use crate::streaming::event_parser::protocols::meteora_damm_v2::parser::METEORA_DAMM_V2_PROGRAM_ID;
+use crate::streaming::event_parser::protocols::meteora_dlmm::parser::METEORA_DLMM_PROGRAM_ID;
+use crate::streaming::event_parser::protocols::orca::parser::ORCA_PROGRAM_ID;
 
 /// 支持的协议
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub enum Protocol {
+    #[default]
     PumpSwap,
-    PumpFun,
-    Bonk,
     RaydiumCpmm,
     RaydiumClmm,
     RaydiumAmmV4,
+    MeteoraDammv2,
+    MeteoraDlmm,
+    Orca,
+    Bonk,
+    PumpFun,
 }
 
 impl Protocol {
@@ -26,6 +33,9 @@ impl Protocol {
             Protocol::RaydiumCpmm => vec![RAYDIUM_CPMM_PROGRAM_ID],
             Protocol::RaydiumClmm => vec![RAYDIUM_CLMM_PROGRAM_ID],
             Protocol::RaydiumAmmV4 => vec![RAYDIUM_AMM_V4_PROGRAM_ID],
+            Protocol::MeteoraDammv2 => vec![METEORA_DAMM_V2_PROGRAM_ID],
+            Protocol::MeteoraDlmm => vec![METEORA_DLMM_PROGRAM_ID],
+            Protocol::Orca => vec![ORCA_PROGRAM_ID],
         }
     }
 }
@@ -39,6 +49,9 @@ impl std::fmt::Display for Protocol {
             Protocol::RaydiumCpmm => write!(f, "RaydiumCpmm"),
             Protocol::RaydiumClmm => write!(f, "RaydiumClmm"),
             Protocol::RaydiumAmmV4 => write!(f, "RaydiumAmmV4"),
+            Protocol::MeteoraDammv2 => write!(f, "MeteoraDammv2"),
+            Protocol::MeteoraDlmm => write!(f, "MeteoraDlmm"),
+            Protocol::Orca => write!(f, "Orca"),
         }
     }
 }
@@ -54,6 +67,9 @@ impl std::str::FromStr for Protocol {
             "raydiumcpmm" => Ok(Protocol::RaydiumCpmm),
             "raydiumclmm" => Ok(Protocol::RaydiumClmm),
             "raydiumammv4" => Ok(Protocol::RaydiumAmmV4),
+            "meteoradammv2" => Ok(Protocol::MeteoraDammv2),
+            "meteoradlmm" => Ok(Protocol::MeteoraDlmm),
+            "orca" => Ok(Protocol::Orca),
             _ => Err(anyhow!("Unsupported protocol: {}", s)),
         }
     }
