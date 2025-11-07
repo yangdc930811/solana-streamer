@@ -108,19 +108,19 @@ git clone https://github.com/0xfnzero/solana-streamer
 
 ```toml
 # 添加到您的 Cargo.toml
-solana-streamer-sdk = { path = "./solana-streamer", version = "1.0.0" }
+solana-streamer-sdk = { path = "./solana-streamer", version = "1.1.0" }
 ```
 
 ### 使用 crates.io
 
 ```toml
 # 添加到您的 Cargo.toml
-solana-streamer-sdk = "1.0.0"
+solana-streamer-sdk = "1.1.0"
 ```
 
 ## 🔄 迁移指南
 
-### 从 v0.5.x 迁移到 v1.0.0
+### 从 v0.5.x 迁移到 v1.x.x
 
 版本 1.0.0 引入了从基于 trait 的事件处理到基于 enum 的事件的重大架构变更。这提供了更好的类型安全性、改进的性能和更简单的代码模式。
 
@@ -141,7 +141,7 @@ let callback = |event: Box<dyn UnifiedEvent>| {
     println!("Event: {:?}", event.event_type());
 };
 
-// 新版 (v1.0.0)
+// 新版 (v1.x.x)
 let callback = |event: DexEvent| {
     println!("Event: {:?}", event.metadata().event_type);
 };

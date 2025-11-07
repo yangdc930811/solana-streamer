@@ -109,19 +109,19 @@ Add the dependency to your `Cargo.toml`:
 
 ```toml
 # Add to your Cargo.toml
-solana-streamer-sdk = { path = "./solana-streamer", version = "1.0.0" }
+solana-streamer-sdk = { path = "./solana-streamer", version = "1.1.0" }
 ```
 
 ### Use crates.io
 
 ```toml
 # Add to your Cargo.toml
-solana-streamer-sdk = "1.0.0"
+solana-streamer-sdk = "1.1.0"
 ```
 
 ## 🔄 Migration Guide
 
-### Migrating from v0.5.x to v1.0.0
+### Migrating from v0.5.x to v1.x.x
 
 Version 1.0.0 introduces a major architectural change from trait-based event handling to enum-based events. This provides better type safety, improved performance, and simpler code patterns.
 
@@ -142,7 +142,7 @@ let callback = |event: Box<dyn UnifiedEvent>| {
     println!("Event: {:?}", event.event_type());
 };
 
-// New (v1.0.0)
+// New (v1.x.x)
 let callback = |event: DexEvent| {
     println!("Event: {:?}", event.metadata().event_type);
 };

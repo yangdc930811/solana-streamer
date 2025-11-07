@@ -1,4 +1,4 @@
-# 迁移指南：v0.5.x 到 v1.0.0
+# 迁移指南：v0.5.x 到 v1.x.x
 
 ## 概述
 
@@ -11,7 +11,7 @@
 
 ## 破坏性变更摘要
 
-| 组件 | v0.5.x | v1.0.0 |
+| 组件 | v0.5.x | v1.x.x |
 |-----------|--------|--------|
 | 事件类型 | `Box<dyn UnifiedEvent>` | `DexEvent`（枚举） |
 | 回调签名 | `Fn(Box<dyn UnifiedEvent>)` | `Fn(DexEvent)` |
@@ -32,7 +32,7 @@ let callback = |event: Box<dyn UnifiedEvent>| {
 };
 ```
 
-**之后 (v1.0.0):**
+**之后 (v1.x.x):**
 ```rust
 use solana_streamer_sdk::streaming::event_parser::DexEvent;
 
@@ -57,7 +57,7 @@ match_event!(event, {
 });
 ```
 
-**之后 (v1.0.0):**
+**之后 (v1.x.x):**
 ```rust
 match event {
     DexEvent::PumpFunTradeEvent(e) => {
@@ -80,7 +80,7 @@ let slot = event.slot();
 let protocol = event.protocol();
 ```
 
-**之后 (v1.0.0):**
+**之后 (v1.x.x):**
 ```rust
 let event_type = event.metadata().event_type;
 let signature = event.metadata().signature;
@@ -104,7 +104,7 @@ use solana_streamer_sdk::{
 };
 ```
 
-**之后 (v1.0.0):**
+**之后 (v1.x.x):**
 ```rust
 use solana_streamer_sdk::streaming::event_parser::{
     DexEvent,
@@ -175,7 +175,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### 之后 (v1.0.0)
+### 之后 (v1.x.x)
 
 ```rust
 use solana_streamer_sdk::streaming::{
@@ -233,7 +233,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### 模式 1：使用 Match 进行事件过滤
 
-**v1.0.0:**
+**v1.x.x:**
 ```rust
 let callback = |event: DexEvent| {
     // 只处理特定事件类型
@@ -251,7 +251,7 @@ let callback = |event: DexEvent| {
 
 ### 模式 2：通用事件处理
 
-**v1.0.0:**
+**v1.x.x:**
 ```rust
 fn process_event(event: DexEvent) {
     let metadata = event.metadata();
@@ -272,7 +272,7 @@ fn process_event(event: DexEvent) {
 
 ### 模式 3：事件类型分类
 
-**v1.0.0:**
+**v1.x.x:**
 ```rust
 fn categorize_event(event: &DexEvent) -> &'static str {
     match event {
@@ -307,7 +307,7 @@ parser.parse_encoded_confirmed_transaction_with_status_meta(
 ).await?;
 ```
 
-**之后 (v1.0.0):**
+**之后 (v1.x.x):**
 ```rust
 EventParser::parse_encoded_confirmed_transaction_with_status_meta(
     &protocols,

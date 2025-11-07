@@ -1,4 +1,4 @@
-# Migration Guide: v0.5.x to v1.0.0
+# Migration Guide: v0.5.x to v1.x.x
 
 ## Overview
 
@@ -11,7 +11,7 @@ Version 1.0.0 introduces a significant architectural improvement by transitionin
 
 ## Breaking Changes Summary
 
-| Component          | v0.5.x                      | v1.0.0                      |
+| Component          | v0.5.x                      | v1.x.x                      |
 | ------------------ | --------------------------- | --------------------------- |
 | Event Type         | `Box<dyn UnifiedEvent>`     | `DexEvent` (enum)           |
 | Callback Signature | `Fn(Box<dyn UnifiedEvent>)` | `Fn(DexEvent)`              |
@@ -33,7 +33,7 @@ let callback = |event: Box<dyn UnifiedEvent>| {
 };
 ```
 
-**After (v1.0.0):**
+**After (v1.x.x):**
 
 ```rust
 use solana_streamer_sdk::streaming::event_parser::DexEvent;
@@ -60,7 +60,7 @@ match_event!(event, {
 });
 ```
 
-**After (v1.0.0):**
+**After (v1.x.x):**
 
 ```rust
 match event {
@@ -85,7 +85,7 @@ let slot = event.slot();
 let protocol = event.protocol();
 ```
 
-**After (v1.0.0):**
+**After (v1.x.x):**
 
 ```rust
 let event_type = event.metadata().event_type;
@@ -111,7 +111,7 @@ use solana_streamer_sdk::{
 };
 ```
 
-**After (v1.0.0):**
+**After (v1.x.x):**
 
 ```rust
 use solana_streamer_sdk::streaming::event_parser::{
@@ -183,7 +183,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### After (v1.0.0)
+### After (v1.x.x)
 
 ```rust
 use solana_streamer_sdk::streaming::{
@@ -241,7 +241,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Pattern 1: Event Filtering with Match
 
-**v1.0.0:**
+**v1.x.x:**
 
 ```rust
 let callback = |event: DexEvent| {
@@ -260,7 +260,7 @@ let callback = |event: DexEvent| {
 
 ### Pattern 2: Generic Event Processing
 
-**v1.0.0:**
+**v1.x.x:**
 
 ```rust
 fn process_event(event: DexEvent) {
@@ -282,7 +282,7 @@ fn process_event(event: DexEvent) {
 
 ### Pattern 3: Event Type Categorization
 
-**v1.0.0:**
+**v1.x.x:**
 
 ```rust
 fn categorize_event(event: &DexEvent) -> &'static str {
@@ -319,7 +319,7 @@ parser.parse_encoded_confirmed_transaction_with_status_meta(
 ).await?;
 ```
 
-**After (v1.0.0):**
+**After (v1.x.x):**
 
 ```rust
 EventParser::parse_encoded_confirmed_transaction_with_status_meta(

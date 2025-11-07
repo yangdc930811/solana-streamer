@@ -64,7 +64,7 @@ pub async fn process_grpc_transaction(
 
             let adapter_callback = create_metrics_callback(callback.clone());
 
-            EventParser::parse_grpc_transaction_owned(
+            EventParser::parse_grpc_transaction(
                 protocols,
                 event_type_filter,
                 grpc_tx,
@@ -123,18 +123,20 @@ pub async fn process_shred_transaction(
     let recv_us = transaction_with_slot.recv_us;
 
     let adapter_callback = create_metrics_callback(callback);
+    let accounts = tx.message.static_account_keys();
 
-    EventParser::parse_versioned_transaction_owned(
+    EventParser::parse_instruction_events_from_versioned_transaction(
         protocols,
         event_type_filter,
-        tx,
+        &tx,
         signature,
         Some(slot),
         None,
         recv_us,
+        accounts,
+        &[],
         bot_wallet,
         None,
-        &[],
         adapter_callback,
     )
     .await?;

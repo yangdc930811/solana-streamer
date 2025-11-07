@@ -4,7 +4,7 @@ use solana_sdk::pubkey::Pubkey;
 
 use crate::streaming::{
     event_parser::{
-        common::EventMetadata,
+        common::{EventMetadata, EventType},
         protocols::pumpswap::{PumpSwapGlobalConfigAccountEvent, PumpSwapPoolAccountEvent},
         DexEvent,
     },
@@ -33,8 +33,10 @@ pub fn global_config_decode(data: &[u8]) -> Option<GlobalConfig> {
 
 pub fn global_config_parser(
     account: &AccountPretty,
-    metadata: EventMetadata,
+    mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
+    metadata.event_type = EventType::AccountPumpSwapGlobalConfig;
+
     if account.data.len() < GLOBAL_CONFIG_SIZE + 8 {
         return None;
     }
@@ -76,7 +78,9 @@ pub fn pool_decode(data: &[u8]) -> Option<Pool> {
     borsh::from_slice::<Pool>(&data[..POOL_SIZE]).ok()
 }
 
-pub fn pool_parser(account: &AccountPretty, metadata: EventMetadata) -> Option<DexEvent> {
+pub fn pool_parser(account: &AccountPretty, mut metadata: EventMetadata) -> Option<DexEvent> {
+    metadata.event_type = EventType::AccountPumpSwapPool;
+
     if account.data.len() < POOL_SIZE + 8 {
         return None;
     }
