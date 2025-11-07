@@ -13,6 +13,9 @@ use crate::streaming::event_parser::{
         bonk::parser as bonk, pumpfun::parser as pumpfun, pumpswap::parser as pumpswap,
         raydium_amm_v4::parser as raydium_amm_v4, raydium_clmm::parser as raydium_clmm,
         raydium_cpmm::parser as raydium_cpmm,
+        meteora_damm_v2::parser as meteora_damm_v2,
+        meteora_dlmm::parser as meteora_dlmm,
+        orca::parser as orca,
     },
     DexEvent, Protocol,
 };
@@ -52,6 +55,9 @@ impl EventDispatcher {
             Protocol::RaydiumCpmm => ProtocolType::RaydiumCpmm,
             Protocol::RaydiumClmm => ProtocolType::RaydiumClmm,
             Protocol::RaydiumAmmV4 => ProtocolType::RaydiumAmmV4,
+            Protocol::MeteoraDammv2 =>  ProtocolType::MeteoraDammv2,
+            Protocol::MeteoraDlmm =>  ProtocolType::MeteoraDlmm,
+            Protocol::Orca =>  ProtocolType::Orca,
         };
 
         match protocol {
@@ -91,6 +97,18 @@ impl EventDispatcher {
                 accounts,
                 metadata,
             ),
+            Protocol::MeteoraDammv2 => {
+                // todo
+                None
+            }
+            Protocol::MeteoraDlmm => {
+                // todo
+                None
+            }
+            Protocol::Orca => {
+                // todo
+                None
+            }
         }
     }
 
@@ -120,6 +138,9 @@ impl EventDispatcher {
             Protocol::RaydiumCpmm => ProtocolType::RaydiumCpmm,
             Protocol::RaydiumClmm => ProtocolType::RaydiumClmm,
             Protocol::RaydiumAmmV4 => ProtocolType::RaydiumAmmV4,
+            Protocol::MeteoraDammv2 =>  ProtocolType::MeteoraDammv2,
+            Protocol::MeteoraDlmm =>  ProtocolType::MeteoraDlmm,
+            Protocol::Orca =>  ProtocolType::Orca,
         };
 
         match protocol {
@@ -153,6 +174,18 @@ impl EventDispatcher {
                 inner_instruction_data,
                 metadata,
             ),
+            Protocol::MeteoraDammv2 => {
+                // todo
+                None
+            }
+            Protocol::MeteoraDlmm => {
+                // todo
+                None
+            }
+            Protocol::Orca => {
+                // todo
+                None
+            }
         }
     }
 
@@ -186,6 +219,9 @@ impl EventDispatcher {
             Protocol::RaydiumCpmm => raydium_cpmm::RAYDIUM_CPMM_PROGRAM_ID,
             Protocol::RaydiumClmm => raydium_clmm::RAYDIUM_CLMM_PROGRAM_ID,
             Protocol::RaydiumAmmV4 => raydium_amm_v4::RAYDIUM_AMM_V4_PROGRAM_ID,
+            Protocol::MeteoraDammv2 => meteora_damm_v2::METEORA_DAMM_V2_PROGRAM_ID,
+            Protocol::MeteoraDlmm => meteora_dlmm::METEORA_DLMM_PROGRAM_ID,
+            Protocol::Orca => orca::ORCA_PROGRAM_ID,
         }
     }
 
@@ -221,6 +257,9 @@ impl EventDispatcher {
             Protocol::RaydiumCpmm => ProtocolType::RaydiumCpmm,
             Protocol::RaydiumClmm => ProtocolType::RaydiumClmm,
             Protocol::RaydiumAmmV4 => ProtocolType::RaydiumAmmV4,
+            Protocol::MeteoraDammv2 =>  ProtocolType::MeteoraDammv2,
+            Protocol::MeteoraDlmm =>  ProtocolType::MeteoraDlmm,
+            Protocol::Orca =>  ProtocolType::Orca,
         };
 
         match protocol {
@@ -239,6 +278,18 @@ impl EventDispatcher {
             }
             Protocol::RaydiumAmmV4 => {
                 raydium_amm_v4::parse_raydium_amm_v4_account_data(discriminator, account, metadata)
+            }
+            Protocol::MeteoraDammv2 => {
+                // todo
+                None
+            }
+            Protocol::MeteoraDlmm => {
+                // todo
+                None
+            }
+            Protocol::Orca => {
+                // todo
+                None
             }
         }
     }
