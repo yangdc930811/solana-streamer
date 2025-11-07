@@ -1,9 +1,9 @@
 use anyhow::Result;
 use solana_sdk::signature::{Keypair, Signer};
-use solana_streamer_sdk::streaming::event_parser::common::filter::EventTypeFilter;
-use solana_streamer_sdk::streaming::event_parser::common::types::EventType;
-use solana_streamer_sdk::streaming::event_parser::Protocol;
-use solana_streamer_sdk::streaming::yellowstone_grpc::{
+use solana_streamer::streaming::event_parser::common::filter::EventTypeFilter;
+use solana_streamer::streaming::event_parser::common::types::EventType;
+use solana_streamer::streaming::event_parser::Protocol;
+use solana_streamer::streaming::yellowstone_grpc::{
     AccountFilter, TransactionFilter, YellowstoneGrpc,
 };
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     let counter = event_counter.clone();
 
     let callback =
-        move |event: solana_streamer_sdk::streaming::event_parser::DexEvent| {
+        move |event: solana_streamer::streaming::event_parser::DexEvent| {
             let count = counter.fetch_add(1, Ordering::Relaxed);
 
             let protocol = match event.metadata().event_type {
@@ -254,7 +254,7 @@ async fn main() -> Result<()> {
     let shutdown_event_counter = Arc::new(AtomicU64::new(0));
     let shutdown_counter = shutdown_event_counter.clone();
     let shutdown_callback =
-        move |_event: solana_streamer_sdk::streaming::event_parser::DexEvent| {
+        move |_event: solana_streamer::streaming::event_parser::DexEvent| {
             shutdown_counter.fetch_add(1, Ordering::Relaxed);
         };
 
@@ -327,7 +327,7 @@ async fn main() -> Result<()> {
     println!("\n=== Subscription enforcement ===");
 
     let test_callback =
-        |_event: solana_streamer_sdk::streaming::event_parser::DexEvent| {};
+        |_event: solana_streamer::streaming::event_parser::DexEvent| {};
 
     match client
         .subscribe_events_immediate(
@@ -358,7 +358,7 @@ async fn main() -> Result<()> {
     let client2_counter = Arc::new(AtomicU64::new(0));
     let counter2 = client2_counter.clone();
     let client2_callback =
-        move |_event: solana_streamer_sdk::streaming::event_parser::DexEvent| {
+        move |_event: solana_streamer::streaming::event_parser::DexEvent| {
             counter2.fetch_add(1, Ordering::Relaxed);
         };
 
@@ -390,7 +390,7 @@ async fn main() -> Result<()> {
     println!("\n=== Advanced subscription enforcement ===");
 
     let test_callback_advanced =
-        |_event: solana_streamer_sdk::streaming::event_parser::DexEvent| {};
+        |_event: solana_streamer::streaming::event_parser::DexEvent| {};
 
     let client3 =
         Arc::new(YellowstoneGrpc::new(GRPC_ENDPOINT.to_string(), API_KEY.map(|s| s.to_string()))?);
@@ -447,7 +447,7 @@ async fn main() -> Result<()> {
     let client4_counter = Arc::new(AtomicU64::new(0));
     let counter4 = client4_counter.clone();
     let client4_callback =
-        move |_event: solana_streamer_sdk::streaming::event_parser::DexEvent| {
+        move |_event: solana_streamer::streaming::event_parser::DexEvent| {
             counter4.fetch_add(1, Ordering::Relaxed);
         };
 

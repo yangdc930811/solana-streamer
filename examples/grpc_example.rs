@@ -1,4 +1,4 @@
-use solana_streamer_sdk::streaming::{
+use solana_streamer::streaming::{
     event_parser::{
         protocols::{
             bonk::parser::BONK_PROGRAM_ID, pumpfun::parser::PUMPFUN_PROGRAM_ID,

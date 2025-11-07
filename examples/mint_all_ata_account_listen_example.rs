@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use solana_sdk::pubkey::Pubkey;
-use solana_streamer_sdk::streaming::{
+use solana_streamer::streaming::{
     event_parser::{
         common::{filter::EventTypeFilter, EventType},
         DexEvent,

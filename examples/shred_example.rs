@@ -1,4 +1,4 @@
-use solana_streamer_sdk::streaming::{
+use solana_streamer::streaming::{
     event_parser::{Protocol, DexEvent},
     shred::StreamClientConfig,
     ShredStreamGrpc,
