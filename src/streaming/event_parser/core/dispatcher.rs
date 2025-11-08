@@ -205,6 +205,12 @@ impl EventDispatcher {
             Some(Protocol::RaydiumClmm)
         } else if program_id == &raydium_amm_v4::RAYDIUM_AMM_V4_PROGRAM_ID {
             Some(Protocol::RaydiumAmmV4)
+        } else if program_id == &meteora_damm_v2::METEORA_DAMM_V2_PROGRAM_ID {
+            Some(Protocol::MeteoraDammv2)
+        } else if program_id == &meteora_dlmm::METEORA_DLMM_PROGRAM_ID {
+            Some(Protocol::MeteoraDlmm)
+        } else if program_id == &orca::ORCA_PROGRAM_ID {
+            Some(Protocol::Orca)
         } else {
             None
         }

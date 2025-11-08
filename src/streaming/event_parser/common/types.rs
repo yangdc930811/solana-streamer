@@ -141,6 +141,7 @@ pub enum EventType {
     Unknown,
 }
 
+// todo
 pub const ACCOUNT_EVENT_TYPES: &[EventType] = &[
     EventType::AccountRaydiumAmmV4AmmInfo,
     EventType::AccountPumpSwapGlobalConfig,
@@ -156,6 +157,7 @@ pub const ACCOUNT_EVENT_TYPES: &[EventType] = &[
     EventType::AccountRaydiumClmmTickArrayState,
     EventType::AccountRaydiumCpmmAmmConfig,
     EventType::AccountRaydiumCpmmPoolState,
+    EventType::AccountMeteoraDammV2Pool,
     EventType::TokenAccount,
     EventType::NonceAccount,
 ];

@@ -4,7 +4,6 @@ use solana_sdk::pubkey::Pubkey;
 use crate::streaming::event_parser::common::{EventMetadata, EventType};
 use crate::streaming::event_parser::DexEvent;
 use crate::streaming::event_parser::protocols::meteora_damm_v2::events::MeteoraDammV2PoolAccountEvent;
-use crate::streaming::event_parser::protocols::pumpswap::PumpSwapPoolAccountEvent;
 use crate::streaming::grpc::AccountPretty;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
