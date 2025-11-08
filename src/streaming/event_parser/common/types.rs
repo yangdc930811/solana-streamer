@@ -112,6 +112,10 @@ pub enum EventType {
     RaydiumAmmV4Withdraw,
     RaydiumAmmV4WithdrawPnl,
 
+    // Meteora Damm V2 events
+    MeteoraDammV2Swap,
+    MeteoraDammV2Swap2,
+
     // Account events
     AccountRaydiumAmmV4AmmInfo,
     AccountPumpSwapGlobalConfig,
@@ -127,6 +131,7 @@ pub enum EventType {
     AccountRaydiumClmmTickArrayState,
     AccountRaydiumCpmmAmmConfig,
     AccountRaydiumCpmmPoolState,
+    AccountMeteoraDammV2Pool,
 
     NonceAccount,
     TokenAccount,
@@ -222,6 +227,9 @@ impl fmt::Display for EventType {
             EventType::NonceAccount => write!(f, "NonceAccount"),
             EventType::BlockMeta => write!(f, "BlockMeta"),
             EventType::Unknown => write!(f, "Unknown"),
+            EventType::MeteoraDammV2Swap => write!(f, "MeteoraDammV2Swap"),
+            EventType::MeteoraDammV2Swap2 => write!(f, "MeteoraDammV2Swap2"),
+            EventType::AccountMeteoraDammV2Pool => write!(f, "AccountMeteoraDammV2Pool"),
         }
     }
 }

@@ -11,6 +11,7 @@ use crate::streaming::event_parser::protocols::raydium_clmm::events::*;
 use crate::streaming::event_parser::protocols::raydium_cpmm::events::*;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
+use crate::streaming::event_parser::protocols::meteora_damm_v2::events::{MeteoraDammV2PoolAccountEvent, MeteoraDammV2Swap2Event, MeteoraDammV2SwapEvent};
 
 /// Unified Event Enum - Replaces the trait-based approach with a type-safe enum
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -74,6 +75,11 @@ pub enum DexEvent {
     NonceAccountEvent(NonceAccountEvent),
     TokenInfoEvent(TokenInfoEvent),
     BlockMetaEvent(BlockMetaEvent),
+
+    // Meteora Damm v2 events
+    MeteoraDammV2SwapEvent(MeteoraDammV2SwapEvent),
+    MeteoraDammV2Swap2Event(MeteoraDammV2Swap2Event),
+    MeteoraDammV2PoolAccountEvent(MeteoraDammV2PoolAccountEvent),
 }
 
 impl DexEvent {
@@ -125,6 +131,9 @@ impl DexEvent {
             DexEvent::NonceAccountEvent(e) => &e.metadata,
             DexEvent::TokenInfoEvent(e) => &e.metadata,
             DexEvent::BlockMetaEvent(e) => &e.metadata,
+            DexEvent::MeteoraDammV2SwapEvent(e) => &e.metadata,
+            DexEvent::MeteoraDammV2Swap2Event(e) => &e.metadata,
+            DexEvent::MeteoraDammV2PoolAccountEvent(e) => &e.metadata,
         }
     }
 
@@ -176,6 +185,9 @@ impl DexEvent {
             DexEvent::NonceAccountEvent(e) => &mut e.metadata,
             DexEvent::TokenInfoEvent(e) => &mut e.metadata,
             DexEvent::BlockMetaEvent(e) => &mut e.metadata,
+            DexEvent::MeteoraDammV2SwapEvent(e) => &mut e.metadata,
+            DexEvent::MeteoraDammV2Swap2Event(e) => &mut e.metadata,
+            DexEvent::MeteoraDammV2PoolAccountEvent(e) => &mut e.metadata,
         }
     }
 }

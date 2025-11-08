@@ -1,6 +1,11 @@
 use borsh::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
+use crate::streaming::event_parser::common::{EventMetadata, EventType};
+use crate::streaming::event_parser::DexEvent;
+use crate::streaming::event_parser::protocols::meteora_damm_v2::events::MeteoraDammV2PoolAccountEvent;
+use crate::streaming::event_parser::protocols::pumpswap::PumpSwapPoolAccountEvent;
+use crate::streaming::grpc::AccountPretty;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
 pub struct BaseFeeStruct {
@@ -118,4 +123,25 @@ pub fn direct_pool_decode(data: &[u8]) -> Option<Pool> {
         return None;
     }
     borsh::from_slice::<Pool>(&data[8..POOL_SIZE + 8]).ok()
+}
+
+pub fn pool_parser(account: &AccountPretty, mut metadata: EventMetadata) -> Option<DexEvent> {
+    metadata.event_type = EventType::AccountMeteoraDammV2Pool;
+
+    if account.data.len() < POOL_SIZE + 8 {
+        return None;
+    }
+    if let Some(pool) = pool_decode(&account.data[8..POOL_SIZE + 8]) {
+        Some(DexEvent::MeteoraDammV2PoolAccountEvent(MeteoraDammV2PoolAccountEvent {
+            metadata,
+            pubkey: account.pubkey,
+            executable: account.executable,
+            lamports: account.lamports,
+            owner: account.owner,
+            rent_epoch: account.rent_epoch,
+            pool,
+        }))
+    } else {
+        None
+    }
 }
