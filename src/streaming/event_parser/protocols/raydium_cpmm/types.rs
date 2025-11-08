@@ -93,6 +93,13 @@ pub fn pool_state_decode(data: &[u8]) -> Option<PoolState> {
     borsh::from_slice::<PoolState>(&data[..POOL_STATE_SIZE]).ok()
 }
 
+pub fn direct_pool_state_decode(data: &[u8]) -> Option<PoolState> {
+    if data.len() < POOL_STATE_SIZE + 8 {
+        return None;
+    }
+    borsh::from_slice::<PoolState>(&data[8..POOL_STATE_SIZE + 8]).ok()
+}
+
 pub fn pool_state_parser(account: &AccountPretty, mut metadata: EventMetadata) -> Option<DexEvent> {
     metadata.event_type = EventType::AccountRaydiumCpmmPoolState;
 

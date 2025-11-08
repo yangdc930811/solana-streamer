@@ -78,6 +78,13 @@ pub fn pool_decode(data: &[u8]) -> Option<Pool> {
     borsh::from_slice::<Pool>(&data[..POOL_SIZE]).ok()
 }
 
+pub fn direct_pool_decode(data: &[u8]) -> Option<Pool> {
+    if data.len() < POOL_SIZE + 8 {
+        return None;
+    }
+    borsh::from_slice::<Pool>(&data[8..POOL_SIZE + 8]).ok()
+}
+
 pub fn pool_parser(account: &AccountPretty, mut metadata: EventMetadata) -> Option<DexEvent> {
     metadata.event_type = EventType::AccountPumpSwapPool;
 
