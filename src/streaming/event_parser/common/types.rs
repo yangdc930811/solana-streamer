@@ -3,7 +3,7 @@ use crossbeam_queue::ArrayQueue;
 use serde::{Deserialize, Serialize};
 use solana_sdk::{pubkey::Pubkey, signature::Signature};
 use std::{borrow::Cow, fmt, str::FromStr, sync::Arc};
-
+use strum_macros::Display;
 use crate::streaming::{common::SimdUtils, event_parser::DexEvent};
 
 // Object pool size configuration
@@ -41,7 +41,7 @@ lazy_static::lazy_static! {
 }
 
 #[derive(
-    Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, BorshSerialize, BorshDeserialize,
+    Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, BorshSerialize, BorshDeserialize, Display
 )]
 pub enum ProtocolType {
     #[default]
