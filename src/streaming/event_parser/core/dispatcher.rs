@@ -102,10 +102,11 @@ impl EventDispatcher {
                 instruction_data,
                 accounts,
                 metadata),
-            Protocol::MeteoraDlmm => {
-                // todo
-                None
-            }
+            Protocol::MeteoraDlmm => meteora_dlmm::parse_meteora_dlmm_instruction_data(
+                instruction_discriminator,
+                instruction_data,
+                accounts,
+                metadata),
             Protocol::Orca => {
                 // todo
                 None
@@ -179,10 +180,11 @@ impl EventDispatcher {
                 // 暂时没有解析的需要
                 None
             }
-            Protocol::MeteoraDlmm => {
-                // todo
-                None
-            }
+            Protocol::MeteoraDlmm => meteora_dlmm::parse_meteora_dlmm_inner_instruction_data(
+                inner_instruction_discriminator,
+                inner_instruction_data,
+                metadata,
+            ),
             Protocol::Orca => {
                 // todo
                 None
@@ -290,8 +292,7 @@ impl EventDispatcher {
                 meteora_damm_v2::parse_meteora_damm_v2_account_data(discriminator, account, metadata)
             }
             Protocol::MeteoraDlmm => {
-                // todo
-                None
+                meteora_dlmm::parse_meteora_dlmm_account_data(discriminator, account, metadata)
             }
             Protocol::Orca => {
                 // todo

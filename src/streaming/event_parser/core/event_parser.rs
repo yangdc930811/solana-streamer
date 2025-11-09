@@ -21,6 +21,7 @@ use solana_sdk::{
 };
 use solana_transaction_status::InnerInstructions;
 use std::sync::Arc;
+use log::info;
 use yellowstone_grpc_proto::geyser::SubscribeUpdateTransactionInfo;
 
 pub struct EventParser {}

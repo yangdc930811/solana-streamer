@@ -1,3 +1,4 @@
+use log::{error, info};
 use crate::streaming::event_parser::DexEvent;
 
 pub fn merge(instruction_event: &mut DexEvent, cpi_log_event: DexEvent) {
@@ -217,6 +218,23 @@ pub fn merge(instruction_event: &mut DexEvent, cpi_log_event: DexEvent) {
                 e.user_base_token_account = cpie.user_base_token_account;
                 e.user_quote_token_account = cpie.user_quote_token_account;
                 e.user_pool_token_account = cpie.user_pool_token_account;
+            }
+            _ => {}
+        },
+
+        // Meteora Dlmm events
+        DexEvent::MeteoraDlmmSwapEvent(e) => match cpi_log_event {
+            DexEvent::MeteoraDlmmSwapEvent(cpie) => {
+                e.from = cpie.from;
+                e.start_bin_id = cpie.start_bin_id;
+                e.end_bin_id = cpie.end_bin_id;
+                e.amount_in = cpie.amount_in;
+                e.amount_out = cpie.amount_out;
+                e.swap_for_y = cpie.swap_for_y;
+                e.fee = cpie.fee;
+                e.protocol_fee = cpie.protocol_fee;
+                e.fee_bps = cpie.fee_bps;
+                e.host_fee = cpie.host_fee;
             }
             _ => {}
         },

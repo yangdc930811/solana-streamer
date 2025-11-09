@@ -116,6 +116,9 @@ pub enum EventType {
     MeteoraDammV2Swap,
     MeteoraDammV2Swap2,
 
+    // Meteora Dlmm events
+    MeteoraDlmmSwap,
+
     // Account events
     AccountRaydiumAmmV4AmmInfo,
     AccountPumpSwapGlobalConfig,
@@ -132,6 +135,7 @@ pub enum EventType {
     AccountRaydiumCpmmAmmConfig,
     AccountRaydiumCpmmPoolState,
     AccountMeteoraDammV2Pool,
+    AccountMeteoraDlmmPool,
 
     NonceAccount,
     TokenAccount,
@@ -158,6 +162,7 @@ pub const ACCOUNT_EVENT_TYPES: &[EventType] = &[
     EventType::AccountRaydiumCpmmAmmConfig,
     EventType::AccountRaydiumCpmmPoolState,
     EventType::AccountMeteoraDammV2Pool,
+    EventType::AccountMeteoraDlmmPool,
     EventType::TokenAccount,
     EventType::NonceAccount,
 ];
@@ -232,6 +237,8 @@ impl fmt::Display for EventType {
             EventType::MeteoraDammV2Swap => write!(f, "MeteoraDammV2Swap"),
             EventType::MeteoraDammV2Swap2 => write!(f, "MeteoraDammV2Swap2"),
             EventType::AccountMeteoraDammV2Pool => write!(f, "AccountMeteoraDammV2Pool"),
+            EventType::MeteoraDlmmSwap => write!(f, "MeteoraDlmmSwap"),
+            EventType::AccountMeteoraDlmmPool => write!(f, "AccountMeteoraDlmmPool"),
         }
     }
 }
