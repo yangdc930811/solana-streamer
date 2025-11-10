@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use crate::streaming::event_parser::protocols::meteora_damm_v2::events::{MeteoraDammV2PoolAccountEvent, MeteoraDammV2Swap2Event, MeteoraDammV2SwapEvent};
 use crate::streaming::event_parser::protocols::meteora_dlmm::events::{MeteoraDlmmPoolAccountEvent, MeteoraDlmmSwapEvent};
+use crate::streaming::event_parser::protocols::orca::events::{OrcaPoolAccountEvent, OrcaSwapEvent};
 
 /// Unified Event Enum - Replaces the trait-based approach with a type-safe enum
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -85,6 +86,10 @@ pub enum DexEvent {
     // Meteora Dlmm Events
     MeteoraDlmmSwapEvent(MeteoraDlmmSwapEvent),
     MeteoraDlmmPoolAccountEvent(MeteoraDlmmPoolAccountEvent),
+
+    // Orca Events
+    OrcaSwapEvent(OrcaSwapEvent),
+    OrcaPoolAccountEvent(OrcaPoolAccountEvent),
 }
 
 impl DexEvent {
@@ -141,6 +146,8 @@ impl DexEvent {
             DexEvent::MeteoraDammV2PoolAccountEvent(e) => &e.metadata,
             DexEvent::MeteoraDlmmSwapEvent(e) => &e.metadata,
             DexEvent::MeteoraDlmmPoolAccountEvent(e) => &e.metadata,
+            DexEvent::OrcaPoolAccountEvent(e) => &e.metadata,
+            DexEvent::OrcaSwapEvent(e) => &e.metadata,
         }
     }
 
@@ -197,6 +204,8 @@ impl DexEvent {
             DexEvent::MeteoraDammV2PoolAccountEvent(e) => &mut e.metadata,
             DexEvent::MeteoraDlmmSwapEvent(e) => &mut e.metadata,
             DexEvent::MeteoraDlmmPoolAccountEvent(e) => &mut e.metadata,
+            DexEvent::OrcaPoolAccountEvent(e) => &mut e.metadata,
+            DexEvent::OrcaSwapEvent(e) => &mut e.metadata,
         }
     }
 }

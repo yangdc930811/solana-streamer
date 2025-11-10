@@ -119,6 +119,9 @@ pub enum EventType {
     // Meteora Dlmm events
     MeteoraDlmmSwap,
 
+    // Orca Events
+    OrcaSwap,
+
     // Account events
     AccountRaydiumAmmV4AmmInfo,
     AccountPumpSwapGlobalConfig,
@@ -136,6 +139,7 @@ pub enum EventType {
     AccountRaydiumCpmmPoolState,
     AccountMeteoraDammV2Pool,
     AccountMeteoraDlmmPool,
+    AccountOrcaPool,
 
     NonceAccount,
     TokenAccount,
@@ -145,7 +149,6 @@ pub enum EventType {
     Unknown,
 }
 
-// todo
 pub const ACCOUNT_EVENT_TYPES: &[EventType] = &[
     EventType::AccountRaydiumAmmV4AmmInfo,
     EventType::AccountPumpSwapGlobalConfig,
@@ -163,9 +166,11 @@ pub const ACCOUNT_EVENT_TYPES: &[EventType] = &[
     EventType::AccountRaydiumCpmmPoolState,
     EventType::AccountMeteoraDammV2Pool,
     EventType::AccountMeteoraDlmmPool,
+    EventType::AccountOrcaPool,
     EventType::TokenAccount,
     EventType::NonceAccount,
 ];
+
 pub const BLOCK_EVENT_TYPES: &[EventType] = &[EventType::BlockMeta];
 
 impl fmt::Display for EventType {
@@ -239,6 +244,8 @@ impl fmt::Display for EventType {
             EventType::AccountMeteoraDammV2Pool => write!(f, "AccountMeteoraDammV2Pool"),
             EventType::MeteoraDlmmSwap => write!(f, "MeteoraDlmmSwap"),
             EventType::AccountMeteoraDlmmPool => write!(f, "AccountMeteoraDlmmPool"),
+            EventType::AccountOrcaPool => write!(f, "AccountOrcaPool"),
+            EventType::OrcaSwap => write!(f, "OrcaSwap"),
         }
     }
 }
