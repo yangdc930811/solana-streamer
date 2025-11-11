@@ -186,6 +186,7 @@ async fn get_single_transaction_details(signature_str: &str) -> Result<()> {
                 Protocol::PumpFun,
                 Protocol::RaydiumCpmm,
                 Protocol::RaydiumAmmV4,
+                Protocol::MeteoraDammV2,
             ];
 
             // Create callback

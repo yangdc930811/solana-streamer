@@ -4,6 +4,7 @@ use crate::streaming::event_parser::core::account_event_parser::{
 };
 use crate::streaming::event_parser::protocols::block::block_meta_event::BlockMetaEvent;
 use crate::streaming::event_parser::protocols::bonk::events::*;
+use crate::streaming::event_parser::protocols::meteora_damm_v2::events::*;
 use crate::streaming::event_parser::protocols::pumpfun::events::*;
 use crate::streaming::event_parser::protocols::pumpswap::events::*;
 use crate::streaming::event_parser::protocols::raydium_amm_v4::events::*;
@@ -29,6 +30,7 @@ pub enum DexEvent {
 
     // PumpFun events
     PumpFunCreateTokenEvent(PumpFunCreateTokenEvent),
+    PumpFunCreateV2TokenEvent(PumpFunCreateV2TokenEvent),
     PumpFunTradeEvent(PumpFunTradeEvent),
     PumpFunMigrateEvent(PumpFunMigrateEvent),
     PumpFunBondingCurveAccountEvent(PumpFunBondingCurveAccountEvent),
@@ -72,16 +74,19 @@ pub enum DexEvent {
     RaydiumCpmmAmmConfigAccountEvent(RaydiumCpmmAmmConfigAccountEvent),
     RaydiumCpmmPoolStateAccountEvent(RaydiumCpmmPoolStateAccountEvent),
 
+    // Meteora DAMM v2 events
+    MeteoraDammV2SwapEvent(MeteoraDammV2SwapEvent),
+    MeteoraDammV2Swap2Event(MeteoraDammV2Swap2Event),
+    MeteoraDammV2InitializePoolEvent(MeteoraDammV2InitializePoolEvent),
+    MeteoraDammV2InitializeCustomizablePoolEvent(MeteoraDammV2InitializeCustomizablePoolEvent),
+    MeteoraDammV2InitializePoolWithDynamicConfigEvent(MeteoraDammV2InitializePoolWithDynamicConfigEvent),
+    MeteoraDammV2PoolAccountEvent(MeteoraDammV2PoolAccountEvent),
+
     // Common events
     TokenAccountEvent(TokenAccountEvent),
     NonceAccountEvent(NonceAccountEvent),
     TokenInfoEvent(TokenInfoEvent),
     BlockMetaEvent(BlockMetaEvent),
-
-    // Meteora Damm v2 events
-    MeteoraDammV2SwapEvent(MeteoraDammV2SwapEvent),
-    MeteoraDammV2Swap2Event(MeteoraDammV2Swap2Event),
-    MeteoraDammV2PoolAccountEvent(MeteoraDammV2PoolAccountEvent),
 
     // Meteora Dlmm Events
     MeteoraDlmmSwapEvent(MeteoraDlmmSwapEvent),
@@ -103,6 +108,7 @@ impl DexEvent {
             DexEvent::BonkGlobalConfigAccountEvent(e) => &e.metadata,
             DexEvent::BonkPlatformConfigAccountEvent(e) => &e.metadata,
             DexEvent::PumpFunCreateTokenEvent(e) => &e.metadata,
+            DexEvent::PumpFunCreateV2TokenEvent(e) => &e.metadata,
             DexEvent::PumpFunTradeEvent(e) => &e.metadata,
             DexEvent::PumpFunMigrateEvent(e) => &e.metadata,
             DexEvent::PumpFunBondingCurveAccountEvent(e) => &e.metadata,
@@ -137,12 +143,15 @@ impl DexEvent {
             DexEvent::RaydiumCpmmInitializeEvent(e) => &e.metadata,
             DexEvent::RaydiumCpmmAmmConfigAccountEvent(e) => &e.metadata,
             DexEvent::RaydiumCpmmPoolStateAccountEvent(e) => &e.metadata,
+            DexEvent::MeteoraDammV2SwapEvent(e) => &e.metadata,
+            DexEvent::MeteoraDammV2Swap2Event(e) => &e.metadata,
+            DexEvent::MeteoraDammV2InitializePoolEvent(e) => &e.metadata,
+            DexEvent::MeteoraDammV2InitializeCustomizablePoolEvent(e) => &e.metadata,
+            DexEvent::MeteoraDammV2InitializePoolWithDynamicConfigEvent(e) => &e.metadata,
             DexEvent::TokenAccountEvent(e) => &e.metadata,
             DexEvent::NonceAccountEvent(e) => &e.metadata,
             DexEvent::TokenInfoEvent(e) => &e.metadata,
             DexEvent::BlockMetaEvent(e) => &e.metadata,
-            DexEvent::MeteoraDammV2SwapEvent(e) => &e.metadata,
-            DexEvent::MeteoraDammV2Swap2Event(e) => &e.metadata,
             DexEvent::MeteoraDammV2PoolAccountEvent(e) => &e.metadata,
             DexEvent::MeteoraDlmmSwapEvent(e) => &e.metadata,
             DexEvent::MeteoraDlmmPoolAccountEvent(e) => &e.metadata,
@@ -161,6 +170,7 @@ impl DexEvent {
             DexEvent::BonkGlobalConfigAccountEvent(e) => &mut e.metadata,
             DexEvent::BonkPlatformConfigAccountEvent(e) => &mut e.metadata,
             DexEvent::PumpFunCreateTokenEvent(e) => &mut e.metadata,
+            DexEvent::PumpFunCreateV2TokenEvent(e) => &mut e.metadata,
             DexEvent::PumpFunTradeEvent(e) => &mut e.metadata,
             DexEvent::PumpFunMigrateEvent(e) => &mut e.metadata,
             DexEvent::PumpFunBondingCurveAccountEvent(e) => &mut e.metadata,
@@ -195,6 +205,11 @@ impl DexEvent {
             DexEvent::RaydiumCpmmInitializeEvent(e) => &mut e.metadata,
             DexEvent::RaydiumCpmmAmmConfigAccountEvent(e) => &mut e.metadata,
             DexEvent::RaydiumCpmmPoolStateAccountEvent(e) => &mut e.metadata,
+            DexEvent::MeteoraDammV2SwapEvent(e) => &mut e.metadata,
+            DexEvent::MeteoraDammV2Swap2Event(e) => &mut e.metadata,
+            DexEvent::MeteoraDammV2InitializePoolEvent(e) => &mut e.metadata,
+            DexEvent::MeteoraDammV2InitializeCustomizablePoolEvent(e) => &mut e.metadata,
+            DexEvent::MeteoraDammV2InitializePoolWithDynamicConfigEvent(e) => &mut e.metadata,
             DexEvent::TokenAccountEvent(e) => &mut e.metadata,
             DexEvent::NonceAccountEvent(e) => &mut e.metadata,
             DexEvent::TokenInfoEvent(e) => &mut e.metadata,

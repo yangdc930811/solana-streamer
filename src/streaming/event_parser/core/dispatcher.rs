@@ -55,9 +55,9 @@ impl EventDispatcher {
             Protocol::RaydiumCpmm => ProtocolType::RaydiumCpmm,
             Protocol::RaydiumClmm => ProtocolType::RaydiumClmm,
             Protocol::RaydiumAmmV4 => ProtocolType::RaydiumAmmV4,
-            Protocol::MeteoraDammv2 => ProtocolType::MeteoraDammv2,
             Protocol::MeteoraDlmm => ProtocolType::MeteoraDlmm,
             Protocol::Orca => ProtocolType::Orca,
+            Protocol::MeteoraDammV2 => ProtocolType::MeteoraDammV2,
         };
 
         match protocol {
@@ -97,11 +97,6 @@ impl EventDispatcher {
                 accounts,
                 metadata,
             ),
-            Protocol::MeteoraDammv2 => meteora_damm_v2::parse_meteora_damm_v2_instruction_data(
-                instruction_discriminator,
-                instruction_data,
-                accounts,
-                metadata),
             Protocol::MeteoraDlmm => meteora_dlmm::parse_meteora_dlmm_instruction_data(
                 instruction_discriminator,
                 instruction_data,
@@ -112,6 +107,12 @@ impl EventDispatcher {
                 instruction_data,
                 accounts,
                 metadata),
+            Protocol::MeteoraDammV2 => meteora_damm_v2::parse_meteora_damm_v2_instruction_data(
+                instruction_discriminator,
+                instruction_data,
+                accounts,
+                metadata,
+            ),
         }
     }
 
@@ -141,9 +142,9 @@ impl EventDispatcher {
             Protocol::RaydiumCpmm => ProtocolType::RaydiumCpmm,
             Protocol::RaydiumClmm => ProtocolType::RaydiumClmm,
             Protocol::RaydiumAmmV4 => ProtocolType::RaydiumAmmV4,
-            Protocol::MeteoraDammv2 => ProtocolType::MeteoraDammv2,
             Protocol::MeteoraDlmm => ProtocolType::MeteoraDlmm,
             Protocol::Orca => ProtocolType::Orca,
+            Protocol::MeteoraDammV2 => ProtocolType::MeteoraDammV2,
         };
 
         match protocol {
@@ -177,13 +178,17 @@ impl EventDispatcher {
                 inner_instruction_data,
                 metadata,
             ),
-            Protocol::MeteoraDammv2 => None,
             Protocol::MeteoraDlmm => meteora_dlmm::parse_meteora_dlmm_inner_instruction_data(
                 inner_instruction_discriminator,
                 inner_instruction_data,
                 metadata,
             ),
-            Protocol::Orca => None
+            Protocol::MeteoraDammV2 => meteora_damm_v2::parse_meteora_damm_v2_inner_instruction_data(
+                inner_instruction_discriminator,
+                inner_instruction_data,
+                metadata,
+            ),
+            Protocol::Orca => None,
         }
     }
 
@@ -203,7 +208,7 @@ impl EventDispatcher {
         } else if program_id == &raydium_amm_v4::RAYDIUM_AMM_V4_PROGRAM_ID {
             Some(Protocol::RaydiumAmmV4)
         } else if program_id == &meteora_damm_v2::METEORA_DAMM_V2_PROGRAM_ID {
-            Some(Protocol::MeteoraDammv2)
+            Some(Protocol::MeteoraDammV2)
         } else if program_id == &meteora_dlmm::METEORA_DLMM_PROGRAM_ID {
             Some(Protocol::MeteoraDlmm)
         } else if program_id == &orca::ORCA_PROGRAM_ID {
@@ -223,9 +228,9 @@ impl EventDispatcher {
             Protocol::RaydiumCpmm => raydium_cpmm::RAYDIUM_CPMM_PROGRAM_ID,
             Protocol::RaydiumClmm => raydium_clmm::RAYDIUM_CLMM_PROGRAM_ID,
             Protocol::RaydiumAmmV4 => raydium_amm_v4::RAYDIUM_AMM_V4_PROGRAM_ID,
-            Protocol::MeteoraDammv2 => meteora_damm_v2::METEORA_DAMM_V2_PROGRAM_ID,
             Protocol::MeteoraDlmm => meteora_dlmm::METEORA_DLMM_PROGRAM_ID,
             Protocol::Orca => orca::ORCA_PROGRAM_ID,
+            Protocol::MeteoraDammV2 => meteora_damm_v2::METEORA_DAMM_V2_PROGRAM_ID,
         }
     }
 
@@ -261,9 +266,9 @@ impl EventDispatcher {
             Protocol::RaydiumCpmm => ProtocolType::RaydiumCpmm,
             Protocol::RaydiumClmm => ProtocolType::RaydiumClmm,
             Protocol::RaydiumAmmV4 => ProtocolType::RaydiumAmmV4,
-            Protocol::MeteoraDammv2 => ProtocolType::MeteoraDammv2,
             Protocol::MeteoraDlmm => ProtocolType::MeteoraDlmm,
             Protocol::Orca => ProtocolType::Orca,
+            Protocol::MeteoraDammV2 => ProtocolType::MeteoraDammV2,
         };
 
         match protocol {
@@ -283,14 +288,14 @@ impl EventDispatcher {
             Protocol::RaydiumAmmV4 => {
                 raydium_amm_v4::parse_raydium_amm_v4_account_data(discriminator, account, metadata)
             }
-            Protocol::MeteoraDammv2 => {
-                meteora_damm_v2::parse_meteora_damm_v2_account_data(discriminator, account, metadata)
-            }
             Protocol::MeteoraDlmm => {
                 meteora_dlmm::parse_meteora_dlmm_account_data(discriminator, account, metadata)
             }
             Protocol::Orca => {
                 orca::parse_orca_account_data(discriminator, account, metadata)
+            }
+            Protocol::MeteoraDammV2 => {
+                    meteora_damm_v2::parse_meteora_damm_v2_account_data(discriminator, account, metadata)
             }
         }
     }

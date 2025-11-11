@@ -1,13 +1,13 @@
 use solana_streamer::streaming::{
     event_parser::{
         protocols::{
-            bonk::parser::BONK_PROGRAM_ID, pumpfun::parser::PUMPFUN_PROGRAM_ID,
-            pumpswap::parser::PUMPSWAP_PROGRAM_ID,
+            bonk::parser::BONK_PROGRAM_ID, meteora_damm_v2::parser::METEORA_DAMM_V2_PROGRAM_ID,
+            pumpfun::parser::PUMPFUN_PROGRAM_ID, pumpswap::parser::PUMPSWAP_PROGRAM_ID,
             raydium_amm_v4::parser::RAYDIUM_AMM_V4_PROGRAM_ID,
             raydium_clmm::parser::RAYDIUM_CLMM_PROGRAM_ID,
             raydium_cpmm::parser::RAYDIUM_CPMM_PROGRAM_ID,
         },
-        Protocol, DexEvent,
+        DexEvent, Protocol,
     },
     grpc::ClientConfig,
     yellowstone_grpc::{AccountFilter, TransactionFilter},
@@ -46,18 +46,20 @@ async fn test_grpc() -> Result<(), Box<dyn std::error::Error>> {
         Protocol::RaydiumCpmm,
         Protocol::RaydiumClmm,
         Protocol::RaydiumAmmV4,
+        Protocol::MeteoraDammV2,
     ];
 
     println!("Protocols to monitor: {:?}", protocols);
 
     // Filter accounts
     let account_include = vec![
-        PUMPFUN_PROGRAM_ID.to_string(),        // Listen to pumpfun program ID
-        PUMPSWAP_PROGRAM_ID.to_string(),       // Listen to pumpswap program ID
-        BONK_PROGRAM_ID.to_string(),           // Listen to bonk program ID
-        RAYDIUM_CPMM_PROGRAM_ID.to_string(),   // Listen to raydium_cpmm program ID
-        RAYDIUM_CLMM_PROGRAM_ID.to_string(),   // Listen to raydium_clmm program ID
-        RAYDIUM_AMM_V4_PROGRAM_ID.to_string(), // Listen to raydium_amm_v4 program ID
+        PUMPFUN_PROGRAM_ID.to_string(),         // Listen to pumpfun program ID
+        PUMPSWAP_PROGRAM_ID.to_string(),        // Listen to pumpswap program ID
+        BONK_PROGRAM_ID.to_string(),            // Listen to bonk program ID
+        RAYDIUM_CPMM_PROGRAM_ID.to_string(),    // Listen to raydium_cpmm program ID
+        RAYDIUM_CLMM_PROGRAM_ID.to_string(),    // Listen to raydium_clmm program ID
+        RAYDIUM_AMM_V4_PROGRAM_ID.to_string(),  // Listen to raydium_amm_v4 program ID
+        METEORA_DAMM_V2_PROGRAM_ID.to_string(), // Listen to meteora_damm_v2 program ID
     ];
     let account_exclude = vec![];
     let account_required = vec![];

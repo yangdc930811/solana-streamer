@@ -18,12 +18,19 @@ fn create_metrics_callback(
     callback: Arc<dyn Fn(DexEvent) + Send + Sync>,
 ) -> Arc<dyn Fn(DexEvent) + Send + Sync> {
     Arc::new(move |event: DexEvent| {
-        let processing_time_us = event.metadata().handle_us as f64;
+        let metadata = event.metadata();
+        let processing_time_us = metadata.handle_us as f64;
+        let recv_us = metadata.recv_us;
+        let block_time_ms = metadata.block_time_ms;
+
         callback(event);
-        MetricsManager::global().update_metrics(
+
+        update_metrics_with_latency(
             MetricsEventType::Transaction,
             1,
             processing_time_us,
+            recv_us,
+            block_time_ms,
         );
     })
 }
@@ -144,8 +151,20 @@ pub async fn process_shred_transaction(
     Ok(())
 }
 
-/// Update metrics for event processing
+/// Update metrics for event processing (with optional latency check)
 #[inline]
 fn update_metrics(ty: MetricsEventType, count: u64, time_us: f64) {
     MetricsManager::global().update_metrics(ty, count, time_us);
+}
+
+/// Update metrics with latency check
+#[inline]
+fn update_metrics_with_latency(
+    ty: MetricsEventType,
+    count: u64,
+    time_us: f64,
+    recv_us: i64,
+    block_time_ms: i64,
+) {
+    MetricsManager::global().update_metrics_with_latency(ty, count, time_us, recv_us, block_time_ms);
 }
