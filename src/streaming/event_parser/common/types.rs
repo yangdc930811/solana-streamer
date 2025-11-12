@@ -41,7 +41,16 @@ lazy_static::lazy_static! {
 }
 
 #[derive(
-    Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, BorshSerialize, BorshDeserialize, Display
+    Debug,
+    Clone,
+    Default,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    BorshSerialize,
+    BorshDeserialize,
+    Display
 )]
 pub enum ProtocolType {
     #[default]
@@ -59,7 +68,16 @@ pub enum ProtocolType {
 
 /// Event type enumeration
 #[derive(
-    Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize, BorshSerialize, BorshDeserialize,
+    Debug,
+    Clone,
+    Default,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    BorshSerialize,
+    BorshDeserialize,
 )]
 pub enum EventType {
     // PumpSwap events
@@ -240,17 +258,13 @@ impl fmt::Display for EventType {
             EventType::AccountPumpFunGlobal => write!(f, "AccountPumpFunGlobal"),
             EventType::AccountRaydiumClmmAmmConfig => write!(f, "AccountRaydiumClmmAmmConfig"),
             EventType::AccountRaydiumClmmPoolState => write!(f, "AccountRaydiumClmmPoolState"),
-            EventType::AccountRaydiumClmmTickArrayState => {
-                write!(f, "AccountRaydiumClmmTickArrayState")
-            }
+            EventType::AccountRaydiumClmmTickArrayState => write!(f, "AccountRaydiumClmmTickArrayState"),
             EventType::AccountRaydiumCpmmAmmConfig => write!(f, "AccountRaydiumCpmmAmmConfig"),
             EventType::AccountRaydiumCpmmPoolState => write!(f, "AccountRaydiumCpmmPoolState"),
             EventType::TokenAccount => write!(f, "TokenAccount"),
             EventType::NonceAccount => write!(f, "NonceAccount"),
             EventType::BlockMeta => write!(f, "BlockMeta"),
             EventType::Unknown => write!(f, "Unknown"),
-            EventType::MeteoraDammV2Swap => write!(f, "MeteoraDammV2Swap"),
-            EventType::MeteoraDammV2Swap2 => write!(f, "MeteoraDammV2Swap2"),
             EventType::AccountMeteoraDammV2Pool => write!(f, "AccountMeteoraDammV2Pool"),
             EventType::MeteoraDlmmSwap => write!(f, "MeteoraDlmmSwap"),
             EventType::AccountMeteoraDlmmPool => write!(f, "AccountMeteoraDlmmPool"),

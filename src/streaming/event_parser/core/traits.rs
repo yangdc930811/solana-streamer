@@ -214,8 +214,6 @@ impl DexEvent {
             DexEvent::NonceAccountEvent(e) => &mut e.metadata,
             DexEvent::TokenInfoEvent(e) => &mut e.metadata,
             DexEvent::BlockMetaEvent(e) => &mut e.metadata,
-            DexEvent::MeteoraDammV2SwapEvent(e) => &mut e.metadata,
-            DexEvent::MeteoraDammV2Swap2Event(e) => &mut e.metadata,
             DexEvent::MeteoraDammV2PoolAccountEvent(e) => &mut e.metadata,
             DexEvent::MeteoraDlmmSwapEvent(e) => &mut e.metadata,
             DexEvent::MeteoraDlmmPoolAccountEvent(e) => &mut e.metadata,
