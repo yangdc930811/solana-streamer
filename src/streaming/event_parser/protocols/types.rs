@@ -10,9 +10,10 @@ use solana_sdk::pubkey::Pubkey;
 use crate::streaming::event_parser::protocols::meteora_dlmm::parser::METEORA_DLMM_PROGRAM_ID;
 use crate::streaming::event_parser::protocols::orca::parser::ORCA_PROGRAM_ID;
 use serde_repr::{Deserialize_repr, Serialize_repr};
+use strum_macros::EnumIter;
 
 /// 支持的协议
-#[derive(Debug, Serialize_repr, Deserialize_repr, Clone, PartialEq, Eq, Hash, Default)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, Clone, PartialEq, Eq, Hash, Default, EnumIter)]
 #[repr(u8)]
 pub enum Protocol {
     #[default]
