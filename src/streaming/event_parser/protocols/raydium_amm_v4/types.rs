@@ -87,13 +87,6 @@ pub fn amm_info_decode(data: &[u8]) -> Option<AmmInfo> {
     borsh::from_slice::<AmmInfo>(&data[..AMM_INFO_SIZE]).ok()
 }
 
-pub fn direct_amm_info_decode(data: &[u8]) -> Option<AmmInfo> {
-    if data.len() < AMM_INFO_SIZE + 8 {
-        return None;
-    }
-    borsh::from_slice::<AmmInfo>(&data[8..AMM_INFO_SIZE + 8]).ok()
-}
-
 pub fn amm_info_parser(account: &AccountPretty, mut metadata: EventMetadata) -> Option<DexEvent> {
     metadata.event_type = EventType::AccountRaydiumAmmV4AmmInfo;
 
