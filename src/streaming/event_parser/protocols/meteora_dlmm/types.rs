@@ -6,7 +6,7 @@ use crate::streaming::event_parser::DexEvent;
 use crate::streaming::event_parser::protocols::meteora_dlmm::events::MeteoraDlmmPoolAccountEvent;
 use crate::streaming::grpc::AccountPretty;
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize, Copy)]
 pub struct LbPair {
     pub parameters: StaticParameters,
     pub v_parameters: VariableParameters,
@@ -43,7 +43,7 @@ pub struct LbPair {
     pub _reserved: [u8; 22],
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize, Copy)]
 pub struct StaticParameters {
     pub base_factor: u16,
     pub filter_period: u16,
@@ -58,7 +58,7 @@ pub struct StaticParameters {
     pub _padding: [u8; 5],
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize, Copy)]
 pub struct VariableParameters {
     pub volatility_accumulator: u32,
     pub volatility_reference: u32,
@@ -68,13 +68,13 @@ pub struct VariableParameters {
     pub _padding_1: [u8; 8],
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize, Copy)]
 pub struct ProtocolFee {
     pub amount_x: u64,
     pub amount_y: u64,
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize, Copy)]
 pub struct RewardInfo {
     pub mint: Pubkey,
     pub vault: Pubkey,
