@@ -278,7 +278,9 @@ impl EventDispatcher {
             Protocol::PumpSwap => {
                 pumpswap::parse_pumpswap_account_data(discriminator, account, metadata)
             }
-            Protocol::Bonk => bonk::parse_bonk_account_data(discriminator, account, metadata),
+            Protocol::Bonk => {
+                bonk::parse_bonk_account_data(discriminator, account, metadata)
+            }
             Protocol::RaydiumCpmm => {
                 raydium_cpmm::parse_raydium_cpmm_account_data(discriminator, account, metadata)
             }
@@ -295,7 +297,7 @@ impl EventDispatcher {
                 orca::parse_orca_account_data(discriminator, account, metadata)
             }
             Protocol::MeteoraDammV2 => {
-                    meteora_damm_v2::parse_meteora_damm_v2_account_data(discriminator, account, metadata)
+                meteora_damm_v2::parse_meteora_damm_v2_account_data(discriminator, account, metadata)
             }
         }
     }
