@@ -65,6 +65,7 @@ pub enum DexEvent {
     RaydiumClmmAmmConfigAccountEvent(RaydiumClmmAmmConfigAccountEvent),
     RaydiumClmmPoolStateAccountEvent(RaydiumClmmPoolStateAccountEvent),
     RaydiumClmmTickArrayStateAccountEvent(RaydiumClmmTickArrayStateAccountEvent),
+    RaydiumClmmTickArrayBitmapExtensionAccountEvent(RaydiumClmmTickArrayBitmapExtensionAccountEvent),
 
     // Raydium CPMM events
     RaydiumCpmmSwapEvent(RaydiumCpmmSwapEvent),
@@ -157,6 +158,7 @@ impl DexEvent {
             DexEvent::MeteoraDlmmPoolAccountEvent(e) => &e.metadata,
             DexEvent::OrcaPoolAccountEvent(e) => &e.metadata,
             DexEvent::OrcaSwapEvent(e) => &e.metadata,
+            DexEvent::RaydiumClmmTickArrayBitmapExtensionAccountEvent(e) => &e.metadata,
         }
     }
 
@@ -219,6 +221,7 @@ impl DexEvent {
             DexEvent::MeteoraDlmmPoolAccountEvent(e) => &mut e.metadata,
             DexEvent::OrcaPoolAccountEvent(e) => &mut e.metadata,
             DexEvent::OrcaSwapEvent(e) => &mut e.metadata,
+            DexEvent::RaydiumClmmTickArrayBitmapExtensionAccountEvent(e) => &mut e.metadata,
         }
     }
 }

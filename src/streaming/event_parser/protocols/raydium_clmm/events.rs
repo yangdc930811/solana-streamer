@@ -1,10 +1,10 @@
 use crate::streaming::event_parser::common::EventMetadata;
-use crate::streaming::event_parser::protocols::raydium_clmm::types::{PoolState, TickArrayState};
-use crate::{
-    streaming::event_parser::protocols::raydium_clmm::types::AmmConfig,
-};
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
+use crate::streaming::event_parser::protocols::raydium_clmm::states::config::AmmConfig;
+use crate::streaming::event_parser::protocols::raydium_clmm::states::pool::PoolState;
+use crate::streaming::event_parser::protocols::raydium_clmm::states::tick_array::TickArrayState;
+use crate::streaming::event_parser::protocols::raydium_clmm::states::tickarray_bitmap_extension::TickArrayBitmapExtension;
 
 /// 交易
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -235,7 +235,6 @@ pub struct RaydiumClmmPoolStateAccountEvent {
     pub pool_state: PoolState,
 }
 
-/// 池状态
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RaydiumClmmTickArrayStateAccountEvent {
     pub metadata: EventMetadata,
@@ -245,6 +244,17 @@ pub struct RaydiumClmmTickArrayStateAccountEvent {
     pub owner: Pubkey,
     pub rent_epoch: u64,
     pub tick_array_state: TickArrayState,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RaydiumClmmTickArrayBitmapExtensionAccountEvent {
+    pub metadata: EventMetadata,
+    pub pubkey: Pubkey,
+    pub executable: bool,
+    pub lamports: u64,
+    pub owner: Pubkey,
+    pub rent_epoch: u64,
+    pub tick_array_bitmap_extension: TickArrayBitmapExtension,
 }
 
 /// 事件鉴别器常量
@@ -263,4 +273,5 @@ pub mod discriminators {
     pub const AMM_CONFIG: &[u8] = &[218, 244, 33, 104, 203, 203, 43, 111];
     pub const POOL_STATE: &[u8] = &[247, 237, 227, 245, 215, 195, 222, 70];
     pub const TICK_ARRAY_STATE: &[u8] = &[192, 155, 85, 205, 49, 249, 129, 42];
+    pub const TICK_ARRAY_BITMAP_EXTENSION: &[u8] = &[60, 150, 36, 219, 97, 128, 139, 153];
 }

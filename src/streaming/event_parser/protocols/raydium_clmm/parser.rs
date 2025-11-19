@@ -12,6 +12,10 @@ use crate::streaming::event_parser::{
     DexEvent,
 };
 use solana_sdk::pubkey::Pubkey;
+use crate::streaming::event_parser::protocols::raydium_clmm::states::config::amm_config_parser;
+use crate::streaming::event_parser::protocols::raydium_clmm::states::pool::pool_state_parser;
+use crate::streaming::event_parser::protocols::raydium_clmm::states::tick_array::tick_array_state_parser;
+use crate::streaming::event_parser::protocols::raydium_clmm::states::tickarray_bitmap_extension::tick_array_bitmap_extension_parser;
 
 /// Raydium CLMM程序ID
 pub const RAYDIUM_CLMM_PROGRAM_ID: Pubkey =
@@ -71,13 +75,16 @@ pub fn parse_raydium_clmm_account_data(
 ) -> Option<crate::streaming::event_parser::DexEvent> {
     match discriminator {
         discriminators::AMM_CONFIG => {
-            crate::streaming::event_parser::protocols::raydium_clmm::types::amm_config_parser(account, metadata)
+            amm_config_parser(account, metadata)
         }
         discriminators::POOL_STATE => {
-            crate::streaming::event_parser::protocols::raydium_clmm::types::pool_state_parser(account, metadata)
+            pool_state_parser(account, metadata)
         }
         discriminators::TICK_ARRAY_STATE => {
-            crate::streaming::event_parser::protocols::raydium_clmm::types::tick_array_state_parser(account, metadata)
+            tick_array_state_parser(account, metadata)
+        }
+        discriminators::TICK_ARRAY_BITMAP_EXTENSION => {
+            tick_array_bitmap_extension_parser(account, metadata)
         }
         _ => None,
     }
