@@ -1,18 +1,14 @@
 use crate::streaming::event_parser::{
-    common::{
-        filter::EventTypeFilter, high_performance_clock::elapsed_micros_since,
-        parse_swap_data_from_next_grpc_instructions, parse_swap_data_from_next_instructions,
-        EventMetadata,
-    },
-    core::{
+    DexEvent, Protocol, common::{
+        EventMetadata, filter::EventTypeFilter, high_performance_clock::elapsed_micros_since, parse_swap_data_from_next_grpc_instructions, parse_swap_data_from_next_instructions
+    }, core::{
         dispatcher::EventDispatcher,
         global_state::{
             add_bonk_dev_address, add_dev_address, is_bonk_dev_address_in_signature,
             is_dev_address_in_signature,
         },
         merger_event::merge,
-    },
-    DexEvent, Protocol,
+    }, protocols::raydium_amm_v4::parser::RAYDIUM_AMM_V4_PROGRAM_ID
 };
 use prost_types::Timestamp;
 use solana_sdk::{
@@ -326,28 +322,17 @@ impl EventParser {
             return Ok(());
         }
 
-        // 使用 EventDispatcher 匹配协议
-        let protocol = match EventDispatcher::match_protocol_by_program_id(&program_id) {
-            Some(p) => p,
-            None => return Ok(()),
+        let is_cu_program = EventDispatcher::is_compute_budget_program(&program_id);
+
+        let disc_len = match program_id {
+            RAYDIUM_AMM_V4_PROGRAM_ID => 1,
+            _ => 8,
         };
 
-        // 检查指令数据长度（至少需要 8 字节的 discriminator）
-        if instruction.data.len() < 8 {
+        // 检查指令数据长度（至少需要 disc_len 字节的 discriminator）
+        if !is_cu_program && instruction.data.len() < disc_len {
             return Ok(());
         }
-
-        // 提取 discriminator 和数据
-        let instruction_discriminator = &instruction.data[..8];
-        let instruction_data = &instruction.data[8..];
-
-        // 构建账户公钥列表
-        let account_pubkeys: Vec<Pubkey> = instruction
-            .accounts
-            .iter()
-            .filter_map(|&idx| accounts.get(idx as usize).copied())
-            .collect();
-
         // 创建元数据
         let timestamp = block_time.unwrap_or(Timestamp { seconds: 0, nanos: 0 });
         let block_time_ms = timestamp.seconds * 1000 + (timestamp.nanos as i64) / 1_000_000;
@@ -364,6 +349,33 @@ impl EventParser {
             recv_us,
             transaction_index,
         );
+
+        if is_cu_program {
+            if let Some(event) = EventDispatcher::dispatch_compute_budget_instruction(
+                &instruction.data,
+                metadata.clone(),
+            ) {
+                callback(&event);
+            }
+            return Ok(());
+        }
+
+        // 使用 EventDispatcher 匹配协议
+        let protocol = match EventDispatcher::match_protocol_by_program_id(&program_id) {
+            Some(p) => p,
+            None => return Ok(()),
+        };
+
+        // 提取 discriminator 和数据
+        let instruction_discriminator = &instruction.data[..disc_len];
+        let instruction_data = &instruction.data[disc_len..];
+
+        // 构建账户公钥列表
+        let account_pubkeys: Vec<Pubkey> = instruction
+            .accounts
+            .iter()
+            .filter_map(|&idx| accounts.get(idx as usize).copied())
+            .collect();
 
         // 使用 EventDispatcher 解析 instruction 事件
         let mut event = match EventDispatcher::dispatch_instruction(
@@ -484,27 +496,17 @@ impl EventParser {
             return Ok(());
         }
 
-        // 使用 EventDispatcher 匹配协议
-        let protocol = match EventDispatcher::match_protocol_by_program_id(&program_id) {
-            Some(p) => p,
-            None => return Ok(()),
+        let is_cu_program = EventDispatcher::is_compute_budget_program(&program_id);
+
+        let disc_len = match program_id {
+            RAYDIUM_AMM_V4_PROGRAM_ID => 1,
+            _ => 8,
         };
 
         // 检查指令数据长度（至少需要 8 字节的 discriminator）
-        if instruction.data.len() < 8 {
+        if !is_cu_program && instruction.data.len() < disc_len {
             return Ok(());
         }
-
-        // 提取 discriminator 和数据
-        let instruction_discriminator = &instruction.data[..8];
-        let instruction_data = &instruction.data[8..];
-
-        // 构建账户公钥列表
-        let account_pubkeys: Vec<Pubkey> = instruction
-            .accounts
-            .iter()
-            .filter_map(|&idx| accounts.get(idx as usize).copied())
-            .collect();
 
         // 创建元数据
         let timestamp = block_time.unwrap_or(Timestamp { seconds: 0, nanos: 0 });
@@ -522,6 +524,33 @@ impl EventParser {
             recv_us,
             transaction_index,
         );
+
+        if is_cu_program {
+            if let Some(event) = EventDispatcher::dispatch_compute_budget_instruction(
+                &instruction.data,
+                metadata.clone(),
+            ) {
+                callback(&event);
+            }
+            return Ok(());
+        }
+
+        // 使用 EventDispatcher 匹配协议
+        let protocol = match EventDispatcher::match_protocol_by_program_id(&program_id) {
+            Some(p) => p,
+            None => return Ok(()),
+        };
+
+        // 提取 discriminator 和数据
+        let instruction_discriminator = &instruction.data[..disc_len];
+        let instruction_data = &instruction.data[disc_len..];
+
+        // 构建账户公钥列表
+        let account_pubkeys: Vec<Pubkey> = instruction
+            .accounts
+            .iter()
+            .filter_map(|&idx| accounts.get(idx as usize).copied())
+            .collect();
 
         // 使用 EventDispatcher 解析 instruction 事件
         let mut event = match EventDispatcher::dispatch_instruction(
@@ -622,6 +651,8 @@ impl EventParser {
         // 使用 EventDispatcher 来匹配协议
         if let Some(protocol) = EventDispatcher::match_protocol_by_program_id(program_id) {
             protocols.contains(&protocol)
+        } else if EventDispatcher::is_compute_budget_program(program_id) {
+            return true;
         } else {
             false
         }
@@ -648,6 +679,14 @@ impl EventParser {
                     add_dev_address(&signature, token_info.creator);
                 }
                 DexEvent::PumpFunCreateTokenEvent(token_info)
+            }
+            DexEvent::PumpFunCreateV2TokenEvent(token_info) => {
+                add_dev_address(&signature, token_info.user);
+                if token_info.creator != Pubkey::default() && token_info.creator != token_info.user
+                {
+                    add_dev_address(&signature, token_info.creator);
+                }
+                DexEvent::PumpFunCreateV2TokenEvent(token_info)
             }
             DexEvent::PumpFunTradeEvent(mut trade_info) => {
                 trade_info.is_dev_create_token_trade =

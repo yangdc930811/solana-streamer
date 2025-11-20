@@ -2,6 +2,9 @@ use crate::streaming::event_parser::common::EventMetadata;
 use crate::streaming::event_parser::core::account_event_parser::{
     NonceAccountEvent, TokenAccountEvent, TokenInfoEvent,
 };
+use crate::streaming::event_parser::core::common_event_parser::{
+    SetComputeUnitLimitEvent, SetComputeUnitPriceEvent,
+};
 use crate::streaming::event_parser::protocols::block::block_meta_event::BlockMetaEvent;
 use crate::streaming::event_parser::protocols::bonk::events::*;
 use crate::streaming::event_parser::protocols::meteora_damm_v2::events::*;
@@ -83,12 +86,6 @@ pub enum DexEvent {
     MeteoraDammV2InitializePoolWithDynamicConfigEvent(MeteoraDammV2InitializePoolWithDynamicConfigEvent),
     MeteoraDammV2PoolAccountEvent(MeteoraDammV2PoolAccountEvent),
 
-    // Common events
-    TokenAccountEvent(TokenAccountEvent),
-    NonceAccountEvent(NonceAccountEvent),
-    TokenInfoEvent(TokenInfoEvent),
-    BlockMetaEvent(BlockMetaEvent),
-
     // Meteora Dlmm Events
     MeteoraDlmmSwapEvent(MeteoraDlmmSwapEvent),
     MeteoraDlmmPoolAccountEvent(MeteoraDlmmPoolAccountEvent),
@@ -96,6 +93,14 @@ pub enum DexEvent {
     // Orca Events
     OrcaSwapEvent(OrcaSwapEvent),
     OrcaPoolAccountEvent(OrcaPoolAccountEvent),
+
+    // Common events
+    TokenAccountEvent(TokenAccountEvent),
+    NonceAccountEvent(NonceAccountEvent),
+    TokenInfoEvent(TokenInfoEvent),
+    BlockMetaEvent(BlockMetaEvent),
+    SetComputeUnitLimitEvent(SetComputeUnitLimitEvent),
+    SetComputeUnitPriceEvent(SetComputeUnitPriceEvent),
 }
 
 impl DexEvent {
@@ -159,6 +164,8 @@ impl DexEvent {
             DexEvent::OrcaPoolAccountEvent(e) => &e.metadata,
             DexEvent::OrcaSwapEvent(e) => &e.metadata,
             DexEvent::RaydiumClmmTickArrayBitmapExtensionAccountEvent(e) => &e.metadata,
+            DexEvent::SetComputeUnitLimitEvent(e) => &e.metadata,
+            DexEvent::SetComputeUnitPriceEvent(e) => &e.metadata,
         }
     }
 
@@ -222,6 +229,8 @@ impl DexEvent {
             DexEvent::OrcaPoolAccountEvent(e) => &mut e.metadata,
             DexEvent::OrcaSwapEvent(e) => &mut e.metadata,
             DexEvent::RaydiumClmmTickArrayBitmapExtensionAccountEvent(e) => &mut e.metadata,
+            DexEvent::SetComputeUnitLimitEvent(e) => &mut e.metadata,
+            DexEvent::SetComputeUnitPriceEvent(e) => &mut e.metadata,
         }
     }
 }

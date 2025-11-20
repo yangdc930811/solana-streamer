@@ -136,7 +136,7 @@ fn parse_buy_instruction(
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpSwapBuy;
 
-    if data.len() < 16 || accounts.len() < 11 {
+    if data.len() < 16 || accounts.len() < 13 {
         return None;
     }
 
@@ -173,7 +173,7 @@ fn parse_sell_instruction(
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpSwapSell;
 
-    if data.len() < 16 || accounts.len() < 11 {
+    if data.len() < 16 || accounts.len() < 13 {
         return None;
     }
 

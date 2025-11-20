@@ -90,13 +90,13 @@ impl SubscriptionManager {
             return None;
         }
         let mut accounts = HashMap::new();
-        for af in account_filter {
+        for (index, af) in account_filter.iter().enumerate() {
             accounts.insert(
-                "".to_owned(),
+                format!("account_{}", index),
                 SubscribeRequestFilterAccounts {
-                    account: af.account,
-                    owner: af.owner,
-                    filters: af.filters,
+                    account: af.account.clone(),
+                    owner: af.owner.clone(),
+                    filters: af.filters.clone(),
                     nonempty_txn_signature: None,
                 },
             );
@@ -114,16 +114,16 @@ impl SubscriptionManager {
             return None;
         }
         let mut transactions = HashMap::new();
-        for tf in transaction_filter {
+        for (index, tf) in transaction_filter.iter().enumerate() {
             transactions.insert(
-                "client".to_string(),
+                format!("transaction_{}", index),
                 SubscribeRequestFilterTransactions {
                     vote: Some(false),
                     failed: Some(false),
                     signature: None,
-                    account_include: tf.account_include,
-                    account_exclude: tf.account_exclude,
-                    account_required: tf.account_required,
+                    account_include: tf.account_include.clone(),
+                    account_exclude: tf.account_exclude.clone(),
+                    account_required: tf.account_required.clone(),
                 },
             );
         }

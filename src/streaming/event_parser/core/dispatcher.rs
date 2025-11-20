@@ -9,6 +9,7 @@
 
 use crate::streaming::event_parser::{
     common::EventMetadata,
+    core::common_event_parser::{CommonEventParser, COMPUTE_BUDGET_PROGRAM_ID},
     protocols::{
         bonk::parser as bonk, pumpfun::parser as pumpfun, pumpswap::parser as pumpswap,
         raydium_amm_v4::parser as raydium_amm_v4, raydium_clmm::parser as raydium_clmm,
@@ -216,6 +217,28 @@ impl EventDispatcher {
         } else {
             None
         }
+    }
+
+    /// 检查是否为 Compute Budget Program
+    #[inline]
+    pub fn is_compute_budget_program(program_id: &Pubkey) -> bool {
+        program_id == &COMPUTE_BUDGET_PROGRAM_ID
+    }
+
+    /// 解析 Compute Budget 指令
+    ///
+    /// # 参数
+    /// - `instruction_data`: 指令数据
+    /// - `metadata`: 事件元数据
+    ///
+    /// # 返回
+    /// 解析成功返回 `Some(DexEvent)`，否则返回 `None`
+    #[inline]
+    pub fn dispatch_compute_budget_instruction(
+        instruction_data: &[u8],
+        metadata: EventMetadata,
+    ) -> Option<DexEvent> {
+        CommonEventParser::parse_compute_budget_instruction(instruction_data, metadata)
     }
 
     /// 获取指定协议的 program_id

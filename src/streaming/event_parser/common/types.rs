@@ -169,6 +169,8 @@ pub enum EventType {
 
     // Common events
     BlockMeta,
+    SetComputeUnitLimit,
+    SetComputeUnitPrice,
     Unknown,
 }
 
@@ -266,6 +268,8 @@ impl fmt::Display for EventType {
             EventType::TokenAccount => write!(f, "TokenAccount"),
             EventType::NonceAccount => write!(f, "NonceAccount"),
             EventType::BlockMeta => write!(f, "BlockMeta"),
+            EventType::SetComputeUnitLimit => write!(f, "SetComputeUnitLimit"),
+            EventType::SetComputeUnitPrice => write!(f, "SetComputeUnitPrice"),
             EventType::Unknown => write!(f, "Unknown"),
             EventType::AccountMeteoraDammV2Pool => write!(f, "AccountMeteoraDammV2Pool"),
             EventType::MeteoraDlmmSwap => write!(f, "MeteoraDlmmSwap"),
