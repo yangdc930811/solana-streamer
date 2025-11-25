@@ -80,6 +80,8 @@ anchor-lang = "0.32.1"
 uint = "0.10.0"
 ruint = "1.17.0"
 serde_with = "3.16.0"
+static_assertions = "1.1.0"
+num = "0.2.1"
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
