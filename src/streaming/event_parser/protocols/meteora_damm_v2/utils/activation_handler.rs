@@ -1,9 +1,12 @@
-use anchor_lang::prelude::*;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::convert::TryFrom;
+use solana_program::sysvar::Sysvar;
+use solana_sdk::clock::Clock;
+use solana_sdk::pubkey::Pubkey;
 use crate::streaming::event_parser::protocols::meteora_damm_v2::math::safe_math::SafeMath;
 use crate::streaming::event_parser::protocols::meteora_damm_v2::utils::constants::activation::{MAX_ACTIVATION_SLOT_DURATION, MAX_ACTIVATION_TIME_DURATION, MAX_VESTING_SLOT_DURATION, MAX_VESTING_TIME_DURATION, SLOT_BUFFER, TIME_BUFFER};
 use crate::streaming::event_parser::protocols::meteora_damm_v2::utils::error::PoolError;
+use anyhow::Result;
 
 #[derive(
     Copy,
@@ -33,19 +36,17 @@ pub struct ActivationHandler {
 }
 
 impl ActivationHandler {
-    pub fn get_current_point(activation_type: u8) -> Result<u64> {
-        let activation_type = ActivationType::try_from(activation_type)
-            .map_err(|_| PoolError::InvalidActivationType)?;
+    pub fn get_current_point(activation_type: u8, clock: &Clock) -> Result<u64> {
+        let activation_type = ActivationType::try_from(activation_type)?;
         let current_point = match activation_type {
-            ActivationType::Slot => Clock::get()?.slot,
-            ActivationType::Timestamp => Clock::get()?.unix_timestamp as u64,
+            ActivationType::Slot => clock.slot,
+            ActivationType::Timestamp => clock.unix_timestamp as u64,
         };
         Ok(current_point)
     }
 
     pub fn get_current_point_and_max_vesting_duration(activation_type: u8) -> Result<(u64, u64)> {
-        let activation_type = ActivationType::try_from(activation_type)
-            .map_err(|_| PoolError::InvalidActivationType)?;
+        let activation_type = ActivationType::try_from(activation_type)?;
         let (curr_point, max_vesting_duration) = match activation_type {
             ActivationType::Slot => (Clock::get()?.slot, MAX_VESTING_SLOT_DURATION),
             ActivationType::Timestamp => (
@@ -57,8 +58,7 @@ impl ActivationHandler {
     }
 
     pub fn get_current_point_and_buffer_duration(activation_type: u8) -> Result<(u64, u64)> {
-        let activation_type = ActivationType::try_from(activation_type)
-            .map_err(|_| PoolError::InvalidActivationType)?;
+        let activation_type = ActivationType::try_from(activation_type)?;
         let (curr_point, buffer_duration) = match activation_type {
             ActivationType::Slot => (Clock::get()?.slot, SLOT_BUFFER),
             ActivationType::Timestamp => (Clock::get()?.unix_timestamp as u64, TIME_BUFFER),
@@ -67,8 +67,7 @@ impl ActivationHandler {
     }
 
     pub fn get_max_activation_point(activation_type: u8) -> Result<u64> {
-        let activation_type = ActivationType::try_from(activation_type)
-            .map_err(|_| PoolError::InvalidActivationType)?;
+        let activation_type = ActivationType::try_from(activation_type)?;
         let (curr_point, max_activation_duration) = match activation_type {
             ActivationType::Slot => (Clock::get()?.slot, MAX_ACTIVATION_SLOT_DURATION),
             ActivationType::Timestamp => (
@@ -76,18 +75,20 @@ impl ActivationHandler {
                 MAX_ACTIVATION_TIME_DURATION,
             ),
         };
-        Ok(curr_point.safe_add(max_activation_duration)?)
+        Ok(curr_point.safe_add(max_activation_duration).map_err(|e| anyhow::anyhow!("{}", e))?)
     }
 
     pub fn get_pre_activation_start_point(&self) -> Result<u64> {
-        Ok(self.activation_point.safe_sub(self.buffer_duration)?)
+        Ok(self.activation_point.safe_sub(self.buffer_duration).map_err(|e| anyhow::anyhow!("{}", e))?)
     }
 
     /// last join pool from alpha-vault
     pub fn get_last_join_point(&self) -> Result<u64> {
         let pre_activation_start_point = self.get_pre_activation_start_point()?;
         let last_join_point =
-            pre_activation_start_point.safe_sub(self.buffer_duration.safe_div(12)?)?; // 5 minutes
+            pre_activation_start_point.safe_sub(
+                self.buffer_duration.safe_div(12).map_err(|e| anyhow::anyhow!("{}", e))?).
+                map_err(|e| anyhow::anyhow!("{}", e))?; // 5 minutes
         Ok(last_join_point)
     }
 }
