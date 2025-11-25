@@ -13,6 +13,7 @@ use spl_token_2022::{
     extension::StateWithExtensions,
     state::{Account as Account2022, Mint as Mint2022},
 };
+use crate::constants::CLOCK_PROGRAM;
 
 /// 通用账户事件
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -25,6 +26,7 @@ pub struct TokenAccountEvent {
     pub rent_epoch: u64,
     pub amount: Option<u64>,
     pub token_owner: Pubkey,
+    pub data: Option<Vec<u8>>,
 }
 
 /// Nonce account event
@@ -197,6 +199,8 @@ impl AccountEventParser {
             Account::unpack(&account.data).ok().map(|info| info.amount)
         };
 
+        // 时钟账户特殊处理
+        let data = if account.pubkey == CLOCK_PROGRAM { Some(account.data.clone()) } else { None };
         let mut event = TokenAccountEvent {
             metadata,
             pubkey,
@@ -206,6 +210,7 @@ impl AccountEventParser {
             rent_epoch,
             amount,
             token_owner: account.owner,
+            data,
         };
         let recv_delta = elapsed_micros_since(account.recv_us);
         event.metadata.handle_us = recv_delta;
