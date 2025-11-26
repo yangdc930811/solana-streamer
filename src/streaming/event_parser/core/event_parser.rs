@@ -18,6 +18,7 @@ use solana_transaction_status::InnerInstructions;
 use std::sync::Arc;
 use log::info;
 use yellowstone_grpc_proto::geyser::SubscribeUpdateTransactionInfo;
+use sol_common::common::constants::RAYDIUM_AMM_V4_PROGRAM_ID;
 
 pub struct EventParser {}
 
@@ -650,8 +651,6 @@ impl EventParser {
         // 使用 EventDispatcher 来匹配协议
         if let Some(protocol) = EventDispatcher::match_protocol_by_program_id(program_id) {
             protocols.contains(&protocol)
-        } else if EventDispatcher::is_compute_budget_program(program_id) {
-            return true;
         } else {
             false
         }
