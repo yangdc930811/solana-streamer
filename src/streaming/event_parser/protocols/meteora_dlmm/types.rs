@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use solana_program::pubkey::Pubkey;
 use crate::streaming::event_parser::common::{EventMetadata, EventType};
 use crate::streaming::event_parser::DexEvent;
-use crate::streaming::event_parser::protocols::meteora_dlmm::events::MeteoraDlmmPoolAccountEvent;
+use crate::streaming::event_parser::protocols::meteora_dlmm::events::{MeteoraDlmmBinArrayBitmapExtensionAccountEvent, MeteoraDlmmPoolAccountEvent};
 use crate::streaming::grpc::AccountPretty;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize, Copy)]
@@ -141,4 +141,22 @@ pub fn direct_bin_array_bitmap_extension_decode(data: &[u8]) -> Option<BinArrayB
         return None;
     }
     borsh::from_slice::<BinArrayBitmapExtension>(&data[8..BIN_ARRAY_BITMAP_EXTENSION_SIZE + 8]).ok()
+}
+
+pub fn bin_array_bitmap_extension_parser(account: &AccountPretty, mut metadata: EventMetadata) -> Option<DexEvent> {
+    metadata.event_type = EventType::AccountMeteoraDlmmBinArrayBitmapExtension;
+
+    if let Some(bin_array_bitmap_extension) = direct_bin_array_bitmap_extension_decode(&account.data) {
+        Some(DexEvent::MeteoraDlmmBinArrayBitmapExtensionAccountEvent(MeteoraDlmmBinArrayBitmapExtensionAccountEvent {
+            metadata,
+            pubkey: account.pubkey,
+            executable: account.executable,
+            lamports: account.lamports,
+            owner: account.owner,
+            rent_epoch: account.rent_epoch,
+            bin_array_bitmap_extension,
+        }))
+    } else {
+        None
+    }
 }

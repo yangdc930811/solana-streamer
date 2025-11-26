@@ -2,8 +2,7 @@ use borsh_derive::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
 use crate::streaming::event_parser::common::EventMetadata;
-use crate::streaming::event_parser::protocols::meteora_damm_v2::types::Pool;
-use crate::streaming::event_parser::protocols::meteora_dlmm::types::LbPair;
+use crate::streaming::event_parser::protocols::meteora_dlmm::types::{BinArrayBitmapExtension, LbPair};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
 pub struct MeteoraDlmmSwapEvent {
@@ -51,6 +50,17 @@ pub struct MeteoraDlmmPoolAccountEvent {
     pub pool: LbPair,
 }
 
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MeteoraDlmmBinArrayBitmapExtensionAccountEvent {
+    pub metadata: EventMetadata,
+    pub pubkey: Pubkey,
+    pub executable: bool,
+    pub lamports: u64,
+    pub owner: Pubkey,
+    pub rent_epoch: u64,
+    pub bin_array_bitmap_extension: BinArrayBitmapExtension,
+}
+
 /// Event discriminator constants
 pub mod discriminators {
     // Event discriminators
@@ -60,6 +70,8 @@ pub mod discriminators {
     pub const SWAP: &[u8] = &[248, 198, 158, 145, 225, 117, 135, 200];
 
     pub const POOL_ACCOUNT: &[u8] = &[33, 11, 49, 98, 181, 101, 177, 13];
+
+    pub const BIN_ARRAY_BITMAP_EXTENSION_ACCOUNT: &[u8] = &[80, 111, 124, 113, 55, 237, 18, 5];
 }
 
 pub const METEORA_DLMM_SWAP_EVENT_LOG_SIZE: usize = 129;

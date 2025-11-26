@@ -16,7 +16,7 @@ use crate::streaming::event_parser::protocols::raydium_cpmm::events::*;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use crate::streaming::event_parser::protocols::meteora_damm_v2::events::{MeteoraDammV2PoolAccountEvent, MeteoraDammV2Swap2Event, MeteoraDammV2SwapEvent};
-use crate::streaming::event_parser::protocols::meteora_dlmm::events::{MeteoraDlmmPoolAccountEvent, MeteoraDlmmSwapEvent};
+use crate::streaming::event_parser::protocols::meteora_dlmm::events::{MeteoraDlmmBinArrayBitmapExtensionAccountEvent, MeteoraDlmmPoolAccountEvent, MeteoraDlmmSwapEvent};
 use crate::streaming::event_parser::protocols::orca::events::{OrcaPoolAccountEvent, OrcaSwapEvent};
 
 /// Unified Event Enum - Replaces the trait-based approach with a type-safe enum
@@ -89,6 +89,7 @@ pub enum DexEvent {
     // Meteora Dlmm Events
     MeteoraDlmmSwapEvent(MeteoraDlmmSwapEvent),
     MeteoraDlmmPoolAccountEvent(MeteoraDlmmPoolAccountEvent),
+    MeteoraDlmmBinArrayBitmapExtensionAccountEvent(MeteoraDlmmBinArrayBitmapExtensionAccountEvent),
 
     // Orca Events
     OrcaSwapEvent(OrcaSwapEvent),
@@ -166,6 +167,7 @@ impl DexEvent {
             DexEvent::RaydiumClmmTickArrayBitmapExtensionAccountEvent(e) => &e.metadata,
             DexEvent::SetComputeUnitLimitEvent(e) => &e.metadata,
             DexEvent::SetComputeUnitPriceEvent(e) => &e.metadata,
+            DexEvent::MeteoraDlmmBinArrayBitmapExtensionAccountEvent(e) => &e.metadata,
         }
     }
 
@@ -231,6 +233,7 @@ impl DexEvent {
             DexEvent::RaydiumClmmTickArrayBitmapExtensionAccountEvent(e) => &mut e.metadata,
             DexEvent::SetComputeUnitLimitEvent(e) => &mut e.metadata,
             DexEvent::SetComputeUnitPriceEvent(e) => &mut e.metadata,
+            DexEvent::MeteoraDlmmBinArrayBitmapExtensionAccountEvent(e) => &mut e.metadata,
         }
     }
 }
