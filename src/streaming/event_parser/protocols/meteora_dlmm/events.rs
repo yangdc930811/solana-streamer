@@ -1,8 +1,9 @@
 use borsh_derive::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
+use sol_common::protocols::meteora_dlmm::extensions::BinArrayBitmapExtension;
+use sol_common::protocols::meteora_dlmm::types::LbPair;
 use crate::streaming::event_parser::common::EventMetadata;
-use crate::streaming::event_parser::protocols::meteora_dlmm::types::{BinArrayBitmapExtension, LbPair};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
 pub struct MeteoraDlmmSwapEvent {

@@ -11,10 +11,6 @@ use crate::streaming::event_parser::{
     DexEvent,
 };
 
-/// Bonk Program ID
-pub const BONK_PROGRAM_ID: Pubkey =
-    solana_sdk::pubkey!("LanMV9sAd7wArD4vJFi2qDdfnVhFxYSUg6eADduJ3uj");
-
 /// 解析 Bonk instruction data
 ///
 /// 根据判别器路由到具体的 instruction 解析函数

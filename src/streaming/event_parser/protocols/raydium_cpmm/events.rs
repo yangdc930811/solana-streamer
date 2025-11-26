@@ -1,11 +1,8 @@
 use crate::streaming::event_parser::common::EventMetadata;
-use crate::streaming::event_parser::protocols::raydium_cpmm::types::PoolState;
-use crate::{
-    streaming::event_parser::protocols::raydium_cpmm::types::AmmConfig,
-};
 use borsh::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
+use sol_common::protocols::raydium_cpmm::{AmmConfig, PoolState};
 
 /// 交易
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]

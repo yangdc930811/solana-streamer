@@ -1,10 +1,8 @@
 use crate::streaming::event_parser::common::EventMetadata;
-use crate::{
-    streaming::event_parser::protocols::raydium_amm_v4::types::AmmInfo,
-};
 use borsh::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
+use sol_common::protocols::raydium_amm_v4::AmmInfo;
 
 /// 交易
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]

@@ -21,6 +21,7 @@ use crate::streaming::event_parser::{
     DexEvent, Protocol,
 };
 use solana_sdk::pubkey::Pubkey;
+use sol_common::common::constants::*;
 
 /// 中心事件解析调度器
 ///
@@ -196,23 +197,23 @@ impl EventDispatcher {
     /// 通过 program_id 匹配协议类型
     #[inline]
     pub fn match_protocol_by_program_id(program_id: &Pubkey) -> Option<Protocol> {
-        if program_id == &pumpfun::PUMPFUN_PROGRAM_ID {
+        if program_id == &PUMPFUN_PROGRAM_ID {
             Some(Protocol::PumpFun)
-        } else if program_id == &pumpswap::PUMPSWAP_PROGRAM_ID {
+        } else if program_id == &PUMPSWAP_PROGRAM_ID {
             Some(Protocol::PumpSwap)
-        } else if program_id == &bonk::BONK_PROGRAM_ID {
+        } else if program_id == &BONK_PROGRAM_ID {
             Some(Protocol::Bonk)
-        } else if program_id == &raydium_cpmm::RAYDIUM_CPMM_PROGRAM_ID {
+        } else if program_id == &RAYDIUM_CPMM_PROGRAM_ID {
             Some(Protocol::RaydiumCpmm)
-        } else if program_id == &raydium_clmm::RAYDIUM_CLMM_PROGRAM_ID {
+        } else if program_id == &RAYDIUM_CLMM_PROGRAM_ID {
             Some(Protocol::RaydiumClmm)
-        } else if program_id == &raydium_amm_v4::RAYDIUM_AMM_V4_PROGRAM_ID {
+        } else if program_id == &RAYDIUM_AMM_V4_PROGRAM_ID {
             Some(Protocol::RaydiumAmmV4)
-        } else if program_id == &meteora_damm_v2::METEORA_DAMM_V2_PROGRAM_ID {
+        } else if program_id == &METEORA_DAMM_V2_PROGRAM_ID {
             Some(Protocol::MeteoraDammV2)
-        } else if program_id == &meteora_dlmm::METEORA_DLMM_PROGRAM_ID {
+        } else if program_id == &METEORA_DLMM_PROGRAM_ID {
             Some(Protocol::MeteoraDlmm)
-        } else if program_id == &orca::ORCA_PROGRAM_ID {
+        } else if program_id == &ORCA_PROGRAM_ID {
             Some(Protocol::Orca)
         } else {
             None
@@ -245,15 +246,15 @@ impl EventDispatcher {
     #[inline]
     pub fn get_program_id(protocol: Protocol) -> Pubkey {
         match protocol {
-            Protocol::PumpFun => pumpfun::PUMPFUN_PROGRAM_ID,
-            Protocol::PumpSwap => pumpswap::PUMPSWAP_PROGRAM_ID,
-            Protocol::Bonk => bonk::BONK_PROGRAM_ID,
-            Protocol::RaydiumCpmm => raydium_cpmm::RAYDIUM_CPMM_PROGRAM_ID,
-            Protocol::RaydiumClmm => raydium_clmm::RAYDIUM_CLMM_PROGRAM_ID,
-            Protocol::RaydiumAmmV4 => raydium_amm_v4::RAYDIUM_AMM_V4_PROGRAM_ID,
-            Protocol::MeteoraDlmm => meteora_dlmm::METEORA_DLMM_PROGRAM_ID,
-            Protocol::Orca => orca::ORCA_PROGRAM_ID,
-            Protocol::MeteoraDammV2 => meteora_damm_v2::METEORA_DAMM_V2_PROGRAM_ID,
+            Protocol::PumpFun => PUMPFUN_PROGRAM_ID,
+            Protocol::PumpSwap => PUMPSWAP_PROGRAM_ID,
+            Protocol::Bonk => BONK_PROGRAM_ID,
+            Protocol::RaydiumCpmm => RAYDIUM_CPMM_PROGRAM_ID,
+            Protocol::RaydiumClmm => RAYDIUM_CLMM_PROGRAM_ID,
+            Protocol::RaydiumAmmV4 => RAYDIUM_AMM_V4_PROGRAM_ID,
+            Protocol::MeteoraDlmm => METEORA_DLMM_PROGRAM_ID,
+            Protocol::Orca => ORCA_PROGRAM_ID,
+            Protocol::MeteoraDammV2 => METEORA_DAMM_V2_PROGRAM_ID,
         }
     }
 

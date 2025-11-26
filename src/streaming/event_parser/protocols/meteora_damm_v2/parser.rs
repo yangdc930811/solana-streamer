@@ -6,10 +6,6 @@ use solana_sdk::pubkey::Pubkey;
 use crate::streaming::event_parser::protocols::meteora_damm_v2;
 use crate::streaming::event_parser::protocols::meteora_damm_v2::events::{discriminators, meteora_damm_v2_initialize_pool_event_decode, meteora_damm_v2_swap_event_decode, MeteoraDammV2InitializeCustomizablePoolEvent, MeteoraDammV2InitializePoolEvent, MeteoraDammV2InitializePoolWithDynamicConfigEvent, MeteoraDammV2Swap2Event, MeteoraDammV2SwapEvent};
 
-/// Meteora DAMM v2 程序ID
-pub const METEORA_DAMM_V2_PROGRAM_ID: Pubkey =
-    solana_sdk::pubkey!("cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG");
-
 /// 解析 Meteora DAMM v2 instruction data
 ///
 /// 根据判别器路由到具体的 instruction 解析函数

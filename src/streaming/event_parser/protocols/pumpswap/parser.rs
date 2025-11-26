@@ -10,10 +10,6 @@ use crate::streaming::event_parser::{
 };
 use solana_sdk::pubkey::Pubkey;
 
-/// PumpSwap程序ID
-pub const PUMPSWAP_PROGRAM_ID: Pubkey =
-    solana_sdk::pubkey!("pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA");
-
 /// 解析 PumpSwap instruction data
 ///
 /// 根据判别器路由到具体的 instruction 解析函数

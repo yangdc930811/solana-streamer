@@ -1,8 +1,8 @@
 use borsh_derive::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_program::pubkey::Pubkey;
+use sol_common::protocols::orca::Whirlpool;
 use crate::streaming::event_parser::common::EventMetadata;
-use crate::streaming::event_parser::protocols::orca::types::Whirlpool;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
 pub struct OrcaSwapEvent {

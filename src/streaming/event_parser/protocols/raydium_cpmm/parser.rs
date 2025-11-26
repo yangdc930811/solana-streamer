@@ -9,10 +9,6 @@ use crate::streaming::event_parser::{
     DexEvent,
 };
 
-/// Raydium CPMM程序ID
-pub const RAYDIUM_CPMM_PROGRAM_ID: Pubkey =
-    solana_sdk::pubkey!("CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C");
-
 /// 解析 Raydium CPMM instruction data
 ///
 /// 根据判别器路由到具体的 instruction 解析函数

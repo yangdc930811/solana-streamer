@@ -3,11 +3,12 @@ use crate::streaming::event_parser::protocols::bonk::types::{
     CurveParams, MintParams, PoolStatus, TradeDirection, VestingParams,
 };
 use crate::streaming::event_parser::protocols::bonk::{
-    AmmFeeOn, GlobalConfig, PlatformConfig, PoolState,
+    AmmFeeOn, GlobalConfig, PlatformConfig,
 };
 use borsh::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
+use sol_common::protocols::bonk::PoolState;
 
 /// Trade event
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]

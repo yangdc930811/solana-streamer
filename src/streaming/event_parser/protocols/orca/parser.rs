@@ -4,9 +4,6 @@ use crate::streaming::event_parser::DexEvent;
 use crate::streaming::event_parser::protocols::orca;
 use crate::streaming::event_parser::protocols::orca::events::{discriminators, OrcaSwapEvent};
 
-pub const ORCA_PROGRAM_ID: Pubkey =
-    solana_sdk::pubkey!("whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc");
-
 // 根据判别器路由到具体的 instruction 解析函数
 pub fn parse_orca_instruction_data(
     discriminator: &[u8],

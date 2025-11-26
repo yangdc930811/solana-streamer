@@ -1,9 +1,8 @@
 use borsh::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
-
+use sol_common::protocols::meteora_damm_v2::types::Pool;
 use crate::streaming::event_parser::common::EventMetadata;
-use crate::streaming::event_parser::protocols::meteora_damm_v2::types::Pool;
 
 /// Base fee parameters
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]

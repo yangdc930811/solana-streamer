@@ -12,14 +12,7 @@ use crate::streaming::event_parser::{
     DexEvent,
 };
 use solana_sdk::pubkey::Pubkey;
-use crate::streaming::event_parser::protocols::raydium_clmm::states::config::amm_config_parser;
-use crate::streaming::event_parser::protocols::raydium_clmm::states::pool::pool_state_parser;
-use crate::streaming::event_parser::protocols::raydium_clmm::states::tick_array::tick_array_state_parser;
-use crate::streaming::event_parser::protocols::raydium_clmm::states::tickarray_bitmap_extension::tick_array_bitmap_extension_parser;
-
-/// Raydium CLMM程序ID
-pub const RAYDIUM_CLMM_PROGRAM_ID: Pubkey =
-    solana_sdk::pubkey!("CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK");
+use crate::streaming::event_parser::protocols::raydium_clmm::types::{amm_config_parser, pool_state_parser, tick_array_bitmap_extension_parser, tick_array_state_parser};
 
 /// 解析 Raydium CLMM instruction data
 ///

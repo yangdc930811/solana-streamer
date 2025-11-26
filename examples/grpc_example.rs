@@ -1,12 +1,6 @@
+use sol_common::common::constants::*;
 use solana_streamer::streaming::{
     event_parser::{
-        protocols::{
-            bonk::parser::BONK_PROGRAM_ID, meteora_damm_v2::parser::METEORA_DAMM_V2_PROGRAM_ID,
-            pumpfun::parser::PUMPFUN_PROGRAM_ID, pumpswap::parser::PUMPSWAP_PROGRAM_ID,
-            raydium_amm_v4::parser::RAYDIUM_AMM_V4_PROGRAM_ID,
-            raydium_clmm::parser::RAYDIUM_CLMM_PROGRAM_ID,
-            raydium_cpmm::parser::RAYDIUM_CPMM_PROGRAM_ID,
-        },
         DexEvent, Protocol,
     },
     grpc::ClientConfig,
@@ -95,7 +89,7 @@ async fn test_grpc() -> Result<(), Box<dyn std::error::Error>> {
         None,
         callback,
     )
-    .await?;
+        .await?;
 
     // 支持 stop 方法，测试代码 -  异步1000秒之后停止
     let grpc_clone = grpc.clone();

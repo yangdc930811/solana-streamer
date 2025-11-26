@@ -4,9 +4,6 @@ use crate::streaming::event_parser::DexEvent;
 use crate::streaming::event_parser::protocols::{meteora_damm_v2, meteora_dlmm};
 use crate::streaming::event_parser::protocols::meteora_dlmm::events::{discriminators, meteora_dlmm_swap_event_log_decode, MeteoraDlmmSwapEvent};
 
-pub const METEORA_DLMM_PROGRAM_ID: Pubkey =
-    solana_sdk::pubkey!("LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo");
-
 // 根据判别器路由到具体的 instruction 解析函数
 pub fn parse_meteora_dlmm_instruction_data(
     discriminator: &[u8],

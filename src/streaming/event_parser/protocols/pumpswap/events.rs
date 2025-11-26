@@ -1,9 +1,8 @@
 use borsh::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
-
+use sol_common::protocols::pumpswap::{GlobalConfig, Pool};
 use crate::streaming::event_parser::common::EventMetadata;
-use crate::streaming::event_parser::protocols::pumpswap::types::{GlobalConfig, Pool};
 
 /// 买入事件
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]

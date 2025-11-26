@@ -1,9 +1,8 @@
 use borsh::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
-
+use sol_common::protocols::pumpfun::{BondingCurve, Global};
 use crate::streaming::event_parser::common::EventMetadata;
-use crate::streaming::event_parser::protocols::pumpfun::types::{BondingCurve, Global};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
 pub struct PumpFunCreateTokenEvent {

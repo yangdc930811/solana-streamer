@@ -8,10 +8,6 @@ use crate::streaming::event_parser::{
 };
 use solana_sdk::pubkey::Pubkey;
 
-/// Raydium AMM V4程序ID
-pub const RAYDIUM_AMM_V4_PROGRAM_ID: Pubkey =
-    solana_sdk::pubkey!("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8");
-
 /// 解析 Raydium AMM V4 instruction data
 ///
 /// 根据判别器路由到具体的 instruction 解析函数

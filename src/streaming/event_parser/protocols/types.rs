@@ -1,16 +1,9 @@
-use crate::streaming::event_parser::protocols::{
-    bonk::parser::BONK_PROGRAM_ID, meteora_damm_v2::parser::METEORA_DAMM_V2_PROGRAM_ID,
-    pumpfun::parser::PUMPFUN_PROGRAM_ID, pumpswap::parser::PUMPSWAP_PROGRAM_ID,
-    raydium_amm_v4::parser::RAYDIUM_AMM_V4_PROGRAM_ID, raydium_clmm::parser::RAYDIUM_CLMM_PROGRAM_ID,
-    raydium_cpmm::parser::RAYDIUM_CPMM_PROGRAM_ID,
-};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
-use crate::streaming::event_parser::protocols::meteora_dlmm::parser::METEORA_DLMM_PROGRAM_ID;
-use crate::streaming::event_parser::protocols::orca::parser::ORCA_PROGRAM_ID;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum_macros::EnumIter;
+use sol_common::common::constants::{BONK_PROGRAM_ID, METEORA_DAMM_V2_PROGRAM_ID, METEORA_DLMM_PROGRAM_ID, ORCA_PROGRAM_ID, PUMPFUN_PROGRAM_ID, PUMPSWAP_PROGRAM_ID, RAYDIUM_AMM_V4_PROGRAM_ID, RAYDIUM_CLMM_PROGRAM_ID, RAYDIUM_CPMM_PROGRAM_ID};
 
 /// 支持的协议
 #[derive(Debug, Serialize_repr, Deserialize_repr, Clone, PartialEq, Eq, Hash, Default, EnumIter)]

@@ -9,10 +9,6 @@ use crate::streaming::event_parser::{
 };
 use solana_sdk::pubkey::Pubkey;
 
-/// PumpFun程序ID
-pub const PUMPFUN_PROGRAM_ID: Pubkey =
-    solana_sdk::pubkey!("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P");
-
 /// 解析 PumpFun instruction data
 ///
 /// 根据判别器路由到具体的 instruction 解析函数

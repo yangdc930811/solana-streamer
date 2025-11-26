@@ -1,10 +1,10 @@
 use crate::streaming::event_parser::common::EventMetadata;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
-use crate::streaming::event_parser::protocols::raydium_clmm::states::config::AmmConfig;
-use crate::streaming::event_parser::protocols::raydium_clmm::states::pool::PoolState;
-use crate::streaming::event_parser::protocols::raydium_clmm::states::tick_array::TickArrayState;
-use crate::streaming::event_parser::protocols::raydium_clmm::states::tickarray_bitmap_extension::TickArrayBitmapExtension;
+use sol_common::protocols::raydium_clmm::states::config::AmmConfig;
+use sol_common::protocols::raydium_clmm::states::pool::PoolState;
+use sol_common::protocols::raydium_clmm::states::tick_array::TickArrayState;
+use sol_common::protocols::raydium_clmm::states::tickarray_bitmap_extension::TickArrayBitmapExtension;
 
 /// 交易
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]

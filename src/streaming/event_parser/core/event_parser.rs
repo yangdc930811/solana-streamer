@@ -1,14 +1,13 @@
 use crate::streaming::event_parser::{
     DexEvent, Protocol, common::{
-        EventMetadata, filter::EventTypeFilter, high_performance_clock::elapsed_micros_since, parse_swap_data_from_next_grpc_instructions, parse_swap_data_from_next_instructions
+        EventMetadata, filter::EventTypeFilter, high_performance_clock::elapsed_micros_since, parse_swap_data_from_next_grpc_instructions, parse_swap_data_from_next_instructions,
     }, core::{
         dispatcher::EventDispatcher,
         global_state::{
             add_bonk_dev_address, add_dev_address, is_bonk_dev_address_in_signature,
             is_dev_address_in_signature,
         },
-        merger_event::merge,
-    }, protocols::raydium_amm_v4::parser::RAYDIUM_AMM_V4_PROGRAM_ID
+        merger_event::merge, },
 };
 use prost_types::Timestamp;
 use solana_sdk::{
@@ -97,7 +96,7 @@ impl EventParser {
                     transaction_index,
                     adapter_callback,
                 )
-                .await?;
+                    .await?;
             }
         }
 
