@@ -13,6 +13,7 @@ readme = "README.md"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+sol-common = { path = "../sol-common" }
 solana-sdk = "3.0.0"
 solana-client = "3.0.0"
 solana-program = "3.0.0" 
