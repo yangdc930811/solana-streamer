@@ -1,7 +1,7 @@
 use borsh_derive::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_program::pubkey::Pubkey;
-use sol_common::protocols::orca::Whirlpool;
+use sol_common::protocols::orca::types::{Whirlpool};
 use crate::streaming::event_parser::common::EventMetadata;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]

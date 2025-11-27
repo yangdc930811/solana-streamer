@@ -1,7 +1,4 @@
-use borsh_derive::BorshDeserialize;
-use serde::{Deserialize, Serialize};
-use solana_program::pubkey::Pubkey;
-use sol_common::protocols::orca::Whirlpool;
+use sol_common::protocols::orca::types::Whirlpool;
 use crate::streaming::event_parser::common::{EventMetadata, EventType};
 use crate::streaming::event_parser::DexEvent;
 use crate::streaming::event_parser::protocols::orca::events::OrcaPoolAccountEvent;
