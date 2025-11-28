@@ -354,6 +354,7 @@ pub struct EventMetadata {
     pub swap_data: Option<SwapData>,
     pub outer_index: i64,
     pub inner_index: Option<i64>,
+    pub data: Option<Vec<u8>>
 }
 
 impl EventMetadata {
@@ -385,6 +386,7 @@ impl EventMetadata {
             outer_index,
             inner_index,
             transaction_index,
+            data: None,
         }
     }
 
