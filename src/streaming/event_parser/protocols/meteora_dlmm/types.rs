@@ -1,8 +1,8 @@
-use sol_common::protocols::meteora_dlmm::extensions::BinArrayBitmapExtension;
+use sol_common::protocols::meteora_dlmm::extensions::{BinArray, BinArrayBitmapExtension};
 use sol_common::protocols::meteora_dlmm::types::LbPair;
 use crate::streaming::event_parser::common::{EventMetadata, EventType};
 use crate::streaming::event_parser::DexEvent;
-use crate::streaming::event_parser::protocols::meteora_dlmm::events::{MeteoraDlmmBinArrayBitmapExtensionAccountEvent, MeteoraDlmmPoolAccountEvent};
+use crate::streaming::event_parser::protocols::meteora_dlmm::events::{MeteoraDlmmBinArrayAccountEvent, MeteoraDlmmBinArrayBitmapExtensionAccountEvent, MeteoraDlmmPoolAccountEvent};
 use crate::streaming::grpc::AccountPretty;
 
 pub const POOL_SIZE: usize = 896;
@@ -43,12 +43,20 @@ pub fn pool_parser(account: &AccountPretty, mut metadata: EventMetadata) -> Opti
 }
 
 pub const BIN_ARRAY_BITMAP_EXTENSION_SIZE: usize = 1568;
+pub const BIN_ARRAY_SIZE: usize = 10128;
 
 pub fn direct_bin_array_bitmap_extension_decode(data: &[u8]) -> Option<BinArrayBitmapExtension> {
     if data.len() < BIN_ARRAY_BITMAP_EXTENSION_SIZE + 8 {
         return None;
     }
     borsh::from_slice::<BinArrayBitmapExtension>(&data[8..BIN_ARRAY_BITMAP_EXTENSION_SIZE + 8]).ok()
+}
+
+pub fn direct_bin_array_decode(data: &[u8]) -> Option<BinArray> {
+    if data.len() < BIN_ARRAY_SIZE + 8 {
+        return None;
+    }
+    borsh::from_slice::<BinArray>(&data[8..BIN_ARRAY_SIZE + 8]).ok()
 }
 
 pub fn bin_array_bitmap_extension_parser(account: &AccountPretty, mut metadata: EventMetadata) -> Option<DexEvent> {
@@ -63,6 +71,24 @@ pub fn bin_array_bitmap_extension_parser(account: &AccountPretty, mut metadata: 
             owner: account.owner,
             rent_epoch: account.rent_epoch,
             bin_array_bitmap_extension,
+        }))
+    } else {
+        None
+    }
+}
+
+pub fn bin_array_parser(account: &AccountPretty, mut metadata: EventMetadata) -> Option<DexEvent> {
+    metadata.event_type = EventType::AccountMeteoraDlmmBinArray;
+
+    if let Some(bin_array) = direct_bin_array_decode(&account.data) {
+        Some(DexEvent::MeteoraDlmmBinArrayAccountEvent(MeteoraDlmmBinArrayAccountEvent {
+            metadata,
+            pubkey: account.pubkey,
+            executable: account.executable,
+            lamports: account.lamports,
+            owner: account.owner,
+            rent_epoch: account.rent_epoch,
+            bin_array,
         }))
     } else {
         None

@@ -1,7 +1,7 @@
 use borsh_derive::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
-use sol_common::protocols::meteora_dlmm::extensions::BinArrayBitmapExtension;
+use sol_common::protocols::meteora_dlmm::extensions::{BinArray, BinArrayBitmapExtension};
 use sol_common::protocols::meteora_dlmm::types::LbPair;
 use crate::streaming::event_parser::common::EventMetadata;
 
@@ -62,6 +62,17 @@ pub struct MeteoraDlmmBinArrayBitmapExtensionAccountEvent {
     pub bin_array_bitmap_extension: BinArrayBitmapExtension,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MeteoraDlmmBinArrayAccountEvent {
+    pub metadata: EventMetadata,
+    pub pubkey: Pubkey,
+    pub executable: bool,
+    pub lamports: u64,
+    pub owner: Pubkey,
+    pub rent_epoch: u64,
+    pub bin_array: BinArray,
+}
+
 /// Event discriminator constants
 pub mod discriminators {
     // Event discriminators
@@ -73,6 +84,8 @@ pub mod discriminators {
     pub const POOL_ACCOUNT: &[u8] = &[33, 11, 49, 98, 181, 101, 177, 13];
 
     pub const BIN_ARRAY_BITMAP_EXTENSION_ACCOUNT: &[u8] = &[80, 111, 124, 113, 55, 237, 18, 5];
+
+    pub const BIN_ARRAY_ACCOUNT: &[u8] = &[92, 142, 92, 220, 5, 148, 70, 181];
 }
 
 pub const METEORA_DLMM_SWAP_EVENT_LOG_SIZE: usize = 129;

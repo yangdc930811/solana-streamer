@@ -77,6 +77,10 @@ pub fn parse_meteora_dlmm_account_data(
         discriminators::BIN_ARRAY_BITMAP_EXTENSION_ACCOUNT => {
             meteora_dlmm::types::bin_array_bitmap_extension_parser(account, metadata)
         }
+
+        discriminators::BIN_ARRAY_ACCOUNT => {
+            meteora_dlmm::types::bin_array_parser(account, metadata)
+        }
         _ => None,
     }
 }
