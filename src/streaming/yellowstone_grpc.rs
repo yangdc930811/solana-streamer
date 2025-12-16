@@ -143,19 +143,16 @@ impl YellowstoneGrpc {
     where
         F: Fn(DexEvent) + Send + Sync + 'static,
     {
-        *self.event_type_filter.write().await = event_type_filter.clone();
+        {
+            *self.event_type_filter.write().await = event_type_filter.clone();
+        }
+
         if self
             .active_subscription
             .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
             .is_err()
         {
             return Err(anyhow!("Already subscribed. Use update_subscription() to modify filters"));
-        }
-
-        let mut metrics_handle = None;
-        // 启动自动性能监控（如果启用）
-        if self.config.enable_metrics {
-            metrics_handle = MetricsManager::global().start_auto_monitoring().await;
         }
 
         let transactions = self
@@ -173,16 +170,19 @@ impl YellowstoneGrpc {
 
         // 用 Arc<Mutex<>> 包装 subscribe_tx 以支持多线程共享
         let subscribe_tx = Arc::new(Mutex::new(subscribe_tx));
-        *self.current_request.write().await = Some(subscribe_request);
+        {
+            *self.current_request.write().await = Some(subscribe_request);
+        }
         let (control_tx, mut control_rx) = mpsc::channel(100);
-        *self.control_tx.lock().await = Some(control_tx);
+        {
+            *self.control_tx.lock().await = Some(control_tx);
+        }
 
         // Wrap callback once before the async block
         let callback = Arc::new(callback);
 
-        let stream_handle = tokio::spawn(async move {
-            loop {
-                tokio::select! {
+        loop {
+            tokio::select! {
                     message = stream.next() => {
                         match message {
                             Some(Ok(msg)) => {
@@ -258,28 +258,18 @@ impl YellowstoneGrpc {
                                 }
                             }
                             Some(Err(error)) => {
-                                error!("Stream error: {error:?}");
-                                break;
+                                return Err(anyhow!("Stream error: {}", error));
                             }
-                            None => break,
+                            None => return Err(anyhow!("Stream quit")),
                         }
                     }
                     Some(update) = control_rx.next() => {
                         if let Err(e) = subscribe_tx.lock().await.send(update).await {
-                            error!("Failed to send subscription update: {}", e);
-                            break;
+                            return Err(anyhow!("Failed to send subscription update: {}", e));
                         }
                     }
                 }
-            }
-        });
-
-        // 保存订阅句柄
-        let subscription_handle = SubscriptionHandle::new(stream_handle, None, metrics_handle);
-        let mut handle_guard = self.subscription_handle.lock().await;
-        *handle_guard = Some(subscription_handle);
-
-        Ok(())
+        }
     }
 
     /// Update subscription filters at runtime without reconnection
