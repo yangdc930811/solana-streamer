@@ -15,10 +15,10 @@ pub enum Protocol {
     RaydiumClmm,
     RaydiumAmmV4,
     MeteoraDlmm,
+    MeteoraDammV2,
     Orca,
     Bonk,
     PumpFun,
-    MeteoraDammV2,
 }
 
 impl Protocol {
