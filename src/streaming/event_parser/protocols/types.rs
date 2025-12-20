@@ -6,7 +6,7 @@ use strum_macros::EnumIter;
 use sol_common::common::constants::{BONK_PROGRAM_ID, METEORA_DAMM_V2_PROGRAM_ID, METEORA_DLMM_PROGRAM_ID, ORCA_PROGRAM_ID, PUMPFUN_PROGRAM_ID, PUMPSWAP_PROGRAM_ID, RAYDIUM_AMM_V4_PROGRAM_ID, RAYDIUM_CLMM_PROGRAM_ID, RAYDIUM_CPMM_PROGRAM_ID};
 
 /// 支持的协议
-#[derive(Debug, Serialize_repr, Deserialize_repr, Clone, PartialEq, Eq, Hash, Default, EnumIter)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, Clone, PartialEq, Eq, Hash, Default, EnumIter, Copy)]
 #[repr(u8)]
 pub enum Protocol {
     #[default]
