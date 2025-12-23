@@ -582,7 +582,6 @@ pub fn parse_swap_data_from_next_instructions(
 }
 
 /// Parse token transfer data from next instructions
-/// TODO: - wait refactor
 pub fn parse_swap_data_from_next_grpc_instructions(
     event: &DexEvent,
     inner_instruction: &yellowstone_grpc_proto::prelude::InnerInstructions,
