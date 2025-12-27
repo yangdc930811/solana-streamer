@@ -15,6 +15,7 @@ use log::error;
 use solana_sdk::pubkey::Pubkey;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use parking_lot::RwLock;
 use tokio::sync::Mutex;
 use yellowstone_grpc_proto::geyser::subscribe_update::UpdateOneof;
 use yellowstone_grpc_proto::geyser::{
@@ -45,10 +46,10 @@ pub struct YellowstoneGrpc {
     pub subscription_handle: Arc<Mutex<Option<SubscriptionHandle>>>,
     // Dynamic subscription management fields
     pub active_subscription: Arc<AtomicBool>,
-    pub control_tx: Arc<tokio::sync::Mutex<Option<mpsc::Sender<SubscribeRequest>>>>,
-    pub current_request: Arc<tokio::sync::RwLock<Option<SubscribeRequest>>>,
+    pub control_tx: Arc<Mutex<Option<mpsc::Sender<SubscribeRequest>>>>,
+    pub current_request: Arc<RwLock<Option<SubscribeRequest>>>,
 
-    pub event_type_filter: Arc<tokio::sync::RwLock<Option<EventTypeFilter>>>,
+    pub event_type_filter: Arc<RwLock<Option<EventTypeFilter>>>,
 }
 
 impl YellowstoneGrpc {
@@ -76,8 +77,8 @@ impl YellowstoneGrpc {
             subscription_handle: Arc::new(Mutex::new(None)),
             active_subscription: Arc::new(AtomicBool::new(false)),
             control_tx: Arc::new(tokio::sync::Mutex::new(None)),
-            current_request: Arc::new(tokio::sync::RwLock::new(None)),
-            event_type_filter: Arc::new(tokio::sync::RwLock::new(None)),
+            current_request: Arc::new(RwLock::new(None)),
+            event_type_filter: Arc::new(RwLock::new(None)),
         })
     }
 
@@ -113,7 +114,7 @@ impl YellowstoneGrpc {
             handle.stop();
         }
         *self.control_tx.lock().await = None;
-        *self.current_request.write().await = None;
+        *self.current_request.write() = None;
         self.active_subscription.store(false, Ordering::Release);
     }
 
@@ -144,7 +145,7 @@ impl YellowstoneGrpc {
         F: Fn(DexEvent) + Send + Sync + 'static,
     {
         {
-            *self.event_type_filter.write().await = event_type_filter.clone();
+            *self.event_type_filter.write() = event_type_filter.clone();
         }
 
         if self
@@ -171,7 +172,7 @@ impl YellowstoneGrpc {
         // 用 Arc<Mutex<>> 包装 subscribe_tx 以支持多线程共享
         let subscribe_tx = Arc::new(Mutex::new(subscribe_tx));
         {
-            *self.current_request.write().await = Some(subscribe_request);
+            *self.current_request.write() = Some(subscribe_request);
         }
         let (control_tx, mut control_rx) = mpsc::channel(100);
         {
@@ -301,7 +302,6 @@ impl YellowstoneGrpc {
         let mut request = self
             .current_request
             .read()
-            .await
             .as_ref()
             .ok_or_else(|| anyhow!("No active subscription"))?
             .clone();
@@ -310,7 +310,7 @@ impl YellowstoneGrpc {
             .subscription_manager
             .get_subscribe_request_filter(
                 transaction_filter,
-                self.event_type_filter.read().await.as_ref(),
+                self.event_type_filter.read().as_ref(),
             )
             .unwrap_or_default();
 
@@ -318,7 +318,7 @@ impl YellowstoneGrpc {
             .subscription_manager
             .subscribe_with_account_request(
                 account_filter,
-                self.event_type_filter.read().await.as_ref(),
+                self.event_type_filter.read().as_ref(),
             )
             .unwrap_or_default();
 
@@ -327,7 +327,7 @@ impl YellowstoneGrpc {
             .await
             .map_err(|e| anyhow!("Failed to send update: {}", e))?;
 
-        *self.current_request.write().await = Some(request);
+        *self.current_request.write() = Some(request);
 
         Ok(())
     }
