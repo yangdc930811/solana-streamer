@@ -184,92 +184,92 @@ impl YellowstoneGrpc {
 
         loop {
             tokio::select! {
-                    message = stream.next() => {
-                        match message {
-                            Some(Ok(msg)) => {
-                                let created_at = msg.created_at;
-                                match msg.update_oneof {
-                                    Some(UpdateOneof::Account(account)) => {
-                                        let account_pretty = factory::create_account_pretty_pooled(account);
-                                        log::debug!("Received account: {:?}", account_pretty);
-                                        if let Err(e) = process_grpc_transaction(
-                                            EventPretty::Account(account_pretty),
-                                            &protocols,
-                                            event_type_filter.as_ref(),
-                                            callback.clone(),
-                                            bot_wallet,
-                                        )
-                                        .await
-                                        {
-                                            error!("Error processing account event: {e:?}");
-                                        }
-                                    }
-                                    Some(UpdateOneof::BlockMeta(sut)) => {
-                                        let block_meta_pretty = factory::create_block_meta_pretty_pooled(sut, created_at);
-                                        log::debug!("Received block meta: {:?}", block_meta_pretty);
-                                        if let Err(e) = process_grpc_transaction(
-                                            EventPretty::BlockMeta(block_meta_pretty),
-                                            &protocols,
-                                            event_type_filter.as_ref(),
-                                            callback.clone(),
-                                            bot_wallet,
-                                        )
-                                        .await
-                                        {
-                                            error!("Error processing block meta event: {e:?}");
-                                        }
-                                    }
-                                    Some(UpdateOneof::Transaction(sut)) => {
-                                        let transaction_pretty = factory::create_transaction_pretty_pooled(sut, created_at);
-                                        log::debug!(
-                                            "Received transaction: {} at slot {}",
-                                            transaction_pretty.signature,
-                                            transaction_pretty.slot
-                                        );
-                                        if let Err(e) = process_grpc_transaction(
-                                            EventPretty::Transaction(transaction_pretty),
-                                            &protocols,
-                                            event_type_filter.as_ref(),
-                                            callback.clone(),
-                                            bot_wallet,
-                                        )
-                                        .await
-                                        {
-                                            error!("Error processing transaction event: {e:?}");
-                                        }
-                                    }
-                                    Some(UpdateOneof::Ping(_)) => {
-                                        // 只在需要时获取锁，并立即释放
-                                        if let Ok(mut tx_guard) = subscribe_tx.try_lock() {
-                                            let _ = tx_guard
-                                                .send(SubscribeRequest {
-                                                    ping: Some(SubscribeRequestPing { id: 1 }),
-                                                    ..Default::default()
-                                                })
-                                                .await;
-                                        }
-                                        log::debug!("service is ping: {}", Local::now());
-                                    }
-                                    Some(UpdateOneof::Pong(_)) => {
-                                        log::debug!("service is pong: {}", Local::now());
-                                    }
-                                    _ => {
-                                        log::debug!("Received other message type");
+                message = stream.next() => {
+                    match message {
+                        Some(Ok(msg)) => {
+                            let created_at = msg.created_at;
+                            match msg.update_oneof {
+                                Some(UpdateOneof::Account(account)) => {
+                                    let account_pretty = factory::create_account_pretty_pooled(account);
+                                    log::debug!("Received account: {:?}", account_pretty);
+                                    if let Err(e) = process_grpc_transaction(
+                                        EventPretty::Account(account_pretty),
+                                        &protocols,
+                                        event_type_filter.as_ref(),
+                                        callback.clone(),
+                                        bot_wallet,
+                                    )
+                                    .await
+                                    {
+                                        error!("Error processing account event: {e:?}");
                                     }
                                 }
+                                Some(UpdateOneof::BlockMeta(sut)) => {
+                                    let block_meta_pretty = factory::create_block_meta_pretty_pooled(sut, created_at);
+                                    log::debug!("Received block meta: {:?}", block_meta_pretty);
+                                    if let Err(e) = process_grpc_transaction(
+                                        EventPretty::BlockMeta(block_meta_pretty),
+                                        &protocols,
+                                        event_type_filter.as_ref(),
+                                        callback.clone(),
+                                        bot_wallet,
+                                    )
+                                    .await
+                                    {
+                                        error!("Error processing block meta event: {e:?}");
+                                    }
+                                }
+                                Some(UpdateOneof::Transaction(sut)) => {
+                                    let transaction_pretty = factory::create_transaction_pretty_pooled(sut, created_at);
+                                    log::debug!(
+                                        "Received transaction: {} at slot {}",
+                                        transaction_pretty.signature,
+                                        transaction_pretty.slot
+                                    );
+                                    if let Err(e) = process_grpc_transaction(
+                                        EventPretty::Transaction(transaction_pretty),
+                                        &protocols,
+                                        event_type_filter.as_ref(),
+                                        callback.clone(),
+                                        bot_wallet,
+                                    )
+                                    .await
+                                    {
+                                        error!("Error processing transaction event: {e:?}");
+                                    }
+                                }
+                                Some(UpdateOneof::Ping(_)) => {
+                                    // 只在需要时获取锁，并立即释放
+                                    if let Ok(mut tx_guard) = subscribe_tx.try_lock() {
+                                        let _ = tx_guard
+                                        .send(SubscribeRequest {
+                                            ping: Some(SubscribeRequestPing { id: 1 }),
+                                            ..Default::default()
+                                        })
+                                        .await;
+                                    }
+                                    log::debug!("service is ping: {}", Local::now());
+                                }
+                                Some(UpdateOneof::Pong(_)) => {
+                                    log::debug!("service is pong: {}", Local::now());
+                                }
+                                _ => {
+                                    log::debug!("Received other message type");
+                                }
                             }
-                            Some(Err(error)) => {
-                                return Err(anyhow!("Stream error: {}", error));
-                            }
-                            None => return Err(anyhow!("Stream quit")),
                         }
-                    }
-                    Some(update) = control_rx.next() => {
-                        if let Err(e) = subscribe_tx.lock().await.send(update).await {
-                            return Err(anyhow!("Failed to send subscription update: {}", e));
+                        Some(Err(error)) => {
+                            return Err(anyhow!("Stream error: {}", error));
                         }
+                        None => return Err(anyhow!("Stream quit")),
                     }
                 }
+                Some(update) = control_rx.next() => {
+                    if let Err(e) = subscribe_tx.lock().await.send(update).await {
+                        return Err(anyhow!("Failed to send subscription update: {}", e));
+                    }
+                }
+            }
         }
     }
 
