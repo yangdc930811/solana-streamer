@@ -15,7 +15,6 @@ use log::error;
 use solana_sdk::pubkey::Pubkey;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use parking_lot::RwLock;
 use tokio::sync::Mutex;
 use yellowstone_grpc_proto::geyser::subscribe_update::UpdateOneof;
 use yellowstone_grpc_proto::geyser::{
@@ -46,10 +45,10 @@ pub struct YellowstoneGrpc {
     pub subscription_handle: Arc<Mutex<Option<SubscriptionHandle>>>,
     // Dynamic subscription management fields
     pub active_subscription: Arc<AtomicBool>,
-    pub control_tx: Arc<Mutex<Option<mpsc::Sender<SubscribeRequest>>>>,
-    pub current_request: Arc<RwLock<Option<SubscribeRequest>>>,
+    pub control_tx: Arc<tokio::sync::Mutex<Option<mpsc::Sender<SubscribeRequest>>>>,
+    pub current_request: Arc<tokio::sync::RwLock<Option<SubscribeRequest>>>,
 
-    pub event_type_filter: Arc<RwLock<Option<EventTypeFilter>>>,
+    pub event_type_filter: Arc<tokio::sync::RwLock<Option<EventTypeFilter>>>,
 }
 
 impl YellowstoneGrpc {
@@ -77,8 +76,8 @@ impl YellowstoneGrpc {
             subscription_handle: Arc::new(Mutex::new(None)),
             active_subscription: Arc::new(AtomicBool::new(false)),
             control_tx: Arc::new(tokio::sync::Mutex::new(None)),
-            current_request: Arc::new(RwLock::new(None)),
-            event_type_filter: Arc::new(RwLock::new(None)),
+            current_request: Arc::new(tokio::sync::RwLock::new(None)),
+            event_type_filter: Arc::new(tokio::sync::RwLock::new(None)),
         })
     }
 
@@ -114,7 +113,7 @@ impl YellowstoneGrpc {
             handle.stop();
         }
         *self.control_tx.lock().await = None;
-        *self.current_request.write() = None;
+        *self.current_request.write().await = None;
         self.active_subscription.store(false, Ordering::Release);
     }
 
@@ -145,7 +144,7 @@ impl YellowstoneGrpc {
         F: Fn(DexEvent) + Send + Sync + 'static,
     {
         {
-            *self.event_type_filter.write() = event_type_filter.clone();
+            *self.event_type_filter.write().await = event_type_filter.clone();
         }
 
         if self
@@ -172,7 +171,7 @@ impl YellowstoneGrpc {
         // 用 Arc<Mutex<>> 包装 subscribe_tx 以支持多线程共享
         let subscribe_tx = Arc::new(Mutex::new(subscribe_tx));
         {
-            *self.current_request.write() = Some(subscribe_request);
+            *self.current_request.write().await = Some(subscribe_request);
         }
         let (control_tx, mut control_rx) = mpsc::channel(100);
         {
@@ -184,92 +183,92 @@ impl YellowstoneGrpc {
 
         loop {
             tokio::select! {
-                message = stream.next() => {
-                    match message {
-                        Some(Ok(msg)) => {
-                            let created_at = msg.created_at;
-                            match msg.update_oneof {
-                                Some(UpdateOneof::Account(account)) => {
-                                    let account_pretty = factory::create_account_pretty_pooled(account);
-                                    log::debug!("Received account: {:?}", account_pretty);
-                                    if let Err(e) = process_grpc_transaction(
-                                        EventPretty::Account(account_pretty),
-                                        &protocols,
-                                        event_type_filter.as_ref(),
-                                        callback.clone(),
-                                        bot_wallet,
-                                    )
-                                    .await
-                                    {
-                                        error!("Error processing account event: {e:?}");
+                    message = stream.next() => {
+                        match message {
+                            Some(Ok(msg)) => {
+                                let created_at = msg.created_at;
+                                match msg.update_oneof {
+                                    Some(UpdateOneof::Account(account)) => {
+                                        let account_pretty = factory::create_account_pretty_pooled(account);
+                                        log::debug!("Received account: {:?}", account_pretty);
+                                        if let Err(e) = process_grpc_transaction(
+                                            EventPretty::Account(account_pretty),
+                                            &protocols,
+                                            event_type_filter.as_ref(),
+                                            callback.clone(),
+                                            bot_wallet,
+                                        )
+                                        .await
+                                        {
+                                            error!("Error processing account event: {e:?}");
+                                        }
                                     }
-                                }
-                                Some(UpdateOneof::BlockMeta(sut)) => {
-                                    let block_meta_pretty = factory::create_block_meta_pretty_pooled(sut, created_at);
-                                    log::debug!("Received block meta: {:?}", block_meta_pretty);
-                                    if let Err(e) = process_grpc_transaction(
-                                        EventPretty::BlockMeta(block_meta_pretty),
-                                        &protocols,
-                                        event_type_filter.as_ref(),
-                                        callback.clone(),
-                                        bot_wallet,
-                                    )
-                                    .await
-                                    {
-                                        error!("Error processing block meta event: {e:?}");
+                                    Some(UpdateOneof::BlockMeta(sut)) => {
+                                        let block_meta_pretty = factory::create_block_meta_pretty_pooled(sut, created_at);
+                                        log::debug!("Received block meta: {:?}", block_meta_pretty);
+                                        if let Err(e) = process_grpc_transaction(
+                                            EventPretty::BlockMeta(block_meta_pretty),
+                                            &protocols,
+                                            event_type_filter.as_ref(),
+                                            callback.clone(),
+                                            bot_wallet,
+                                        )
+                                        .await
+                                        {
+                                            error!("Error processing block meta event: {e:?}");
+                                        }
                                     }
-                                }
-                                Some(UpdateOneof::Transaction(sut)) => {
-                                    let transaction_pretty = factory::create_transaction_pretty_pooled(sut, created_at);
-                                    log::debug!(
-                                        "Received transaction: {} at slot {}",
-                                        transaction_pretty.signature,
-                                        transaction_pretty.slot
-                                    );
-                                    if let Err(e) = process_grpc_transaction(
-                                        EventPretty::Transaction(transaction_pretty),
-                                        &protocols,
-                                        event_type_filter.as_ref(),
-                                        callback.clone(),
-                                        bot_wallet,
-                                    )
-                                    .await
-                                    {
-                                        error!("Error processing transaction event: {e:?}");
+                                    Some(UpdateOneof::Transaction(sut)) => {
+                                        let transaction_pretty = factory::create_transaction_pretty_pooled(sut, created_at);
+                                        log::debug!(
+                                            "Received transaction: {} at slot {}",
+                                            transaction_pretty.signature,
+                                            transaction_pretty.slot
+                                        );
+                                        if let Err(e) = process_grpc_transaction(
+                                            EventPretty::Transaction(transaction_pretty),
+                                            &protocols,
+                                            event_type_filter.as_ref(),
+                                            callback.clone(),
+                                            bot_wallet,
+                                        )
+                                        .await
+                                        {
+                                            error!("Error processing transaction event: {e:?}");
+                                        }
                                     }
-                                }
-                                Some(UpdateOneof::Ping(_)) => {
-                                    // 只在需要时获取锁，并立即释放
-                                    if let Ok(mut tx_guard) = subscribe_tx.try_lock() {
-                                        let _ = tx_guard
-                                        .send(SubscribeRequest {
-                                            ping: Some(SubscribeRequestPing { id: 1 }),
-                                            ..Default::default()
-                                        })
-                                        .await;
+                                    Some(UpdateOneof::Ping(_)) => {
+                                        // 只在需要时获取锁，并立即释放
+                                        if let Ok(mut tx_guard) = subscribe_tx.try_lock() {
+                                            let _ = tx_guard
+                                                .send(SubscribeRequest {
+                                                    ping: Some(SubscribeRequestPing { id: 1 }),
+                                                    ..Default::default()
+                                                })
+                                                .await;
+                                        }
+                                        log::debug!("service is ping: {}", Local::now());
                                     }
-                                    log::debug!("service is ping: {}", Local::now());
-                                }
-                                Some(UpdateOneof::Pong(_)) => {
-                                    log::debug!("service is pong: {}", Local::now());
-                                }
-                                _ => {
-                                    log::debug!("Received other message type");
+                                    Some(UpdateOneof::Pong(_)) => {
+                                        log::debug!("service is pong: {}", Local::now());
+                                    }
+                                    _ => {
+                                        log::debug!("Received other message type");
+                                    }
                                 }
                             }
+                            Some(Err(error)) => {
+                                return Err(anyhow!("Stream error: {}", error));
+                            }
+                            None => return Err(anyhow!("Stream quit")),
                         }
-                        Some(Err(error)) => {
-                            return Err(anyhow!("Stream error: {}", error));
+                    }
+                    Some(update) = control_rx.next() => {
+                        if let Err(e) = subscribe_tx.lock().await.send(update).await {
+                            return Err(anyhow!("Failed to send subscription update: {}", e));
                         }
-                        None => return Err(anyhow!("Stream quit")),
                     }
                 }
-                Some(update) = control_rx.next() => {
-                    if let Err(e) = subscribe_tx.lock().await.send(update).await {
-                        return Err(anyhow!("Failed to send subscription update: {}", e));
-                    }
-                }
-            }
         }
     }
 
@@ -302,6 +301,7 @@ impl YellowstoneGrpc {
         let mut request = self
             .current_request
             .read()
+            .await
             .as_ref()
             .ok_or_else(|| anyhow!("No active subscription"))?
             .clone();
@@ -310,7 +310,7 @@ impl YellowstoneGrpc {
             .subscription_manager
             .get_subscribe_request_filter(
                 transaction_filter,
-                self.event_type_filter.read().as_ref(),
+                self.event_type_filter.read().await.as_ref(),
             )
             .unwrap_or_default();
 
@@ -318,7 +318,7 @@ impl YellowstoneGrpc {
             .subscription_manager
             .subscribe_with_account_request(
                 account_filter,
-                self.event_type_filter.read().as_ref(),
+                self.event_type_filter.read().await.as_ref(),
             )
             .unwrap_or_default();
 
@@ -327,7 +327,7 @@ impl YellowstoneGrpc {
             .await
             .map_err(|e| anyhow!("Failed to send update: {}", e))?;
 
-        *self.current_request.write() = Some(request);
+        *self.current_request.write().await = Some(request);
 
         Ok(())
     }
