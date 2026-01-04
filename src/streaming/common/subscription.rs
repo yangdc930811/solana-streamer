@@ -2,9 +2,9 @@ use tokio::task::JoinHandle;
 
 /// Subscription handle for managing and stopping subscriptions
 pub struct SubscriptionHandle {
-    stream_handle: JoinHandle<()>,
-    event_handle: Option<JoinHandle<()>>,
-    metrics_handle: Option<JoinHandle<()>>,
+    pub stream_handle: JoinHandle<()>,
+    pub event_handle: Option<JoinHandle<()>>,
+    pub metrics_handle: Option<JoinHandle<()>>,
 }
 
 impl SubscriptionHandle {
