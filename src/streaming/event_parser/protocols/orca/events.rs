@@ -16,6 +16,8 @@ pub struct OrcaSwapEvent {
     #[borsh(skip)]
     pub token_program: Pubkey,
     #[borsh(skip)]
+    pub payer: Pubkey,
+    #[borsh(skip)]
     pub whirlpool: Pubkey,
     #[borsh(skip)]
     pub token_owner_account_a: Pubkey,

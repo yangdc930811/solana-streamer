@@ -42,6 +42,7 @@ fn parse_swap_instruction(
         amount_specified_is_input,
         a_to_b,
         token_program: accounts[0],
+        payer: accounts[1],
         whirlpool: accounts[2],
         token_owner_account_a: accounts[3],
         token_vault_a: accounts[4],
