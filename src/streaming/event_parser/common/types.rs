@@ -51,7 +51,7 @@ lazy_static::lazy_static! {
     BorshSerialize,
     BorshDeserialize,
     Display
-)]
+    , Hash)]
 pub enum ProtocolType {
     #[default]
     PumpSwap,
