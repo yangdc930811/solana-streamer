@@ -357,7 +357,7 @@ pub struct EventMetadata {
     pub swap_data: Option<SwapData>,
     pub outer_index: i64,
     pub inner_index: Option<i64>,
-    pub data: Option<Vec<u8>>
+    pub data: Option<Vec<u8>>,
 }
 
 impl EventMetadata {
@@ -662,6 +662,44 @@ pub fn parse_swap_data_from_next_grpc_instructions(
             user_to_token = Some(e.user_destination_token_account);
             from_vault = Some(e.pool_pc_token_account);
             to_vault = Some(e.pool_coin_token_account);
+        }
+        DexEvent::MeteoraDammV2SwapEvent(e) => {
+            user_from_token = Some(e.input_token_account);
+            user_to_token = Some(e.output_token_account);
+        }
+        DexEvent::MeteoraDammV2Swap2Event(e) => {
+            user_from_token = Some(e.input_token_account);
+            user_to_token = Some(e.output_token_account);
+        }
+        DexEvent::MeteoraDlmmSwapEvent(e) => {
+            (from_mint, to_mint, from_vault, to_vault) = {
+                if e.swap_for_y {
+                    (Some(e.token_x_mint),
+                     Some(e.token_y_mint),
+                     Some(e.reserve_x),
+                     Some(e.reserve_y))
+                } else {
+                    (Some(e.token_y_mint),
+                     Some(e.token_x_mint),
+                     Some(e.reserve_y),
+                     Some(e.reserve_x))
+                }
+            };
+        }
+        DexEvent::OrcaSwapEvent(e) => {
+            (user_from_token, user_to_token, from_vault, to_vault) = {
+                if e.a_to_b {
+                    (Some(e.token_owner_account_a),
+                     Some(e.token_owner_account_b),
+                     Some(e.token_vault_a),
+                     Some(e.token_vault_b))
+                } else {
+                    (Some(e.token_owner_account_b),
+                     Some(e.token_owner_account_a),
+                     Some(e.token_vault_b),
+                     Some(e.token_vault_a))
+                }
+            };
         }
         _ => {}
     }
