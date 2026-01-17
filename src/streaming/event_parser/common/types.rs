@@ -3,6 +3,7 @@ use crossbeam_queue::ArrayQueue;
 use serde::{Deserialize, Serialize};
 use solana_sdk::{pubkey::Pubkey, signature::Signature};
 use std::{borrow::Cow, fmt, str::FromStr, sync::Arc};
+use log::info;
 use strum_macros::Display;
 use crate::streaming::{common::SimdUtils, event_parser::DexEvent};
 
@@ -662,54 +663,6 @@ pub fn parse_swap_data_from_next_grpc_instructions(
             user_to_token = Some(e.user_destination_token_account);
             from_vault = Some(e.pool_pc_token_account);
             to_vault = Some(e.pool_coin_token_account);
-        }
-        DexEvent::MeteoraDammV2SwapEvent(e) => {
-            (from_mint, to_mint, from_vault, to_vault) = if e.trade_direction == 0 {
-                (Some(e.token_a_mint), Some(e.token_b_mint), Some(e.token_a_vault), Some(e.token_b_vault))
-            } else {
-                (Some(e.token_b_mint), Some(e.token_a_mint), Some(e.token_b_vault), Some(e.token_a_vault))
-            };
-            user_from_token = Some(e.input_token_account);
-            user_to_token = Some(e.output_token_account);
-        }
-        DexEvent::MeteoraDammV2Swap2Event(e) => {
-            (from_mint, to_mint, from_vault, to_vault) = if e.trade_direction == 0 {
-                (Some(e.token_a_mint), Some(e.token_b_mint), Some(e.token_a_vault), Some(e.token_b_vault))
-            } else {
-                (Some(e.token_b_mint), Some(e.token_a_mint), Some(e.token_b_vault), Some(e.token_a_vault))
-            };
-            user_from_token = Some(e.input_token_account);
-            user_to_token = Some(e.output_token_account);
-        }
-        DexEvent::MeteoraDlmmSwapEvent(e) => {
-            (from_mint, to_mint, from_vault, to_vault) = {
-                if e.swap_for_y {
-                    (Some(e.token_x_mint),
-                     Some(e.token_y_mint),
-                     Some(e.reserve_x),
-                     Some(e.reserve_y))
-                } else {
-                    (Some(e.token_y_mint),
-                     Some(e.token_x_mint),
-                     Some(e.reserve_y),
-                     Some(e.reserve_x))
-                }
-            };
-        }
-        DexEvent::OrcaSwapEvent(e) => {
-            (user_from_token, user_to_token, from_vault, to_vault) = {
-                if e.a_to_b {
-                    (Some(e.token_owner_account_a),
-                     Some(e.token_owner_account_b),
-                     Some(e.token_vault_a),
-                     Some(e.token_vault_b))
-                } else {
-                    (Some(e.token_owner_account_b),
-                     Some(e.token_owner_account_a),
-                     Some(e.token_vault_b),
-                     Some(e.token_vault_a))
-                }
-            };
         }
         _ => {}
     }
