@@ -664,10 +664,20 @@ pub fn parse_swap_data_from_next_grpc_instructions(
             to_vault = Some(e.pool_coin_token_account);
         }
         DexEvent::MeteoraDammV2SwapEvent(e) => {
+            (from_mint, to_mint, from_vault, to_vault) = if e.trade_direction == 0 {
+                (Some(e.token_a_mint), Some(e.token_b_mint), Some(e.token_a_vault), Some(e.token_b_vault))
+            } else {
+                (Some(e.token_b_mint), Some(e.token_a_mint), Some(e.token_b_vault), Some(e.token_a_vault))
+            };
             user_from_token = Some(e.input_token_account);
             user_to_token = Some(e.output_token_account);
         }
         DexEvent::MeteoraDammV2Swap2Event(e) => {
+            (from_mint, to_mint, from_vault, to_vault) = if e.trade_direction == 0 {
+                (Some(e.token_a_mint), Some(e.token_b_mint), Some(e.token_a_vault), Some(e.token_b_vault))
+            } else {
+                (Some(e.token_b_mint), Some(e.token_a_mint), Some(e.token_b_vault), Some(e.token_a_vault))
+            };
             user_from_token = Some(e.input_token_account);
             user_to_token = Some(e.output_token_account);
         }
