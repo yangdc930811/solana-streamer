@@ -42,6 +42,7 @@ impl EventParser {
         bot_wallet: Option<Pubkey>,
         transaction_index: Option<u64>,
         callback: Arc<dyn Fn(DexEvent) + Send + Sync>,
+        is_log: bool,
     ) -> anyhow::Result<()> {
         // 创建适配器回调，将所有权回调转换为引用回调
         let adapter_callback = Arc::new(move |event: &DexEvent| {
@@ -54,6 +55,7 @@ impl EventParser {
                     yellowstone_grpc_proto::solana::storage::confirmed_block::InnerInstructions,
                 > = vec![];
 
+                let mut logs = None;
                 if let Some(meta) = grpc_tx.meta {
                     inner_instructions = meta.inner_instructions;
                     address_table_lookups.reserve(
@@ -64,6 +66,9 @@ impl EventParser {
                     address_table_lookups.extend(
                         loaded_writable_addresses.into_iter().chain(loaded_readonly_addresses),
                     );
+
+                    // 是否需要传递日志
+                    if is_log { logs = Some(Arc::new(meta.log_messages)); }
                 }
 
                 let mut accounts_bytes: Vec<Vec<u8>> =
@@ -96,6 +101,7 @@ impl EventParser {
                     bot_wallet,
                     transaction_index,
                     adapter_callback,
+                    logs,
                 )
                     .await?;
             }
@@ -163,6 +169,7 @@ impl EventParser {
                             transaction_index,
                             inner_instructions,
                             adapter_callback.clone(),
+                            None
                         )?;
                     }
                     // Immediately process inner instructions for correct ordering
@@ -185,6 +192,7 @@ impl EventParser {
                                 transaction_index,
                                 Some(&inner_instructions),
                                 adapter_callback.clone(),
+                                None
                             )?;
                         }
                     }
@@ -216,6 +224,7 @@ impl EventParser {
         bot_wallet: Option<Pubkey>,
         transaction_index: Option<u64>,
         callback: Arc<dyn for<'a> Fn(&'a DexEvent) + Send + Sync>,
+        logs: Option<Arc<Vec<String>>>,
     ) -> anyhow::Result<()> {
         // 获取交易的指令和账户
         let mut accounts = accounts.to_vec();
@@ -252,6 +261,7 @@ impl EventParser {
                             transaction_index,
                             inner_instructions,
                             callback.clone(),
+                            logs.clone(),
                         )?;
                     }
                     // Immediately process inner instructions for correct ordering
@@ -282,6 +292,7 @@ impl EventParser {
                                 transaction_index,
                                 Some(&inner_instructions),
                                 callback.clone(),
+                                logs.clone(),
                             )?;
                         }
                     }
@@ -311,6 +322,7 @@ impl EventParser {
         transaction_index: Option<u64>,
         inner_instructions: Option<&yellowstone_grpc_proto::prelude::InnerInstructions>,
         callback: Arc<dyn for<'a> Fn(&'a DexEvent) + Send + Sync>,
+        logs: Option<Arc<Vec<String>>>,
     ) -> anyhow::Result<()> {
         // 添加边界检查以防止越界访问
         let program_id_index = instruction.program_id_index as usize;
@@ -348,6 +360,7 @@ impl EventParser {
             inner_index,
             recv_us,
             transaction_index,
+            logs,
         );
 
         if is_cu_program {
@@ -394,7 +407,7 @@ impl EventParser {
         let mut inner_instruction_event: Option<DexEvent> = None;
         if let Some(inner_instructions_ref) = inner_instructions {
             let current_inner_idx = inner_index.unwrap_or(-1) as i32;
-            
+
             // 并行执行两个任务: 解析 inner event 和提取 swap_data
             let (inner_event_result, swap_data_result) = std::thread::scope(|s| {
                 let inner_event_handle = s.spawn(|| {
@@ -403,7 +416,7 @@ impl EventParser {
                         if (idx as i32) <= current_inner_idx {
                             continue;
                         }
-                        
+
                         let inner_data = &inner_instruction.data;
                         // 检查长度（需要 16 字节的 discriminator）
                         if inner_data.len() < 16 {
@@ -493,6 +506,7 @@ impl EventParser {
         transaction_index: Option<u64>,
         inner_instructions: Option<&InnerInstructions>,
         callback: Arc<dyn for<'a> Fn(&'a DexEvent) + Send + Sync>,
+        logs: Option<Arc<Vec<String>>>,
     ) -> anyhow::Result<()> {
         // 添加边界检查以防止越界访问
         let program_id_index = instruction.program_id_index as usize;
@@ -531,6 +545,7 @@ impl EventParser {
             inner_index,
             recv_us,
             transaction_index,
+            logs,
         );
 
         if is_cu_program {
@@ -577,7 +592,7 @@ impl EventParser {
         let mut inner_instruction_event: Option<DexEvent> = None;
         if let Some(inner_instructions_ref) = inner_instructions {
             let current_inner_idx = inner_index.unwrap_or(-1) as i32;
-            
+
             // 并行执行两个任务: 解析 inner event 和提取 swap_data
             let (inner_event_result, swap_data_result) = std::thread::scope(|s| {
                 let inner_event_handle = s.spawn(|| {
@@ -586,7 +601,7 @@ impl EventParser {
                         if (idx as i32) <= current_inner_idx {
                             continue;
                         }
-                        
+
                         let inner_data = &inner_instruction.instruction.data;
                         // 检查长度（需要 16 字节的 discriminator）
                         if inner_data.len() < 16 {

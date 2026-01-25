@@ -42,6 +42,7 @@ pub async fn process_grpc_transaction(
     event_type_filter: Option<&EventTypeFilter>,
     callback: Arc<dyn Fn(DexEvent) + Send + Sync>,
     bot_wallet: Option<Pubkey>,
+    is_log: bool
 ) -> AnyResult<()> {
     match event_pretty {
         EventPretty::Account(account_pretty) => {
@@ -82,6 +83,7 @@ pub async fn process_grpc_transaction(
                 bot_wallet,
                 transaction_index,
                 adapter_callback,
+                is_log
             )
             .await?;
         }

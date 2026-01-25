@@ -139,6 +139,7 @@ impl YellowstoneGrpc {
         event_type_filter: Option<EventTypeFilter>,
         commitment: Option<CommitmentLevel>,
         callback: F,
+        is_log: bool,
     ) -> AnyResult<()>
     where
         F: Fn(DexEvent) + Send + Sync + 'static,
@@ -197,6 +198,7 @@ impl YellowstoneGrpc {
                                             event_type_filter.as_ref(),
                                             callback.clone(),
                                             bot_wallet,
+                                            is_log
                                         )
                                         .await
                                         {
@@ -212,6 +214,7 @@ impl YellowstoneGrpc {
                                             event_type_filter.as_ref(),
                                             callback.clone(),
                                             bot_wallet,
+                                            is_log
                                         )
                                         .await
                                         {
@@ -231,6 +234,7 @@ impl YellowstoneGrpc {
                                             event_type_filter.as_ref(),
                                             callback.clone(),
                                             bot_wallet,
+                                            is_log
                                         )
                                         .await
                                         {
