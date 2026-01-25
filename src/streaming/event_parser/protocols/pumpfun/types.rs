@@ -41,7 +41,7 @@ pub fn bonding_curve_parser(
     }
 }
 
-pub const GLOBAL_SIZE: usize = 1 + 32 * 2 + 8 * 5 + 32 + 1 + 8 * 2 + 32 * 7 + 32 * 2 + 1 + 32 * 2 + 1;
+pub const GLOBAL_SIZE: usize = 1 + 32 * 2 + 8 * 5 + 32 + 1 + 8 * 2 + 32 * 7 + 32 * 2 + 1 + 32 * 2 + 1 + 32 * 7;
 
 pub fn global_decode(data: &[u8]) -> Option<Global> {
     if data.len() < GLOBAL_SIZE {

@@ -85,6 +85,15 @@ impl Default for CurveParams {
     }
 }
 
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
+pub struct VestingSchedule {
+    pub total_locked_amount: u64,
+    pub cliff_period: u64,
+    pub unlock_period: u64,
+    pub start_time: u64,
+    pub allocated_share_amount: u64,
+}
+
 pub const POOL_STATE_SIZE: usize = 8 + 1 * 5 + 8 * 10 + 32 * 7 + 8 * 8 + 8 * 5;
 
 pub fn pool_state_decode(data: &[u8]) -> Option<PoolState> {

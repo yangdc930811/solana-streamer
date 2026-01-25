@@ -28,6 +28,9 @@ solana-perf = "3.1.4"
 solana-metrics = "3.1.4"
 solana-commitment-config = { workspace = true }
 
+spl-token = { workspace = true }
+spl-token-2022 = { workspace = true }
+
 spl-associated-token-account = "8.0.0"
 borsh = { version = "1.6.0", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
@@ -71,8 +74,6 @@ crossbeam = "0.8.4"
 crossbeam-queue = "0.3.12"
 parking_lot = "0.12.5"
 wide = "1.1.0"
-spl-token = "8.0.0"
-spl-token-2022 = "9.0.0"
 tonic-prost = "0.14.2"
 serde_repr = "0.1.20"
 strum = "0.27.2"
