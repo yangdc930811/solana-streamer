@@ -361,6 +361,7 @@ impl EventParser {
             recv_us,
             transaction_index,
             logs,
+            Some(accounts[0])
         );
 
         if is_cu_program {
@@ -546,6 +547,7 @@ impl EventParser {
             recv_us,
             transaction_index,
             logs,
+            Some(accounts[0])
         );
 
         if is_cu_program {

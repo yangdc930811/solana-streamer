@@ -32,6 +32,7 @@ impl BlockMetaEvent {
             recv_us,
             None,
             None,
+            None,
         );
         Self { metadata, slot, block_hash }
     }

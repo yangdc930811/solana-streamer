@@ -361,6 +361,8 @@ pub struct EventMetadata {
     pub data: Option<Vec<u8>>,
     #[serde(skip)]
     pub log: Option<Arc<Vec<String>>>,
+    #[serde(skip)]
+    pub signer: Option<Pubkey>,
 }
 
 impl EventMetadata {
@@ -378,6 +380,7 @@ impl EventMetadata {
         recv_us: i64,
         transaction_index: Option<u64>,
         log: Option<Arc<Vec<String>>>,
+        signer: Option<Pubkey>,
     ) -> Self {
         Self {
             signature,
@@ -395,6 +398,7 @@ impl EventMetadata {
             transaction_index,
             data: None,
             log,
+            signer,
         }
     }
 
