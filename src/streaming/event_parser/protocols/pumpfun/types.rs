@@ -8,7 +8,7 @@ use crate::streaming::{
     grpc::AccountPretty,
 };
 
-pub const BONDING_CURVE_SIZE: usize = 8 * 5 + 1 + 32 + 1;
+pub const BONDING_CURVE_SIZE: usize = 8 * 5 + 1 + 32 + 1 + 1;
 
 pub fn bonding_curve_decode(data: &[u8]) -> Option<BondingCurve> {
     if data.len() < BONDING_CURVE_SIZE {
@@ -41,7 +41,7 @@ pub fn bonding_curve_parser(
     }
 }
 
-pub const GLOBAL_SIZE: usize = 1 + 32 * 2 + 8 * 5 + 32 + 1 + 8 * 2 + 32 * 7 + 32 * 2 + 1 + 32 * 2 + 1 + 32 * 7;
+pub const GLOBAL_SIZE: usize = 1 + 32 * 2 + 8 * 5 + 32 + 1 + 8 * 2 + 32 * 7 + 32 * 2 + 1 + 32 * 2 + 1 + 32 * 7 + 1;
 
 pub fn global_decode(data: &[u8]) -> Option<Global> {
     if data.len() < GLOBAL_SIZE {

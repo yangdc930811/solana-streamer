@@ -1,4 +1,4 @@
-use borsh_derive::BorshDeserialize;
+use borsh::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
 use sol_common::protocols::meteora_dlmm::extensions::{BinArray, BinArrayBitmapExtension};
