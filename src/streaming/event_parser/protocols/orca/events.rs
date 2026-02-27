@@ -1,4 +1,4 @@
-use borsh_derive::BorshDeserialize;
+use borsh::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_program::pubkey::Pubkey;
 use sol_common::protocols::orca::types::{Whirlpool};
