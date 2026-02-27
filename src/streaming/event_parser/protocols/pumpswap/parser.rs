@@ -179,12 +179,10 @@ fn parse_buy_exact_quote_in_instruction(
 
     // 注意：buy_exact_quote_in 的参数顺序是先 quote (SOL) 再 base (token)
     let spendable_quote_in = read_u64_le(data, 0)?;
-    let min_base_amount_out = read_u64_le(data, 8)?;
 
     Some(DexEvent::PumpSwapBuyEvent(PumpSwapBuyEvent {
         metadata,
-        base_amount_out: min_base_amount_out,
-        max_quote_amount_in: spendable_quote_in,
+        spendable_quote_in,
         pool: accounts[0],
         user: accounts[1],
         base_mint: accounts[3],

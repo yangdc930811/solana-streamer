@@ -9,6 +9,8 @@ use crate::streaming::event_parser::common::EventMetadata;
 pub struct PumpSwapBuyEvent {
     #[borsh(skip)]
     pub metadata: EventMetadata,
+    #[borsh(skip)]
+    pub spendable_quote_in: u64,
     pub timestamp: i64,
     pub base_amount_out: u64,
     pub max_quote_amount_in: u64,
