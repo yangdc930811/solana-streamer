@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
 use sol_common::protocols::pumpswap::{GlobalConfig, Pool};
 use crate::streaming::event_parser::common::EventMetadata;
+use crate::streaming::event_parser::protocols::pumpfun::PUMPFUN_TRADE_EVENT_LOG_SIZE;
 
 /// 买入事件
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
@@ -39,6 +40,15 @@ pub struct PumpSwapBuyEvent {
     pub total_claimed_tokens: u64,
     pub current_sol_volume: u64,
     pub last_update_timestamp: i64,
+    pub min_base_amount_out: u64,
+
+    #[borsh(skip)]
+    pub ix_name: String,
+    #[borsh(skip)]
+    pub cashback_fee_basis_points: u64,
+    #[borsh(skip)]
+    pub cashback: u64,
+
     #[borsh(skip)]
     pub base_mint: Pubkey,
     #[borsh(skip)]
@@ -57,13 +67,28 @@ pub struct PumpSwapBuyEvent {
     pub quote_token_program: Pubkey,
 }
 
-pub const PUMP_SWAP_BUY_EVENT_LOG_SIZE: usize = 385;
+pub const PUMP_SWAP_BUY_EVENT_LOG_SIZE: usize = 393;
 
 pub fn pump_swap_buy_event_log_decode(data: &[u8]) -> Option<PumpSwapBuyEvent> {
     if data.len() < PUMP_SWAP_BUY_EVENT_LOG_SIZE {
         return None;
     }
-    borsh::from_slice::<PumpSwapBuyEvent>(&data[..PUMP_SWAP_BUY_EVENT_LOG_SIZE]).ok()
+    let mut event = borsh::from_slice::<PumpSwapBuyEvent>(&data[..PUMP_SWAP_BUY_EVENT_LOG_SIZE]).ok()?;
+    let mut offset = PUMP_SWAP_BUY_EVENT_LOG_SIZE;
+    if offset < data.len() {
+        let (ix_name, inc) = read_borsh_string(data, offset).unwrap_or((String::new(), 0));
+        offset += inc;
+        event.ix_name = ix_name;
+    }
+    if offset + 8 <= data.len() {
+        event.cashback_fee_basis_points = u64::from_le_bytes(data[offset..offset + 8].try_into().ok()?);
+        offset += 8;
+    }
+    if offset + 8 <= data.len() {
+        event.cashback = u64::from_le_bytes(data[offset..offset + 8].try_into().ok()?);
+    }
+
+    Some(event)
 }
 
 /// 卖出事件
@@ -94,6 +119,8 @@ pub struct PumpSwapSellEvent {
     pub coin_creator: Pubkey,
     pub coin_creator_fee_basis_points: u64,
     pub coin_creator_fee: u64,
+    pub cashback_fee_basis_points: u64,
+    pub cashback: u64,
     #[borsh(skip)]
     pub base_mint: Pubkey,
     #[borsh(skip)]
@@ -112,13 +139,27 @@ pub struct PumpSwapSellEvent {
     pub quote_token_program: Pubkey,
 }
 
-pub const PUMP_SWAP_SELL_EVENT_LOG_SIZE: usize = 352;
+pub const PUMP_SWAP_SELL_EVENT_LOG_SIZE: usize = 368;
 
 pub fn pump_swap_sell_event_log_decode(data: &[u8]) -> Option<PumpSwapSellEvent> {
     if data.len() < PUMP_SWAP_SELL_EVENT_LOG_SIZE {
         return None;
     }
     borsh::from_slice::<PumpSwapSellEvent>(&data[..PUMP_SWAP_SELL_EVENT_LOG_SIZE]).ok()
+}
+
+#[inline]
+fn read_borsh_string(data: &[u8], start: usize) -> Option<(String, usize)> {
+    if start + 4 > data.len() {
+        return None;
+    }
+    let len = u32::from_le_bytes(data[start..start + 4].try_into().ok()?) as usize;
+    let start = start + 4;
+    if start + len > data.len() {
+        return None;
+    }
+    let s = String::from_utf8_lossy(&data[start..start + len]).to_string();
+    Some((s, 4 + len))
 }
 
 /// 创建池子事件
