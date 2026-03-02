@@ -44,7 +44,7 @@ pub fn global_config_parser(
     }
 }
 
-pub const POOL_SIZE: usize = 1 + 2 + 32 * 6 + 8 + 32 + 1;
+pub const POOL_SIZE: usize = 1 + 2 + 32 * 6 + 8 + 32 + 1 + 1;
 
 pub fn pool_decode(data: &[u8]) -> Option<Pool> {
     if data.len() < POOL_SIZE {
