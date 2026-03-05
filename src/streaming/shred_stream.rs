@@ -66,12 +66,14 @@ impl ShredStreamGrpc {
                                         callback.clone(),
                                         bot_wallet,
                                     )
-                                    .await
+                                        .await
                                     {
                                         error!("Error handling message: {e:?}");
                                     }
                                 }
                             }
+                        } else {
+                            error!("deserialize Stream error");
                         }
                         continue;
                     }
