@@ -11,7 +11,7 @@ use crate::streaming::event_parser::common::high_performance_clock::get_high_per
 use crate::streaming::event_parser::{Protocol, DexEvent};
 use crate::streaming::grpc::MetricsManager;
 use crate::streaming::shred::pool::factory;
-use log::error;
+use log::{error, warn};
 use solana_entry::entry::Entry;
 
 use super::ShredStreamGrpc;
@@ -83,6 +83,8 @@ impl ShredStreamGrpc {
                     }
                 }
             }
+
+            warn!("Shred Stream quit!");
         });
 
         // 保存订阅句柄
