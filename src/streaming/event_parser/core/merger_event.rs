@@ -200,6 +200,11 @@ pub fn merge(instruction_event: &mut DexEvent, cpi_log_event: DexEvent) {
                 e.total_claimed_tokens = cpie.total_claimed_tokens;
                 e.current_sol_volume = cpie.current_sol_volume;
                 e.last_update_timestamp = cpie.last_update_timestamp;
+                e.min_base_amount_out = cpie.min_base_amount_out;
+                e.ix_name = cpie.ix_name.clone();
+                e.cashback_fee_basis_points = cpie.cashback_fee_basis_points;
+                e.cashback = cpie.cashback;
+                e.is_pump_pool = cpie.is_pump_pool;
             }
             _ => {}
         },
@@ -228,6 +233,9 @@ pub fn merge(instruction_event: &mut DexEvent, cpi_log_event: DexEvent) {
                 e.coin_creator = cpie.coin_creator;
                 e.coin_creator_fee_basis_points = cpie.coin_creator_fee_basis_points;
                 e.coin_creator_fee = cpie.coin_creator_fee;
+                e.cashback_fee_basis_points = cpie.cashback_fee_basis_points;
+                e.cashback = cpie.cashback;
+                e.is_pump_pool = cpie.is_pump_pool;
             }
             _ => {}
         },

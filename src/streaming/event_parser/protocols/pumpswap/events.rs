@@ -2,6 +2,7 @@ use borsh::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
 
+use crate::streaming::event_parser::common::utils::{read_i64_le, read_u32_le, read_u64_le};
 use crate::streaming::event_parser::common::EventMetadata;
 use crate::streaming::event_parser::protocols::pumpswap::types::{GlobalConfig, Pool};
 
@@ -38,6 +39,14 @@ pub struct PumpSwapBuyEvent {
     pub total_claimed_tokens: u64,
     pub current_sol_volume: u64,
     pub last_update_timestamp: i64,
+    /// Minimum base out (IDL extension; also set on `buy_exact_quote_in` from ix args).
+    pub min_base_amount_out: u64,
+    /// Instruction name from event (`buy`, `buy_exact_quote_in`, …).
+    pub ix_name: String,
+    pub cashback_fee_basis_points: u64,
+    pub cashback: u64,
+    #[borsh(skip)]
+    pub is_pump_pool: bool,
     #[borsh(skip)]
     pub base_mint: Pubkey,
     #[borsh(skip)]
@@ -56,13 +65,104 @@ pub struct PumpSwapBuyEvent {
     pub quote_token_program: Pubkey,
 }
 
-pub const PUMP_SWAP_BUY_EVENT_LOG_SIZE: usize = 385;
+/// Minimum bytes through `last_update_timestamp` (Anchor/Borsh layout, bool = 1 byte).
+pub const PUMP_SWAP_BUY_EVENT_LOG_MIN: usize = 385;
+/// Backwards-compatible name for the minimum BuyEvent payload size (legacy `borsh` slice length).
+pub const PUMP_SWAP_BUY_EVENT_LOG_SIZE: usize = PUMP_SWAP_BUY_EVENT_LOG_MIN;
 
 pub fn pump_swap_buy_event_log_decode(data: &[u8]) -> Option<PumpSwapBuyEvent> {
-    if data.len() < PUMP_SWAP_BUY_EVENT_LOG_SIZE {
+    if data.len() < PUMP_SWAP_BUY_EVENT_LOG_MIN {
         return None;
     }
-    borsh::from_slice::<PumpSwapBuyEvent>(&data[..PUMP_SWAP_BUY_EVENT_LOG_SIZE]).ok()
+    let timestamp = read_i64_le(data, 0)?;
+    let base_amount_out = read_u64_le(data, 8)?;
+    let max_quote_amount_in = read_u64_le(data, 16)?;
+    let user_base_token_reserves = read_u64_le(data, 24)?;
+    let user_quote_token_reserves = read_u64_le(data, 32)?;
+    let pool_base_token_reserves = read_u64_le(data, 40)?;
+    let pool_quote_token_reserves = read_u64_le(data, 48)?;
+    let quote_amount_in = read_u64_le(data, 56)?;
+    let lp_fee_basis_points = read_u64_le(data, 64)?;
+    let lp_fee = read_u64_le(data, 72)?;
+    let protocol_fee_basis_points = read_u64_le(data, 80)?;
+    let protocol_fee = read_u64_le(data, 88)?;
+    let quote_amount_in_with_lp_fee = read_u64_le(data, 96)?;
+    let user_quote_amount_in = read_u64_le(data, 104)?;
+    let pool = Pubkey::new_from_array(data.get(112..144)?.try_into().ok()?);
+    let user = Pubkey::new_from_array(data.get(144..176)?.try_into().ok()?);
+    let user_base_token_account = Pubkey::new_from_array(data.get(176..208)?.try_into().ok()?);
+    let user_quote_token_account = Pubkey::new_from_array(data.get(208..240)?.try_into().ok()?);
+    let protocol_fee_recipient = Pubkey::new_from_array(data.get(240..272)?.try_into().ok()?);
+    let protocol_fee_recipient_token_account = Pubkey::new_from_array(data.get(272..304)?.try_into().ok()?);
+    let coin_creator = Pubkey::new_from_array(data.get(304..336)?.try_into().ok()?);
+    let coin_creator_fee_basis_points = read_u64_le(data, 336)?;
+    let coin_creator_fee = read_u64_le(data, 344)?;
+    let track_volume = *data.get(352)? != 0;
+    let total_unclaimed_tokens = read_u64_le(data, 353)?;
+    let total_claimed_tokens = read_u64_le(data, 361)?;
+    let current_sol_volume = read_u64_le(data, 369)?;
+    let last_update_timestamp = read_i64_le(data, 377)?;
+
+    let mut offset = 385usize;
+    let min_base_amount_out = if data.len() >= offset + 8 {
+        let v = read_u64_le(data, offset)?;
+        offset += 8;
+        v
+    } else {
+        0
+    };
+
+    let ix_name = if data.len() >= offset + 4 {
+        let slen = read_u32_le(data, offset)? as usize;
+        let str_start = offset + 4;
+        if data.len() < str_start + slen {
+            return None;
+        }
+        offset = str_start + slen;
+        String::from_utf8_lossy(&data[str_start..offset]).into_owned()
+    } else {
+        String::new()
+    };
+
+    let cashback_fee_basis_points = read_u64_le(data, offset).unwrap_or(0);
+    let cashback = read_u64_le(data, offset + 8).unwrap_or(0);
+
+    Some(PumpSwapBuyEvent {
+        metadata: EventMetadata::default(),
+        timestamp,
+        base_amount_out,
+        max_quote_amount_in,
+        user_base_token_reserves,
+        user_quote_token_reserves,
+        pool_base_token_reserves,
+        pool_quote_token_reserves,
+        quote_amount_in,
+        lp_fee_basis_points,
+        lp_fee,
+        protocol_fee_basis_points,
+        protocol_fee,
+        quote_amount_in_with_lp_fee,
+        user_quote_amount_in,
+        pool,
+        user,
+        user_base_token_account,
+        user_quote_token_account,
+        protocol_fee_recipient,
+        protocol_fee_recipient_token_account,
+        coin_creator,
+        coin_creator_fee_basis_points,
+        coin_creator_fee,
+        track_volume,
+        total_unclaimed_tokens,
+        total_claimed_tokens,
+        current_sol_volume,
+        last_update_timestamp,
+        min_base_amount_out,
+        ix_name,
+        cashback_fee_basis_points,
+        cashback,
+        ..Default::default()
+    })
 }
 
 /// 卖出事件
@@ -93,6 +193,10 @@ pub struct PumpSwapSellEvent {
     pub coin_creator: Pubkey,
     pub coin_creator_fee_basis_points: u64,
     pub coin_creator_fee: u64,
+    pub cashback_fee_basis_points: u64,
+    pub cashback: u64,
+    #[borsh(skip)]
+    pub is_pump_pool: bool,
     #[borsh(skip)]
     pub base_mint: Pubkey,
     #[borsh(skip)]
@@ -111,13 +215,73 @@ pub struct PumpSwapSellEvent {
     pub quote_token_program: Pubkey,
 }
 
-pub const PUMP_SWAP_SELL_EVENT_LOG_SIZE: usize = 352;
+pub const PUMP_SWAP_SELL_EVENT_LOG_MIN: usize = 352;
+pub const PUMP_SWAP_SELL_EVENT_WITH_CASHBACK: usize = 368;
+/// Backwards-compatible name for the pre-cashback SellEvent payload size.
+pub const PUMP_SWAP_SELL_EVENT_LOG_SIZE: usize = PUMP_SWAP_SELL_EVENT_LOG_MIN;
 
 pub fn pump_swap_sell_event_log_decode(data: &[u8]) -> Option<PumpSwapSellEvent> {
-    if data.len() < PUMP_SWAP_SELL_EVENT_LOG_SIZE {
+    if data.len() < PUMP_SWAP_SELL_EVENT_LOG_MIN {
         return None;
     }
-    borsh::from_slice::<PumpSwapSellEvent>(&data[..PUMP_SWAP_SELL_EVENT_LOG_SIZE]).ok()
+    let timestamp = read_i64_le(data, 0)?;
+    let base_amount_in = read_u64_le(data, 8)?;
+    let min_quote_amount_out = read_u64_le(data, 16)?;
+    let user_base_token_reserves = read_u64_le(data, 24)?;
+    let user_quote_token_reserves = read_u64_le(data, 32)?;
+    let pool_base_token_reserves = read_u64_le(data, 40)?;
+    let pool_quote_token_reserves = read_u64_le(data, 48)?;
+    let quote_amount_out = read_u64_le(data, 56)?;
+    let lp_fee_basis_points = read_u64_le(data, 64)?;
+    let lp_fee = read_u64_le(data, 72)?;
+    let protocol_fee_basis_points = read_u64_le(data, 80)?;
+    let protocol_fee = read_u64_le(data, 88)?;
+    let quote_amount_out_without_lp_fee = read_u64_le(data, 96)?;
+    let user_quote_amount_out = read_u64_le(data, 104)?;
+    let pool = Pubkey::new_from_array(data.get(112..144)?.try_into().ok()?);
+    let user = Pubkey::new_from_array(data.get(144..176)?.try_into().ok()?);
+    let user_base_token_account = Pubkey::new_from_array(data.get(176..208)?.try_into().ok()?);
+    let user_quote_token_account = Pubkey::new_from_array(data.get(208..240)?.try_into().ok()?);
+    let protocol_fee_recipient = Pubkey::new_from_array(data.get(240..272)?.try_into().ok()?);
+    let protocol_fee_recipient_token_account = Pubkey::new_from_array(data.get(272..304)?.try_into().ok()?);
+    let coin_creator = Pubkey::new_from_array(data.get(304..336)?.try_into().ok()?);
+    let coin_creator_fee_basis_points = read_u64_le(data, 336)?;
+    let coin_creator_fee = read_u64_le(data, 344)?;
+    let (cashback_fee_basis_points, cashback) = if data.len() >= PUMP_SWAP_SELL_EVENT_WITH_CASHBACK {
+        (read_u64_le(data, 352)?, read_u64_le(data, 360)?)
+    } else {
+        (0, 0)
+    };
+
+    Some(PumpSwapSellEvent {
+        metadata: EventMetadata::default(),
+        timestamp,
+        base_amount_in,
+        min_quote_amount_out,
+        user_base_token_reserves,
+        user_quote_token_reserves,
+        pool_base_token_reserves,
+        pool_quote_token_reserves,
+        quote_amount_out,
+        lp_fee_basis_points,
+        lp_fee,
+        protocol_fee_basis_points,
+        protocol_fee,
+        quote_amount_out_without_lp_fee,
+        user_quote_amount_out,
+        pool,
+        user,
+        user_base_token_account,
+        user_quote_token_account,
+        protocol_fee_recipient,
+        protocol_fee_recipient_token_account,
+        coin_creator,
+        coin_creator_fee_basis_points,
+        coin_creator_fee,
+        cashback_fee_basis_points,
+        cashback,
+        ..Default::default()
+    })
 }
 
 /// 创建池子事件
