@@ -1,7 +1,7 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use crossbeam_queue::ArrayQueue;
 use serde::{Deserialize, Serialize};
-use solana_sdk::{pubkey::Pubkey, signature::Signature};
+use solana_sdk::{instruction::AccountMeta, pubkey::Pubkey, signature::Signature};
 use std::{borrow::Cow, fmt, str::FromStr, sync::Arc};
 use log::info;
 use strum_macros::Display;
@@ -363,6 +363,8 @@ pub struct EventMetadata {
     pub log: Option<Arc<Vec<String>>>,
     #[serde(skip)]
     pub signer: Option<Pubkey>,
+    #[serde(skip)]
+    pub instruction_account_metas: Arc<Vec<AccountMeta>>,
 }
 
 impl EventMetadata {
@@ -381,6 +383,7 @@ impl EventMetadata {
         transaction_index: Option<u64>,
         log: Option<Arc<Vec<String>>>,
         signer: Option<Pubkey>,
+        instruction_account_metas: Arc<Vec<AccountMeta>>,
     ) -> Self {
         Self {
             signature,
@@ -399,6 +402,7 @@ impl EventMetadata {
             data: None,
             log,
             signer,
+            instruction_account_metas,
         }
     }
 

@@ -2,6 +2,7 @@ use crate::streaming::event_parser::common::{types::EventType, EventMetadata};
 use borsh::BorshDeserialize;
 use serde::{Deserialize, Serialize};
 use solana_sdk::signature::Signature;
+use std::sync::Arc;
 
 /// Block元数据事件
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
@@ -33,6 +34,7 @@ impl BlockMetaEvent {
             None,
             None,
             None,
+            Arc::new(Vec::new()),
         );
         Self { metadata, slot, block_hash }
     }
