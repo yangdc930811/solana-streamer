@@ -7,7 +7,7 @@ use crate::streaming::event_parser::{
     },
     DexEvent,
 };
-use solana_sdk::pubkey::Pubkey;
+use solana_sdk::{instruction::AccountMeta, pubkey::Pubkey};
 
 /// 解析 PumpFun instruction data
 ///
@@ -15,7 +15,7 @@ use solana_sdk::pubkey::Pubkey;
 pub fn parse_pumpfun_instruction_data(
     discriminator: &[u8],
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     metadata: EventMetadata,
 ) -> Option<DexEvent> {
     match discriminator {
@@ -109,7 +109,7 @@ fn parse_trade_inner_instruction(data: &[u8], metadata: EventMetadata) -> Option
 /// 解析创建代币指令事件
 fn parse_create_token_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpFunCreateToken;
@@ -160,20 +160,20 @@ fn parse_create_token_instruction(
         symbol: symbol.to_string(),
         uri: uri.to_string(),
         creator,
-        mint: accounts[0],
-        mint_authority: accounts[1],
-        bonding_curve: accounts[2],
-        associated_bonding_curve: accounts[3],
-        global: accounts[4],
-        mpl_token_metadata: accounts[5],
-        metadata_account: accounts[6],
-        user: accounts[7],
-        system_program: accounts[8],
-        token_program: accounts[9],
-        associated_token_program: accounts[10],
-        rent: accounts[11],
-        event_authority: accounts[12],
-        program: accounts[13],
+        mint: accounts[0].pubkey,
+        mint_authority: accounts[1].pubkey,
+        bonding_curve: accounts[2].pubkey,
+        associated_bonding_curve: accounts[3].pubkey,
+        global: accounts[4].pubkey,
+        mpl_token_metadata: accounts[5].pubkey,
+        metadata_account: accounts[6].pubkey,
+        user: accounts[7].pubkey,
+        system_program: accounts[8].pubkey,
+        token_program: accounts[9].pubkey,
+        associated_token_program: accounts[10].pubkey,
+        rent: accounts[11].pubkey,
+        event_authority: accounts[12].pubkey,
+        program: accounts[13].pubkey,
         ..Default::default()
     }))
 }
@@ -181,7 +181,7 @@ fn parse_create_token_instruction(
 /// 解析创建 V2 代币指令事件 (SPL-22 Token, Mayhem Mode)
 fn parse_create_v2_token_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpFunCreateV2Token;
@@ -232,22 +232,22 @@ fn parse_create_v2_token_instruction(
         symbol: symbol.to_string(),
         uri: uri.to_string(),
         creator,
-        mint: accounts[0],
-        mint_authority: accounts[1],
-        bonding_curve: accounts[2],
-        associated_bonding_curve: accounts[3],
-        global: accounts[4],
-        user: accounts[5],
-        system_program: accounts[6],
-        token_program: accounts[7],
-        associated_token_program: accounts[8],
-        mayhem_program_id: accounts[9],
-        global_params: accounts[10],
-        sol_vault: accounts[11],
-        mayhem_state: accounts[12],
-        mayhem_token_vault: accounts[13],
-        event_authority: accounts[14],
-        program: accounts[15],
+        mint: accounts[0].pubkey,
+        mint_authority: accounts[1].pubkey,
+        bonding_curve: accounts[2].pubkey,
+        associated_bonding_curve: accounts[3].pubkey,
+        global: accounts[4].pubkey,
+        user: accounts[5].pubkey,
+        system_program: accounts[6].pubkey,
+        token_program: accounts[7].pubkey,
+        associated_token_program: accounts[8].pubkey,
+        mayhem_program_id: accounts[9].pubkey,
+        global_params: accounts[10].pubkey,
+        sol_vault: accounts[11].pubkey,
+        mayhem_state: accounts[12].pubkey,
+        mayhem_token_vault: accounts[13].pubkey,
+        event_authority: accounts[14].pubkey,
+        program: accounts[15].pubkey,
         ..Default::default()
     }))
 }
@@ -255,7 +255,7 @@ fn parse_create_v2_token_instruction(
 // 解析买入指令事件
 fn parse_buy_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpFunBuy;
@@ -267,22 +267,22 @@ fn parse_buy_instruction(
     let max_sol_cost = u64::from_le_bytes(data[8..16].try_into().unwrap());
     Some(DexEvent::PumpFunTradeEvent(PumpFunTradeEvent {
         metadata,
-        global: accounts[0],
-        fee_recipient: accounts[1],
-        mint: accounts[2],
-        bonding_curve: accounts[3],
-        associated_bonding_curve: accounts[4],
-        associated_user: accounts[5],
-        user: accounts[6],
-        system_program: accounts[7],
-        token_program: accounts[8],
-        creator_vault: accounts[9],
-        event_authority: accounts[10],
-        program: accounts[11],
-        global_volume_accumulator: accounts[12],
-        user_volume_accumulator: accounts[13],
-        fee_config: accounts[14],
-        fee_program: accounts[15],
+        global: accounts[0].pubkey,
+        fee_recipient: accounts[1].pubkey,
+        mint: accounts[2].pubkey,
+        bonding_curve: accounts[3].pubkey,
+        associated_bonding_curve: accounts[4].pubkey,
+        associated_user: accounts[5].pubkey,
+        user: accounts[6].pubkey,
+        system_program: accounts[7].pubkey,
+        token_program: accounts[8].pubkey,
+        creator_vault: accounts[9].pubkey,
+        event_authority: accounts[10].pubkey,
+        program: accounts[11].pubkey,
+        global_volume_accumulator: accounts[12].pubkey,
+        user_volume_accumulator: accounts[13].pubkey,
+        fee_config: accounts[14].pubkey,
+        fee_program: accounts[15].pubkey,
         max_sol_cost,
         amount,
         is_buy: true,
@@ -295,7 +295,7 @@ fn parse_buy_instruction(
 /// buy_exact_sol_in: spendable_sol_in (SOL), min_tokens_out (token)
 /// buy: amount (token), max_sol_cost (SOL)
 fn parse_buy_exact_sol_in_instruction(
-    data: &[u8], accounts: &[Pubkey],
+    data: &[u8], accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpFunBuy;
@@ -310,22 +310,22 @@ fn parse_buy_exact_sol_in_instruction(
 
     Some(DexEvent::PumpFunTradeEvent(PumpFunTradeEvent {
         metadata,
-        global: accounts[0],
-        fee_recipient: accounts[1],
-        mint: accounts[2],
-        bonding_curve: accounts[3],
-        associated_bonding_curve: accounts[4],
-        associated_user: accounts[5],
-        user: accounts[6],
-        system_program: accounts[7],
-        token_program: accounts[8],
-        creator_vault: accounts[9],
-        event_authority: accounts[10],
-        program: accounts[11],
-        global_volume_accumulator: accounts[12],
-        user_volume_accumulator: accounts[13],
-        fee_config: accounts[14],
-        fee_program: accounts[15],
+        global: accounts[0].pubkey,
+        fee_recipient: accounts[1].pubkey,
+        mint: accounts[2].pubkey,
+        bonding_curve: accounts[3].pubkey,
+        associated_bonding_curve: accounts[4].pubkey,
+        associated_user: accounts[5].pubkey,
+        user: accounts[6].pubkey,
+        system_program: accounts[7].pubkey,
+        token_program: accounts[8].pubkey,
+        creator_vault: accounts[9].pubkey,
+        event_authority: accounts[10].pubkey,
+        program: accounts[11].pubkey,
+        global_volume_accumulator: accounts[12].pubkey,
+        user_volume_accumulator: accounts[13].pubkey,
+        fee_config: accounts[14].pubkey,
+        fee_program: accounts[15].pubkey,
         max_sol_cost: spendable_sol_in,  // Map spendable_sol_in to max_sol_cost
         amount: min_tokens_out,           // Map min_tokens_out to amount
         is_buy: true,
@@ -336,7 +336,7 @@ fn parse_buy_exact_sol_in_instruction(
 // 解析卖出指令事件
 fn parse_sell_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpFunSell;
@@ -348,22 +348,22 @@ fn parse_sell_instruction(
     let min_sol_output = u64::from_le_bytes(data[8..16].try_into().unwrap());
     Some(DexEvent::PumpFunTradeEvent(PumpFunTradeEvent {
         metadata,
-        global: accounts[0],
-        fee_recipient: accounts[1],
-        mint: accounts[2],
-        bonding_curve: accounts[3],
-        associated_bonding_curve: accounts[4],
-        associated_user: accounts[5],
-        user: accounts[6],
-        system_program: accounts[7],
-        creator_vault: accounts[8],
-        token_program: accounts[9],
-        event_authority: accounts[10],
-        program: accounts[11],
+        global: accounts[0].pubkey,
+        fee_recipient: accounts[1].pubkey,
+        mint: accounts[2].pubkey,
+        bonding_curve: accounts[3].pubkey,
+        associated_bonding_curve: accounts[4].pubkey,
+        associated_user: accounts[5].pubkey,
+        user: accounts[6].pubkey,
+        system_program: accounts[7].pubkey,
+        creator_vault: accounts[8].pubkey,
+        token_program: accounts[9].pubkey,
+        event_authority: accounts[10].pubkey,
+        program: accounts[11].pubkey,
         global_volume_accumulator: Pubkey::default(),
         user_volume_accumulator: Pubkey::default(),
-        fee_config: accounts[12],
-        fee_program: accounts[13],
+        fee_config: accounts[12].pubkey,
+        fee_program: accounts[13].pubkey,
         min_sol_output,
         amount,
         is_buy: false,
@@ -374,7 +374,7 @@ fn parse_sell_instruction(
 /// 解析迁移指令事件
 fn parse_migrate_instruction(
     _data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpFunMigrate;
@@ -384,30 +384,30 @@ fn parse_migrate_instruction(
     }
     Some(DexEvent::PumpFunMigrateEvent(PumpFunMigrateEvent {
         metadata,
-        global: accounts[0],
-        withdraw_authority: accounts[1],
-        mint: accounts[2],
-        bonding_curve: accounts[3],
-        associated_bonding_curve: accounts[4],
-        user: accounts[5],
-        system_program: accounts[6],
-        token_program: accounts[7],
-        pump_amm: accounts[8],
-        pool: accounts[9],
-        pool_authority: accounts[10],
-        pool_authority_mint_account: accounts[11],
-        pool_authority_wsol_account: accounts[12],
-        amm_global_config: accounts[13],
-        wsol_mint: accounts[14],
-        lp_mint: accounts[15],
-        user_pool_token_account: accounts[16],
-        pool_base_token_account: accounts[17],
-        pool_quote_token_account: accounts[18],
-        token_2022_program: accounts[19],
-        associated_token_program: accounts[20],
-        pump_amm_event_authority: accounts[21],
-        event_authority: accounts[22],
-        program: accounts[23],
+        global: accounts[0].pubkey,
+        withdraw_authority: accounts[1].pubkey,
+        mint: accounts[2].pubkey,
+        bonding_curve: accounts[3].pubkey,
+        associated_bonding_curve: accounts[4].pubkey,
+        user: accounts[5].pubkey,
+        system_program: accounts[6].pubkey,
+        token_program: accounts[7].pubkey,
+        pump_amm: accounts[8].pubkey,
+        pool: accounts[9].pubkey,
+        pool_authority: accounts[10].pubkey,
+        pool_authority_mint_account: accounts[11].pubkey,
+        pool_authority_wsol_account: accounts[12].pubkey,
+        amm_global_config: accounts[13].pubkey,
+        wsol_mint: accounts[14].pubkey,
+        lp_mint: accounts[15].pubkey,
+        user_pool_token_account: accounts[16].pubkey,
+        pool_base_token_account: accounts[17].pubkey,
+        pool_quote_token_account: accounts[18].pubkey,
+        token_2022_program: accounts[19].pubkey,
+        associated_token_program: accounts[20].pubkey,
+        pump_amm_event_authority: accounts[21].pubkey,
+        event_authority: accounts[22].pubkey,
+        program: accounts[23].pubkey,
         ..Default::default()
     }))
 }

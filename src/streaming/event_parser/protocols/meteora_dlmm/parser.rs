@@ -1,4 +1,4 @@
-use solana_program::pubkey::Pubkey;
+use solana_sdk::instruction::AccountMeta;
 use crate::streaming::event_parser::common::{EventMetadata, EventType};
 use crate::streaming::event_parser::DexEvent;
 use crate::streaming::event_parser::protocols::{meteora_damm_v2, meteora_dlmm};
@@ -8,7 +8,7 @@ use crate::streaming::event_parser::protocols::meteora_dlmm::events::{discrimina
 pub fn parse_meteora_dlmm_instruction_data(
     discriminator: &[u8],
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     metadata: EventMetadata,
 ) -> Option<DexEvent> {
     match discriminator {
@@ -31,7 +31,7 @@ pub fn parse_meteora_dlmm_inner_instruction_data(
 
 fn parse_swap_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::MeteoraDlmmSwap;
@@ -42,15 +42,15 @@ fn parse_swap_instruction(
 
     Some(DexEvent::MeteoraDlmmSwapEvent(MeteoraDlmmSwapEvent {
         metadata,
-        lb_pair: accounts[0],
-        reserve_x: accounts[2],
-        reserve_y: accounts[3],
-        token_x_mint: accounts[6],
-        token_y_mint: accounts[7],
-        oracle: accounts[8],
-        token_x_program: accounts[11],
-        token_y_program: accounts[12],
-        event_authority: accounts[13],
+        lb_pair: accounts[0].pubkey,
+        reserve_x: accounts[2].pubkey,
+        reserve_y: accounts[3].pubkey,
+        token_x_mint: accounts[6].pubkey,
+        token_y_mint: accounts[7].pubkey,
+        oracle: accounts[8].pubkey,
+        token_x_program: accounts[11].pubkey,
+        token_y_program: accounts[12].pubkey,
+        event_authority: accounts[13].pubkey,
         ..Default::default()
     }))
 }

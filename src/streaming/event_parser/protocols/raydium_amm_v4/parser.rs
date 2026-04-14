@@ -6,7 +6,7 @@ use crate::streaming::event_parser::{
     },
     DexEvent,
 };
-use solana_sdk::pubkey::Pubkey;
+use solana_sdk::{instruction::AccountMeta, pubkey::Pubkey};
 
 /// 解析 Raydium AMM V4 instruction data
 ///
@@ -14,7 +14,7 @@ use solana_sdk::pubkey::Pubkey;
 pub fn parse_raydium_amm_v4_instruction_data(
     discriminator: &[u8],
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     metadata: EventMetadata,
 ) -> Option<DexEvent> {
     match discriminator {
@@ -66,7 +66,7 @@ pub fn parse_raydium_amm_v4_account_data(
 /// 解析提现指令事件
 fn parse_withdraw_pnl_instruction(
     _data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumAmmV4WithdrawPnl;
@@ -77,30 +77,30 @@ fn parse_withdraw_pnl_instruction(
 
     Some(DexEvent::RaydiumAmmV4WithdrawPnlEvent(RaydiumAmmV4WithdrawPnlEvent {
         metadata,
-        token_program: accounts[0],
-        amm: accounts[1],
-        amm_config: accounts[2],
-        amm_authority: accounts[3],
-        amm_open_orders: accounts[4],
-        pool_coin_token_account: accounts[5],
-        pool_pc_token_account: accounts[6],
-        coin_pnl_token_account: accounts[7],
-        pc_pnl_token_account: accounts[8],
-        pnl_owner_account: accounts[9],
-        amm_target_orders: accounts[10],
-        serum_program: accounts[11],
-        serum_market: accounts[12],
-        serum_event_queue: accounts[13],
-        serum_coin_vault_account: accounts[14],
-        serum_pc_vault_account: accounts[15],
-        serum_vault_signer: accounts[16],
+        token_program: accounts[0].pubkey,
+        amm: accounts[1].pubkey,
+        amm_config: accounts[2].pubkey,
+        amm_authority: accounts[3].pubkey,
+        amm_open_orders: accounts[4].pubkey,
+        pool_coin_token_account: accounts[5].pubkey,
+        pool_pc_token_account: accounts[6].pubkey,
+        coin_pnl_token_account: accounts[7].pubkey,
+        pc_pnl_token_account: accounts[8].pubkey,
+        pnl_owner_account: accounts[9].pubkey,
+        amm_target_orders: accounts[10].pubkey,
+        serum_program: accounts[11].pubkey,
+        serum_market: accounts[12].pubkey,
+        serum_event_queue: accounts[13].pubkey,
+        serum_coin_vault_account: accounts[14].pubkey,
+        serum_pc_vault_account: accounts[15].pubkey,
+        serum_vault_signer: accounts[16].pubkey,
     }))
 }
 
 /// 解析移除流动性指令事件
 fn parse_withdraw_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumAmmV4Withdraw;
@@ -114,35 +114,35 @@ fn parse_withdraw_instruction(
         metadata,
         amount,
 
-        token_program: accounts[0],
-        amm: accounts[1],
-        amm_authority: accounts[2],
-        amm_open_orders: accounts[3],
-        amm_target_orders: accounts[4],
-        lp_mint_address: accounts[5],
-        pool_coin_token_account: accounts[6],
-        pool_pc_token_account: accounts[7],
-        pool_withdraw_queue: accounts[8],
-        pool_temp_lp_token_account: accounts[9],
-        serum_program: accounts[10],
-        serum_market: accounts[11],
-        serum_coin_vault_account: accounts[12],
-        serum_pc_vault_account: accounts[13],
-        serum_vault_signer: accounts[14],
-        user_lp_token_account: accounts[15],
-        user_coin_token_account: accounts[16],
-        user_pc_token_account: accounts[17],
-        user_owner: accounts[18],
-        serum_event_queue: accounts[19],
-        serum_bids: accounts[20],
-        serum_asks: accounts[21],
+        token_program: accounts[0].pubkey,
+        amm: accounts[1].pubkey,
+        amm_authority: accounts[2].pubkey,
+        amm_open_orders: accounts[3].pubkey,
+        amm_target_orders: accounts[4].pubkey,
+        lp_mint_address: accounts[5].pubkey,
+        pool_coin_token_account: accounts[6].pubkey,
+        pool_pc_token_account: accounts[7].pubkey,
+        pool_withdraw_queue: accounts[8].pubkey,
+        pool_temp_lp_token_account: accounts[9].pubkey,
+        serum_program: accounts[10].pubkey,
+        serum_market: accounts[11].pubkey,
+        serum_coin_vault_account: accounts[12].pubkey,
+        serum_pc_vault_account: accounts[13].pubkey,
+        serum_vault_signer: accounts[14].pubkey,
+        user_lp_token_account: accounts[15].pubkey,
+        user_coin_token_account: accounts[16].pubkey,
+        user_pc_token_account: accounts[17].pubkey,
+        user_owner: accounts[18].pubkey,
+        serum_event_queue: accounts[19].pubkey,
+        serum_bids: accounts[20].pubkey,
+        serum_asks: accounts[21].pubkey,
     }))
 }
 
 /// 解析初始化指令事件
 fn parse_initialize2_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumAmmV4Initialize2;
@@ -162,34 +162,34 @@ fn parse_initialize2_instruction(
         init_pc_amount,
         init_coin_amount,
 
-        token_program: accounts[0],
-        spl_associated_token_account: accounts[1],
-        system_program: accounts[2],
-        rent: accounts[3],
-        amm: accounts[4],
-        amm_authority: accounts[5],
-        amm_open_orders: accounts[6],
-        lp_mint: accounts[7],
-        coin_mint: accounts[8],
-        pc_mint: accounts[9],
-        pool_coin_token_account: accounts[10],
-        pool_pc_token_account: accounts[11],
-        pool_withdraw_queue: accounts[12],
-        amm_target_orders: accounts[13],
-        pool_temp_lp: accounts[14],
-        serum_program: accounts[15],
-        serum_market: accounts[16],
-        user_wallet: accounts[17],
-        user_token_coin: accounts[18],
-        user_token_pc: accounts[19],
-        user_lp_token_account: accounts[20],
+        token_program: accounts[0].pubkey,
+        spl_associated_token_account: accounts[1].pubkey,
+        system_program: accounts[2].pubkey,
+        rent: accounts[3].pubkey,
+        amm: accounts[4].pubkey,
+        amm_authority: accounts[5].pubkey,
+        amm_open_orders: accounts[6].pubkey,
+        lp_mint: accounts[7].pubkey,
+        coin_mint: accounts[8].pubkey,
+        pc_mint: accounts[9].pubkey,
+        pool_coin_token_account: accounts[10].pubkey,
+        pool_pc_token_account: accounts[11].pubkey,
+        pool_withdraw_queue: accounts[12].pubkey,
+        amm_target_orders: accounts[13].pubkey,
+        pool_temp_lp: accounts[14].pubkey,
+        serum_program: accounts[15].pubkey,
+        serum_market: accounts[16].pubkey,
+        user_wallet: accounts[17].pubkey,
+        user_token_coin: accounts[18].pubkey,
+        user_token_pc: accounts[19].pubkey,
+        user_lp_token_account: accounts[20].pubkey,
     }))
 }
 
 /// 解析添加流动性指令事件
 fn parse_deposit_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumAmmV4Deposit;
@@ -207,27 +207,27 @@ fn parse_deposit_instruction(
         max_pc_amount,
         base_side,
 
-        token_program: accounts[0],
-        amm: accounts[1],
-        amm_authority: accounts[2],
-        amm_open_orders: accounts[3],
-        amm_target_orders: accounts[4],
-        lp_mint_address: accounts[5],
-        pool_coin_token_account: accounts[6],
-        pool_pc_token_account: accounts[7],
-        serum_market: accounts[8],
-        user_coin_token_account: accounts[9],
-        user_pc_token_account: accounts[10],
-        user_lp_token_account: accounts[11],
-        user_owner: accounts[12],
-        serum_event_queue: accounts[13],
+        token_program: accounts[0].pubkey,
+        amm: accounts[1].pubkey,
+        amm_authority: accounts[2].pubkey,
+        amm_open_orders: accounts[3].pubkey,
+        amm_target_orders: accounts[4].pubkey,
+        lp_mint_address: accounts[5].pubkey,
+        pool_coin_token_account: accounts[6].pubkey,
+        pool_pc_token_account: accounts[7].pubkey,
+        serum_market: accounts[8].pubkey,
+        user_coin_token_account: accounts[9].pubkey,
+        user_pc_token_account: accounts[10].pubkey,
+        user_lp_token_account: accounts[11].pubkey,
+        user_owner: accounts[12].pubkey,
+        serum_event_queue: accounts[13].pubkey,
     }))
 }
 
 /// 解析买入指令事件
 fn parse_swap_base_output_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumAmmV4SwapBaseOut;
@@ -242,7 +242,7 @@ fn parse_swap_base_output_instruction(
     if accounts.len() == 17 {
         // 添加一个默认的 Pubkey 作为 amm_target_orders 的占位符
         // 因为在某些情况下，amm_target_orders 可能是可选的
-        accounts.insert(4, Pubkey::default());
+        accounts.insert(4, AccountMeta::new_readonly(Pubkey::default(), false));
     }
 
     Some(DexEvent::RaydiumAmmV4SwapEvent(RaydiumAmmV4SwapEvent {
@@ -250,24 +250,24 @@ fn parse_swap_base_output_instruction(
         max_amount_in,
         amount_out,
 
-        token_program: accounts[0],
-        amm: accounts[1],
-        amm_authority: accounts[2],
-        amm_open_orders: accounts[3],
-        amm_target_orders: Some(accounts[4]),
-        pool_coin_token_account: accounts[5],
-        pool_pc_token_account: accounts[6],
-        serum_program: accounts[7],
-        serum_market: accounts[8],
-        serum_bids: accounts[9],
-        serum_asks: accounts[10],
-        serum_event_queue: accounts[11],
-        serum_coin_vault_account: accounts[12],
-        serum_pc_vault_account: accounts[13],
-        serum_vault_signer: accounts[14],
-        user_source_token_account: accounts[15],
-        user_destination_token_account: accounts[16],
-        user_source_owner: accounts[17],
+        token_program: accounts[0].pubkey,
+        amm: accounts[1].pubkey,
+        amm_authority: accounts[2].pubkey,
+        amm_open_orders: accounts[3].pubkey,
+        amm_target_orders: Some(accounts[4].pubkey),
+        pool_coin_token_account: accounts[5].pubkey,
+        pool_pc_token_account: accounts[6].pubkey,
+        serum_program: accounts[7].pubkey,
+        serum_market: accounts[8].pubkey,
+        serum_bids: accounts[9].pubkey,
+        serum_asks: accounts[10].pubkey,
+        serum_event_queue: accounts[11].pubkey,
+        serum_coin_vault_account: accounts[12].pubkey,
+        serum_pc_vault_account: accounts[13].pubkey,
+        serum_vault_signer: accounts[14].pubkey,
+        user_source_token_account: accounts[15].pubkey,
+        user_destination_token_account: accounts[16].pubkey,
+        user_source_owner: accounts[17].pubkey,
 
         ..Default::default()
     }))
@@ -276,7 +276,7 @@ fn parse_swap_base_output_instruction(
 /// 解析买入指令事件
 fn parse_swap_base_input_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumAmmV4SwapBaseIn;
@@ -291,7 +291,7 @@ fn parse_swap_base_input_instruction(
     if accounts.len() == 17 {
         // 添加一个默认的 Pubkey 作为 amm_target_orders 的占位符
         // 因为在某些情况下，amm_target_orders 可能是可选的
-        accounts.insert(4, Pubkey::default());
+        accounts.insert(4, AccountMeta::new_readonly(Pubkey::default(), false));
     }
 
     Some(DexEvent::RaydiumAmmV4SwapEvent(RaydiumAmmV4SwapEvent {
@@ -299,24 +299,24 @@ fn parse_swap_base_input_instruction(
         amount_in,
         minimum_amount_out,
 
-        token_program: accounts[0],
-        amm: accounts[1],
-        amm_authority: accounts[2],
-        amm_open_orders: accounts[3],
-        amm_target_orders: Some(accounts[4]),
-        pool_coin_token_account: accounts[5],
-        pool_pc_token_account: accounts[6],
-        serum_program: accounts[7],
-        serum_market: accounts[8],
-        serum_bids: accounts[9],
-        serum_asks: accounts[10],
-        serum_event_queue: accounts[11],
-        serum_coin_vault_account: accounts[12],
-        serum_pc_vault_account: accounts[13],
-        serum_vault_signer: accounts[14],
-        user_source_token_account: accounts[15],
-        user_destination_token_account: accounts[16],
-        user_source_owner: accounts[17],
+        token_program: accounts[0].pubkey,
+        amm: accounts[1].pubkey,
+        amm_authority: accounts[2].pubkey,
+        amm_open_orders: accounts[3].pubkey,
+        amm_target_orders: Some(accounts[4].pubkey),
+        pool_coin_token_account: accounts[5].pubkey,
+        pool_pc_token_account: accounts[6].pubkey,
+        serum_program: accounts[7].pubkey,
+        serum_market: accounts[8].pubkey,
+        serum_bids: accounts[9].pubkey,
+        serum_asks: accounts[10].pubkey,
+        serum_event_queue: accounts[11].pubkey,
+        serum_coin_vault_account: accounts[12].pubkey,
+        serum_pc_vault_account: accounts[13].pubkey,
+        serum_vault_signer: accounts[14].pubkey,
+        user_source_token_account: accounts[15].pubkey,
+        user_destination_token_account: accounts[16].pubkey,
+        user_source_owner: accounts[17].pubkey,
 
         ..Default::default()
     }))

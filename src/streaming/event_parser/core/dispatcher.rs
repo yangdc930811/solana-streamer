@@ -20,8 +20,13 @@ use crate::streaming::event_parser::{
     },
     DexEvent, Protocol,
 };
-use solana_sdk::pubkey::Pubkey;
+use solana_sdk::{instruction::AccountMeta, pubkey::Pubkey};
 use sol_common::common::constants::*;
+use std::cell::RefCell;
+
+thread_local! {
+    static DISPATCH_ACCOUNT_METAS_CACHE: RefCell<Vec<AccountMeta>> = RefCell::new(Vec::with_capacity(32));
+}
 
 /// 中心事件解析调度器
 ///
@@ -45,7 +50,7 @@ impl EventDispatcher {
         protocol: Protocol,
         instruction_discriminator: &[u8],
         instruction_data: &[u8],
-        accounts: &[Pubkey],
+        account_metas: &[AccountMeta],
         mut metadata: EventMetadata,
     ) -> Option<DexEvent> {
         // 根据协议类型设置 metadata.protocol
@@ -66,56 +71,84 @@ impl EventDispatcher {
             Protocol::PumpFun => pumpfun::parse_pumpfun_instruction_data(
                 instruction_discriminator,
                 instruction_data,
-                accounts,
+                account_metas,
                 metadata,
             ),
             Protocol::PumpSwap => pumpswap::parse_pumpswap_instruction_data(
                 instruction_discriminator,
                 instruction_data,
-                accounts,
+                account_metas,
                 metadata,
             ),
             Protocol::Bonk => bonk::parse_bonk_instruction_data(
                 instruction_discriminator,
                 instruction_data,
-                accounts,
+                account_metas,
                 metadata,
             ),
             Protocol::RaydiumCpmm => raydium_cpmm::parse_raydium_cpmm_instruction_data(
                 instruction_discriminator,
                 instruction_data,
-                accounts,
+                account_metas,
                 metadata,
             ),
             Protocol::RaydiumClmm => raydium_clmm::parse_raydium_clmm_instruction_data(
                 instruction_discriminator,
                 instruction_data,
-                accounts,
+                account_metas,
                 metadata,
             ),
             Protocol::RaydiumAmmV4 => raydium_amm_v4::parse_raydium_amm_v4_instruction_data(
                 instruction_discriminator,
                 instruction_data,
-                accounts,
+                account_metas,
                 metadata,
             ),
             Protocol::MeteoraDlmm => meteora_dlmm::parse_meteora_dlmm_instruction_data(
                 instruction_discriminator,
                 instruction_data,
-                accounts,
+                account_metas,
                 metadata),
             Protocol::Orca => orca::parse_orca_instruction_data(
                 instruction_discriminator,
                 instruction_data,
-                accounts,
+                account_metas,
                 metadata),
             Protocol::MeteoraDammV2 => meteora_damm_v2::parse_meteora_damm_v2_instruction_data(
                 instruction_discriminator,
                 instruction_data,
-                accounts,
+                account_metas,
                 metadata,
             ),
         }
+    }
+
+    #[inline]
+    pub fn dispatch_instruction_with_pubkeys(
+        protocol: Protocol,
+        instruction_discriminator: &[u8],
+        instruction_data: &[u8],
+        accounts: &[Pubkey],
+        metadata: EventMetadata,
+    ) -> Option<DexEvent> {
+        DISPATCH_ACCOUNT_METAS_CACHE.with(|cache| {
+            let mut cache = cache.borrow_mut();
+            cache.clear();
+            let current_capacity = cache.capacity();
+            if current_capacity < accounts.len() {
+                cache.reserve(accounts.len() - current_capacity);
+            }
+            for &pubkey in accounts {
+                cache.push(AccountMeta::new_readonly(pubkey, false));
+            }
+            Self::dispatch_instruction(
+                protocol,
+                instruction_discriminator,
+                instruction_data,
+                &cache,
+                metadata,
+            )
+        })
     }
 
     /// 解析 inner instruction 事件（只解析，不合并）

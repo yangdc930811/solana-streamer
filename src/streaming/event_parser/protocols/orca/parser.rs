@@ -1,4 +1,4 @@
-use solana_program::pubkey::Pubkey;
+use solana_sdk::instruction::AccountMeta;
 use crate::streaming::event_parser::common::{read_u128_le, read_u64_le, read_u8_le, EventMetadata, EventType};
 use crate::streaming::event_parser::DexEvent;
 use crate::streaming::event_parser::protocols::orca;
@@ -8,7 +8,7 @@ use crate::streaming::event_parser::protocols::orca::events::{discriminators, Or
 pub fn parse_orca_instruction_data(
     discriminator: &[u8],
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     metadata: EventMetadata,
 ) -> Option<DexEvent> {
     match discriminator {
@@ -19,7 +19,7 @@ pub fn parse_orca_instruction_data(
 
 fn parse_swap_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::OrcaSwap;
@@ -41,14 +41,14 @@ fn parse_swap_instruction(
         sqrt_price_limit,
         amount_specified_is_input,
         a_to_b,
-        token_program: accounts[0],
-        payer: accounts[1],
-        whirlpool: accounts[2],
-        token_owner_account_a: accounts[3],
-        token_vault_a: accounts[4],
-        token_owner_account_b: accounts[5],
-        token_vault_b: accounts[6],
-        oracle: accounts[10],
+        token_program: accounts[0].pubkey,
+        payer: accounts[1].pubkey,
+        whirlpool: accounts[2].pubkey,
+        token_owner_account_a: accounts[3].pubkey,
+        token_vault_a: accounts[4].pubkey,
+        token_owner_account_b: accounts[5].pubkey,
+        token_vault_b: accounts[6].pubkey,
+        oracle: accounts[10].pubkey,
     }))
 }
 

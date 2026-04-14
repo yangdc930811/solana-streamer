@@ -1,4 +1,4 @@
-use solana_sdk::pubkey::Pubkey;
+use solana_sdk::instruction::AccountMeta;
 
 use crate::streaming::event_parser::{
     common::{read_u64_le, EventMetadata, EventType},
@@ -15,7 +15,7 @@ use crate::streaming::event_parser::{
 pub fn parse_raydium_cpmm_instruction_data(
     discriminator: &[u8],
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     metadata: EventMetadata,
 ) -> Option<DexEvent> {
     match discriminator {
@@ -67,7 +67,7 @@ pub fn parse_raydium_cpmm_account_data(
 /// 解析提款指令事件
 fn parse_withdraw_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumCpmmWithdraw;
@@ -80,27 +80,27 @@ fn parse_withdraw_instruction(
         lp_token_amount: read_u64_le(data, 0)?,
         minimum_token0_amount: read_u64_le(data, 8)?,
         minimum_token1_amount: read_u64_le(data, 16)?,
-        owner: accounts[0],
-        authority: accounts[1],
-        pool_state: accounts[2],
-        owner_lp_token: accounts[3],
-        token_0_account: accounts[4],
-        token_1_account: accounts[5],
-        token_0_vault: accounts[6],
-        token_1_vault: accounts[7],
-        token_program: accounts[8],
-        token_program2022: accounts[9],
-        vault_0_mint: accounts[10],
-        vault_1_mint: accounts[11],
-        lp_mint: accounts[12],
-        memo_program: accounts[13],
+        owner: accounts[0].pubkey,
+        authority: accounts[1].pubkey,
+        pool_state: accounts[2].pubkey,
+        owner_lp_token: accounts[3].pubkey,
+        token_0_account: accounts[4].pubkey,
+        token_1_account: accounts[5].pubkey,
+        token_0_vault: accounts[6].pubkey,
+        token_1_vault: accounts[7].pubkey,
+        token_program: accounts[8].pubkey,
+        token_program2022: accounts[9].pubkey,
+        vault_0_mint: accounts[10].pubkey,
+        vault_1_mint: accounts[11].pubkey,
+        lp_mint: accounts[12].pubkey,
+        memo_program: accounts[13].pubkey,
     }))
 }
 
 /// 解析初始化指令事件
 fn parse_initialize_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumCpmmInitialize;
@@ -113,33 +113,33 @@ fn parse_initialize_instruction(
         init_amount0: read_u64_le(data, 0)?,
         init_amount1: read_u64_le(data, 8)?,
         open_time: read_u64_le(data, 16)?,
-        creator: accounts[0],
-        amm_config: accounts[1],
-        authority: accounts[2],
-        pool_state: accounts[3],
-        token_0_mint: accounts[4],
-        token_1_mint: accounts[5],
-        lp_mint: accounts[6],
-        creator_token_0: accounts[7],
-        creator_token_1: accounts[8],
-        creator_lp_token: accounts[9],
-        token_0_vault: accounts[10],
-        token_1_vault: accounts[11],
-        create_pool_fee: accounts[12],
-        observation_state: accounts[13],
-        token_program: accounts[14],
-        token_0_program: accounts[15],
-        token_1_program: accounts[16],
-        associated_token_program: accounts[17],
-        system_program: accounts[18],
-        rent: accounts[19],
+        creator: accounts[0].pubkey,
+        amm_config: accounts[1].pubkey,
+        authority: accounts[2].pubkey,
+        pool_state: accounts[3].pubkey,
+        token_0_mint: accounts[4].pubkey,
+        token_1_mint: accounts[5].pubkey,
+        lp_mint: accounts[6].pubkey,
+        creator_token_0: accounts[7].pubkey,
+        creator_token_1: accounts[8].pubkey,
+        creator_lp_token: accounts[9].pubkey,
+        token_0_vault: accounts[10].pubkey,
+        token_1_vault: accounts[11].pubkey,
+        create_pool_fee: accounts[12].pubkey,
+        observation_state: accounts[13].pubkey,
+        token_program: accounts[14].pubkey,
+        token_0_program: accounts[15].pubkey,
+        token_1_program: accounts[16].pubkey,
+        associated_token_program: accounts[17].pubkey,
+        system_program: accounts[18].pubkey,
+        rent: accounts[19].pubkey,
     }))
 }
 
 /// 解析存款指令事件
 fn parse_deposit_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumCpmmDeposit;
@@ -152,26 +152,26 @@ fn parse_deposit_instruction(
         lp_token_amount: read_u64_le(data, 0)?,
         maximum_token0_amount: read_u64_le(data, 8)?,
         maximum_token1_amount: read_u64_le(data, 16)?,
-        owner: accounts[0],
-        authority: accounts[1],
-        pool_state: accounts[2],
-        owner_lp_token: accounts[3],
-        token_0_account: accounts[4],
-        token_1_account: accounts[5],
-        token_0_vault: accounts[6],
-        token_1_vault: accounts[7],
-        token_program: accounts[8],
-        token_program2022: accounts[9],
-        vault_0_mint: accounts[10],
-        vault_1_mint: accounts[11],
-        lp_mint: accounts[12],
+        owner: accounts[0].pubkey,
+        authority: accounts[1].pubkey,
+        pool_state: accounts[2].pubkey,
+        owner_lp_token: accounts[3].pubkey,
+        token_0_account: accounts[4].pubkey,
+        token_1_account: accounts[5].pubkey,
+        token_0_vault: accounts[6].pubkey,
+        token_1_vault: accounts[7].pubkey,
+        token_program: accounts[8].pubkey,
+        token_program2022: accounts[9].pubkey,
+        vault_0_mint: accounts[10].pubkey,
+        vault_1_mint: accounts[11].pubkey,
+        lp_mint: accounts[12].pubkey,
     }))
 }
 
 /// 解析买入指令事件
 fn parse_swap_base_input_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumCpmmSwapBaseInput;
@@ -187,26 +187,26 @@ fn parse_swap_base_input_instruction(
         metadata,
         amount_in,
         minimum_amount_out,
-        payer: accounts[0],
-        authority: accounts[1],
-        amm_config: accounts[2],
-        pool_state: accounts[3],
-        input_token_account: accounts[4],
-        output_token_account: accounts[5],
-        input_vault: accounts[6],
-        output_vault: accounts[7],
-        input_token_program: accounts[8],
-        output_token_program: accounts[9],
-        input_token_mint: accounts[10],
-        output_token_mint: accounts[11],
-        observation_state: accounts[12],
+        payer: accounts[0].pubkey,
+        authority: accounts[1].pubkey,
+        amm_config: accounts[2].pubkey,
+        pool_state: accounts[3].pubkey,
+        input_token_account: accounts[4].pubkey,
+        output_token_account: accounts[5].pubkey,
+        input_vault: accounts[6].pubkey,
+        output_vault: accounts[7].pubkey,
+        input_token_program: accounts[8].pubkey,
+        output_token_program: accounts[9].pubkey,
+        input_token_mint: accounts[10].pubkey,
+        output_token_mint: accounts[11].pubkey,
+        observation_state: accounts[12].pubkey,
         ..Default::default()
     }))
 }
 
 fn parse_swap_base_output_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumCpmmSwapBaseOutput;
@@ -222,19 +222,19 @@ fn parse_swap_base_output_instruction(
         metadata,
         max_amount_in,
         amount_out,
-        payer: accounts[0],
-        authority: accounts[1],
-        amm_config: accounts[2],
-        pool_state: accounts[3],
-        input_token_account: accounts[4],
-        output_token_account: accounts[5],
-        input_vault: accounts[6],
-        output_vault: accounts[7],
-        input_token_program: accounts[8],
-        output_token_program: accounts[9],
-        input_token_mint: accounts[10],
-        output_token_mint: accounts[11],
-        observation_state: accounts[12],
+        payer: accounts[0].pubkey,
+        authority: accounts[1].pubkey,
+        amm_config: accounts[2].pubkey,
+        pool_state: accounts[3].pubkey,
+        input_token_account: accounts[4].pubkey,
+        output_token_account: accounts[5].pubkey,
+        input_vault: accounts[6].pubkey,
+        output_vault: accounts[7].pubkey,
+        input_token_program: accounts[8].pubkey,
+        output_token_program: accounts[9].pubkey,
+        input_token_mint: accounts[10].pubkey,
+        output_token_mint: accounts[11].pubkey,
+        observation_state: accounts[12].pubkey,
         ..Default::default()
     }))
 }

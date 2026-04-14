@@ -2,7 +2,7 @@ use crate::streaming::event_parser::{
     common::{EventMetadata, EventType},
     DexEvent,
 };
-use solana_sdk::pubkey::Pubkey;
+use solana_sdk::instruction::AccountMeta;
 use crate::streaming::event_parser::protocols::meteora_damm_v2;
 use crate::streaming::event_parser::protocols::meteora_damm_v2::events::{discriminators, meteora_damm_v2_initialize_pool_event_decode, meteora_damm_v2_swap_event_decode, MeteoraDammV2InitializeCustomizablePoolEvent, MeteoraDammV2InitializePoolEvent, MeteoraDammV2InitializePoolWithDynamicConfigEvent, MeteoraDammV2Swap2Event, MeteoraDammV2SwapEvent};
 
@@ -12,7 +12,7 @@ use crate::streaming::event_parser::protocols::meteora_damm_v2::events::{discrim
 pub fn parse_meteora_damm_v2_instruction_data(
     discriminator: &[u8],
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     metadata: EventMetadata,
 ) -> Option<DexEvent> {
     match discriminator {
@@ -51,7 +51,7 @@ pub fn parse_meteora_damm_v2_inner_instruction_data(
 /// 解析 swap 指令
 fn parse_swap_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::MeteoraDammV2Swap;
@@ -66,20 +66,20 @@ fn parse_swap_instruction(
 
     Some(DexEvent::MeteoraDammV2SwapEvent(MeteoraDammV2SwapEvent {
         metadata,
-        pool_authority: accounts[0],
-        pool: accounts[1],
-        input_token_account: accounts[2],
-        output_token_account: accounts[3],
-        token_a_vault: accounts[4],
-        token_b_vault: accounts[5],
-        token_a_mint: accounts[6],
-        token_b_mint: accounts[7],
-        payer: accounts[8],
-        token_a_program: accounts[9],
-        token_b_program: accounts[10],
-        referral_token_account: Some(accounts[11]),
-        event_authority: accounts[12],
-        program: accounts[13],
+        pool_authority: accounts[0].pubkey,
+        pool: accounts[1].pubkey,
+        input_token_account: accounts[2].pubkey,
+        output_token_account: accounts[3].pubkey,
+        token_a_vault: accounts[4].pubkey,
+        token_b_vault: accounts[5].pubkey,
+        token_a_mint: accounts[6].pubkey,
+        token_b_mint: accounts[7].pubkey,
+        payer: accounts[8].pubkey,
+        token_a_program: accounts[9].pubkey,
+        token_b_program: accounts[10].pubkey,
+        referral_token_account: Some(accounts[11].pubkey),
+        event_authority: accounts[12].pubkey,
+        program: accounts[13].pubkey,
         amount_0: amount_in,
         amount_1: minimum_amount_out,
         ..Default::default()
@@ -89,7 +89,7 @@ fn parse_swap_instruction(
 /// 解析 swap2 指令
 fn parse_swap2_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::MeteoraDammV2Swap2;
@@ -108,25 +108,25 @@ fn parse_swap2_instruction(
 
     Some(DexEvent::MeteoraDammV2Swap2Event(MeteoraDammV2Swap2Event {
         metadata,
-        pool_authority: accounts[0],
-        pool: accounts[1],
-        input_token_account: accounts[2],
-        output_token_account: accounts[3],
-        token_a_vault: accounts[4],
-        token_b_vault: accounts[5],
-        token_a_mint: accounts[6],
-        token_b_mint: accounts[7],
-        payer: accounts[8],
-        token_a_program: accounts[9],
-        token_b_program: accounts[10],
+        pool_authority: accounts[0].pubkey,
+        pool: accounts[1].pubkey,
+        input_token_account: accounts[2].pubkey,
+        output_token_account: accounts[3].pubkey,
+        token_a_vault: accounts[4].pubkey,
+        token_b_vault: accounts[5].pubkey,
+        token_a_mint: accounts[6].pubkey,
+        token_b_mint: accounts[7].pubkey,
+        payer: accounts[8].pubkey,
+        token_a_program: accounts[9].pubkey,
+        token_b_program: accounts[10].pubkey,
         referral_token_account: if has_referral && accounts.len() > 11 {
-            Some(accounts[11])
+            Some(accounts[11].pubkey)
         } else {
             None
         },
-        event_authority: accounts[if has_referral { 12 } else { 11 }],
-        program: accounts[if has_referral { 13 } else { 12 }],
-        sysvar: accounts[if has_referral { 14 } else { 13 }],
+        event_authority: accounts[if has_referral { 12 } else { 11 }].pubkey,
+        program: accounts[if has_referral { 13 } else { 12 }].pubkey,
+        sysvar: accounts[if has_referral { 14 } else { 13 }].pubkey,
         amount_0,
         amount_1,
         swap_mode,
@@ -138,7 +138,7 @@ fn parse_swap2_instruction(
 /// 解析 initialize_pool 指令
 fn parse_initialize_pool_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::MeteoraDammV2InitializePool;
@@ -174,25 +174,25 @@ fn parse_initialize_pool_instruction(
 
     Some(DexEvent::MeteoraDammV2InitializePoolEvent(MeteoraDammV2InitializePoolEvent {
         metadata,
-        creator: accounts[0],
-        position_nft_mint: accounts[1],
-        position_nft_account: accounts[2],
-        payer: accounts[3],
-        config: accounts[4],
-        pool_authority: accounts[5],
-        pool: accounts[6],
-        position: accounts[7],
-        token_a_mint: accounts[8],
-        token_b_mint: accounts[9],
-        token_a_vault: accounts[10],
-        token_b_vault: accounts[11],
-        payer_token_a: accounts[12],
-        payer_token_b: accounts[13],
-        token_a_program: accounts[14],
-        token_b_program: accounts[15],
-        event_authority: accounts[18],
-        program: accounts[19],
-        remaining_accounts: accounts[20..].to_vec(),
+        creator: accounts[0].pubkey,
+        position_nft_mint: accounts[1].pubkey,
+        position_nft_account: accounts[2].pubkey,
+        payer: accounts[3].pubkey,
+        config: accounts[4].pubkey,
+        pool_authority: accounts[5].pubkey,
+        pool: accounts[6].pubkey,
+        position: accounts[7].pubkey,
+        token_a_mint: accounts[8].pubkey,
+        token_b_mint: accounts[9].pubkey,
+        token_a_vault: accounts[10].pubkey,
+        token_b_vault: accounts[11].pubkey,
+        payer_token_a: accounts[12].pubkey,
+        payer_token_b: accounts[13].pubkey,
+        token_a_program: accounts[14].pubkey,
+        token_b_program: accounts[15].pubkey,
+        event_authority: accounts[18].pubkey,
+        program: accounts[19].pubkey,
+        remaining_accounts: accounts[20..].iter().map(|m| m.pubkey).collect(),
         liquidity,
         sqrt_price,
         ..Default::default()
@@ -202,7 +202,7 @@ fn parse_initialize_pool_instruction(
 /// 解析 initialize_customizable_pool 指令
 fn parse_initialize_customizable_pool_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::MeteoraDammV2InitializeCustomizablePool;
@@ -274,26 +274,26 @@ fn parse_initialize_customizable_pool_instruction(
     Some(DexEvent::MeteoraDammV2InitializeCustomizablePoolEvent(
         MeteoraDammV2InitializeCustomizablePoolEvent {
             metadata,
-            creator: accounts[0],
-            position_nft_mint: accounts[1],
-            position_nft_account: accounts[2],
-            payer: accounts[3],
-            pool_authority: accounts[4],
-            pool: accounts[5],
-            position: accounts[6],
-            token_a_mint: accounts[7],
-            token_b_mint: accounts[8],
-            token_a_vault: accounts[9],
-            token_b_vault: accounts[10],
-            payer_token_a: accounts[11],
-            payer_token_b: accounts[12],
-            token_a_program: accounts[13],
-            token_b_program: accounts[14],
-            token_2022_program: accounts[15],
-            system_program: accounts[16],
-            event_authority: accounts[17],
-            program: accounts[18],
-            remaining_accounts: accounts[19..].to_vec(),
+            creator: accounts[0].pubkey,
+            position_nft_mint: accounts[1].pubkey,
+            position_nft_account: accounts[2].pubkey,
+            payer: accounts[3].pubkey,
+            pool_authority: accounts[4].pubkey,
+            pool: accounts[5].pubkey,
+            position: accounts[6].pubkey,
+            token_a_mint: accounts[7].pubkey,
+            token_b_mint: accounts[8].pubkey,
+            token_a_vault: accounts[9].pubkey,
+            token_b_vault: accounts[10].pubkey,
+            payer_token_a: accounts[11].pubkey,
+            payer_token_b: accounts[12].pubkey,
+            token_a_program: accounts[13].pubkey,
+            token_b_program: accounts[14].pubkey,
+            token_2022_program: accounts[15].pubkey,
+            system_program: accounts[16].pubkey,
+            event_authority: accounts[17].pubkey,
+            program: accounts[18].pubkey,
+            remaining_accounts: accounts[19..].iter().map(|m| m.pubkey).collect(),
             pool_fees,
             sqrt_min_price,
             sqrt_max_price,
@@ -309,7 +309,7 @@ fn parse_initialize_customizable_pool_instruction(
 /// 解析 initialize_pool_with_dynamic_config 指令
 fn parse_initialize_pool_with_dynamic_config_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::MeteoraDammV2InitializePoolWithDynamicConfig;
@@ -377,27 +377,27 @@ fn parse_initialize_pool_with_dynamic_config_instruction(
     Some(DexEvent::MeteoraDammV2InitializePoolWithDynamicConfigEvent(
         MeteoraDammV2InitializePoolWithDynamicConfigEvent {
             metadata,
-            creator: accounts[0],
-            position_nft_mint: accounts[1],
-            position_nft_account: accounts[2],
-            payer: accounts[3],
-            pool_creator_authority: accounts[4],
-            pool_authority: accounts[6],
-            pool: accounts[7],
-            position: accounts[8],
-            token_a_mint: accounts[9],
-            token_b_mint: accounts[10],
-            token_a_vault: accounts[11],
-            token_b_vault: accounts[12],
-            payer_token_a: accounts[13],
-            payer_token_b: accounts[14],
-            token_a_program: accounts[15],
-            token_b_program: accounts[16],
-            token_2022_program: accounts[17],
-            system_program: accounts[18],
-            event_authority: accounts[19],
-            program: accounts[20],
-            config: accounts[5],
+            creator: accounts[0].pubkey,
+            position_nft_mint: accounts[1].pubkey,
+            position_nft_account: accounts[2].pubkey,
+            payer: accounts[3].pubkey,
+            pool_creator_authority: accounts[4].pubkey,
+            pool_authority: accounts[6].pubkey,
+            pool: accounts[7].pubkey,
+            position: accounts[8].pubkey,
+            token_a_mint: accounts[9].pubkey,
+            token_b_mint: accounts[10].pubkey,
+            token_a_vault: accounts[11].pubkey,
+            token_b_vault: accounts[12].pubkey,
+            payer_token_a: accounts[13].pubkey,
+            payer_token_b: accounts[14].pubkey,
+            token_a_program: accounts[15].pubkey,
+            token_b_program: accounts[16].pubkey,
+            token_2022_program: accounts[17].pubkey,
+            system_program: accounts[18].pubkey,
+            event_authority: accounts[19].pubkey,
+            program: accounts[20].pubkey,
+            config: accounts[5].pubkey,
             pool_fees,
             sqrt_min_price,
             sqrt_max_price,

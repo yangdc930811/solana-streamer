@@ -8,7 +8,7 @@ use crate::streaming::event_parser::{
     },
     DexEvent,
 };
-use solana_sdk::pubkey::Pubkey;
+use solana_sdk::{instruction::AccountMeta, pubkey::Pubkey};
 
 /// 解析 PumpSwap instruction data
 ///
@@ -16,7 +16,7 @@ use solana_sdk::pubkey::Pubkey;
 pub fn parse_pumpswap_instruction_data(
     discriminator: &[u8],
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     metadata: EventMetadata,
 ) -> Option<DexEvent> {
     match discriminator {
@@ -128,7 +128,7 @@ fn parse_withdraw_inner_instruction(data: &[u8], metadata: EventMetadata) -> Opt
 /// 解析买入指令事件
 fn parse_buy_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpSwapBuy;
@@ -144,20 +144,20 @@ fn parse_buy_instruction(
         metadata,
         base_amount_out,
         max_quote_amount_in,
-        pool: accounts[0],
-        user: accounts[1],
-        base_mint: accounts[3],
-        quote_mint: accounts[4],
-        user_base_token_account: accounts[5],
-        user_quote_token_account: accounts[6],
-        pool_base_token_account: accounts[7],
-        pool_quote_token_account: accounts[8],
-        protocol_fee_recipient: accounts[9],
-        protocol_fee_recipient_token_account: accounts[10],
-        base_token_program: accounts[11],
-        quote_token_program: accounts[12],
-        coin_creator_vault_ata: accounts.get(17).copied().unwrap_or_default(),
-        coin_creator_vault_authority: accounts.get(18).copied().unwrap_or_default(),
+        pool: accounts[0].pubkey,
+        user: accounts[1].pubkey,
+        base_mint: accounts[3].pubkey,
+        quote_mint: accounts[4].pubkey,
+        user_base_token_account: accounts[5].pubkey,
+        user_quote_token_account: accounts[6].pubkey,
+        pool_base_token_account: accounts[7].pubkey,
+        pool_quote_token_account: accounts[8].pubkey,
+        protocol_fee_recipient: accounts[9].pubkey,
+        protocol_fee_recipient_token_account: accounts[10].pubkey,
+        base_token_program: accounts[11].pubkey,
+        quote_token_program: accounts[12].pubkey,
+        coin_creator_vault_ata: accounts.get(17).map(|m| m.pubkey).unwrap_or_default(),
+        coin_creator_vault_authority: accounts.get(18).map(|m| m.pubkey).unwrap_or_default(),
         ..Default::default()
     }))
 }
@@ -168,7 +168,7 @@ fn parse_buy_instruction(
 /// buy: base_amount_out (token), max_quote_amount_in (SOL)
 fn parse_buy_exact_quote_in_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpSwapBuy;
@@ -183,20 +183,20 @@ fn parse_buy_exact_quote_in_instruction(
     Some(DexEvent::PumpSwapBuyEvent(PumpSwapBuyEvent {
         metadata,
         spendable_quote_in,
-        pool: accounts[0],
-        user: accounts[1],
-        base_mint: accounts[3],
-        quote_mint: accounts[4],
-        user_base_token_account: accounts[5],
-        user_quote_token_account: accounts[6],
-        pool_base_token_account: accounts[7],
-        pool_quote_token_account: accounts[8],
-        protocol_fee_recipient: accounts[9],
-        protocol_fee_recipient_token_account: accounts[10],
-        base_token_program: accounts[11],
-        quote_token_program: accounts[12],
-        coin_creator_vault_ata: accounts.get(17).copied().unwrap_or_default(),
-        coin_creator_vault_authority: accounts.get(18).copied().unwrap_or_default(),
+        pool: accounts[0].pubkey,
+        user: accounts[1].pubkey,
+        base_mint: accounts[3].pubkey,
+        quote_mint: accounts[4].pubkey,
+        user_base_token_account: accounts[5].pubkey,
+        user_quote_token_account: accounts[6].pubkey,
+        pool_base_token_account: accounts[7].pubkey,
+        pool_quote_token_account: accounts[8].pubkey,
+        protocol_fee_recipient: accounts[9].pubkey,
+        protocol_fee_recipient_token_account: accounts[10].pubkey,
+        base_token_program: accounts[11].pubkey,
+        quote_token_program: accounts[12].pubkey,
+        coin_creator_vault_ata: accounts.get(17).map(|m| m.pubkey).unwrap_or_default(),
+        coin_creator_vault_authority: accounts.get(18).map(|m| m.pubkey).unwrap_or_default(),
         ..Default::default()
     }))
 }
@@ -204,7 +204,7 @@ fn parse_buy_exact_quote_in_instruction(
 /// 解析卖出指令事件
 fn parse_sell_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpSwapSell;
@@ -220,20 +220,20 @@ fn parse_sell_instruction(
         metadata,
         base_amount_in,
         min_quote_amount_out,
-        pool: accounts[0],
-        user: accounts[1],
-        base_mint: accounts[3],
-        quote_mint: accounts[4],
-        user_base_token_account: accounts[5],
-        user_quote_token_account: accounts[6],
-        pool_base_token_account: accounts[7],
-        pool_quote_token_account: accounts[8],
-        protocol_fee_recipient: accounts[9],
-        protocol_fee_recipient_token_account: accounts[10],
-        base_token_program: accounts[11],
-        quote_token_program: accounts[12],
-        coin_creator_vault_ata: accounts.get(17).copied().unwrap_or_default(),
-        coin_creator_vault_authority: accounts.get(18).copied().unwrap_or_default(),
+        pool: accounts[0].pubkey,
+        user: accounts[1].pubkey,
+        base_mint: accounts[3].pubkey,
+        quote_mint: accounts[4].pubkey,
+        user_base_token_account: accounts[5].pubkey,
+        user_quote_token_account: accounts[6].pubkey,
+        pool_base_token_account: accounts[7].pubkey,
+        pool_quote_token_account: accounts[8].pubkey,
+        protocol_fee_recipient: accounts[9].pubkey,
+        protocol_fee_recipient_token_account: accounts[10].pubkey,
+        base_token_program: accounts[11].pubkey,
+        quote_token_program: accounts[12].pubkey,
+        coin_creator_vault_ata: accounts.get(17).map(|m| m.pubkey).unwrap_or_default(),
+        coin_creator_vault_authority: accounts.get(18).map(|m| m.pubkey).unwrap_or_default(),
         ..Default::default()
     }))
 }
@@ -241,7 +241,7 @@ fn parse_sell_instruction(
 /// 解析创建池子指令事件
 fn parse_create_pool_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpSwapCreatePool;
@@ -264,16 +264,16 @@ fn parse_create_pool_instruction(
         index,
         base_amount_in,
         quote_amount_in,
-        pool: accounts[0],
-        creator: accounts[2],
-        base_mint: accounts[3],
-        quote_mint: accounts[4],
-        lp_mint: accounts[5],
-        user_base_token_account: accounts[6],
-        user_quote_token_account: accounts[7],
-        user_pool_token_account: accounts[8],
-        pool_base_token_account: accounts[9],
-        pool_quote_token_account: accounts[10],
+        pool: accounts[0].pubkey,
+        creator: accounts[2].pubkey,
+        base_mint: accounts[3].pubkey,
+        quote_mint: accounts[4].pubkey,
+        lp_mint: accounts[5].pubkey,
+        user_base_token_account: accounts[6].pubkey,
+        user_quote_token_account: accounts[7].pubkey,
+        user_pool_token_account: accounts[8].pubkey,
+        pool_base_token_account: accounts[9].pubkey,
+        pool_quote_token_account: accounts[10].pubkey,
         coin_creator,
         ..Default::default()
     }))
@@ -282,7 +282,7 @@ fn parse_create_pool_instruction(
 /// 解析存款指令事件
 fn parse_deposit_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpSwapDeposit;
@@ -300,15 +300,15 @@ fn parse_deposit_instruction(
         lp_token_amount_out,
         max_base_amount_in,
         max_quote_amount_in,
-        pool: accounts[0],
-        user: accounts[2],
-        base_mint: accounts[3],
-        quote_mint: accounts[4],
-        user_base_token_account: accounts[6],
-        user_quote_token_account: accounts[7],
-        user_pool_token_account: accounts[8],
-        pool_base_token_account: accounts[9],
-        pool_quote_token_account: accounts[10],
+        pool: accounts[0].pubkey,
+        user: accounts[2].pubkey,
+        base_mint: accounts[3].pubkey,
+        quote_mint: accounts[4].pubkey,
+        user_base_token_account: accounts[6].pubkey,
+        user_quote_token_account: accounts[7].pubkey,
+        user_pool_token_account: accounts[8].pubkey,
+        pool_base_token_account: accounts[9].pubkey,
+        pool_quote_token_account: accounts[10].pubkey,
         ..Default::default()
     }))
 }
@@ -316,7 +316,7 @@ fn parse_deposit_instruction(
 /// 解析提款指令事件
 fn parse_withdraw_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpSwapWithdraw;
@@ -334,15 +334,15 @@ fn parse_withdraw_instruction(
         lp_token_amount_in,
         min_base_amount_out,
         min_quote_amount_out,
-        pool: accounts[0],
-        user: accounts[2],
-        base_mint: accounts[3],
-        quote_mint: accounts[4],
-        user_base_token_account: accounts[6],
-        user_quote_token_account: accounts[7],
-        user_pool_token_account: accounts[8],
-        pool_base_token_account: accounts[9],
-        pool_quote_token_account: accounts[10],
+        pool: accounts[0].pubkey,
+        user: accounts[2].pubkey,
+        base_mint: accounts[3].pubkey,
+        quote_mint: accounts[4].pubkey,
+        user_base_token_account: accounts[6].pubkey,
+        user_quote_token_account: accounts[7].pubkey,
+        user_pool_token_account: accounts[8].pubkey,
+        pool_base_token_account: accounts[9].pubkey,
+        pool_quote_token_account: accounts[10].pubkey,
         ..Default::default()
     }))
 }

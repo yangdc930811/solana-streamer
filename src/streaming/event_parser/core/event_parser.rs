@@ -11,7 +11,8 @@ use crate::streaming::event_parser::{
 };
 use prost_types::Timestamp;
 use solana_sdk::{
-    message::compiled_instruction::CompiledInstruction, pubkey::Pubkey, signature::Signature,
+    instruction::AccountMeta, message::compiled_instruction::CompiledInstruction, pubkey::Pubkey,
+    signature::Signature,
     transaction::VersionedTransaction,
 };
 use solana_transaction_status::InnerInstructions;
@@ -51,6 +52,8 @@ impl EventParser {
         if let Some(transition) = grpc_tx.transaction {
             if let Some(message) = &transition.message {
                 let mut address_table_lookups: Vec<Vec<u8>> = vec![];
+                let mut loaded_writable_len = 0usize;
+                let mut loaded_readonly_len = 0usize;
                 let mut inner_instructions: Vec<
                     yellowstone_grpc_proto::solana::storage::confirmed_block::InnerInstructions,
                 > = vec![];
@@ -63,6 +66,8 @@ impl EventParser {
                     );
                     let loaded_writable_addresses = meta.loaded_writable_addresses;
                     let loaded_readonly_addresses = meta.loaded_readonly_addresses;
+                    loaded_writable_len = loaded_writable_addresses.len();
+                    loaded_readonly_len = loaded_readonly_addresses.len();
                     address_table_lookups.extend(
                         loaded_writable_addresses.into_iter().chain(loaded_readonly_addresses),
                     );
@@ -78,14 +83,21 @@ impl EventParser {
                 // 转换为 Pubkey
                 let accounts: Vec<Pubkey> = accounts_bytes
                     .iter()
-                    .filter_map(|account| {
+                    .map(|account| {
                         if account.len() == 32 {
-                            Some(Pubkey::try_from(account.as_slice()).unwrap_or_default())
+                            Pubkey::try_from(account.as_slice()).unwrap_or_default()
                         } else {
-                            None
+                            Pubkey::default()
                         }
                     })
                     .collect();
+                let tx_account_metas = Self::build_grpc_tx_account_metas(
+                    &accounts,
+                    message.account_keys.len(),
+                    message.header.as_ref(),
+                    loaded_writable_len,
+                    loaded_readonly_len,
+                );
                 // 解析指令事件
                 let instructions = &message.instructions;
                 Self::parse_instruction_events_from_grpc_transaction(
@@ -97,6 +109,7 @@ impl EventParser {
                     block_time,
                     recv_us,
                     &accounts,
+                    &tx_account_metas,
                     &inner_instructions,
                     bot_wallet,
                     transaction_index,
@@ -220,6 +233,7 @@ impl EventParser {
         block_time: Option<Timestamp>,
         recv_us: i64,
         accounts: &[Pubkey],
+        tx_account_metas: &[AccountMeta],
         inner_instructions: &[yellowstone_grpc_proto::prelude::InnerInstructions],
         bot_wallet: Option<Pubkey>,
         transaction_index: Option<u64>,
@@ -228,6 +242,7 @@ impl EventParser {
     ) -> anyhow::Result<()> {
         // 获取交易的指令和账户
         let mut accounts = accounts.to_vec();
+        let mut tx_account_metas = tx_account_metas.to_vec();
         // 检查交易中是否包含程序
         let has_program = accounts
             .iter()
@@ -244,6 +259,10 @@ impl EventParser {
                     // 补齐accounts(使用Pubkey::default())
                     if *max_idx as usize >= accounts.len() {
                         accounts.resize(*max_idx as usize + 1, Pubkey::default());
+                        tx_account_metas.resize(
+                            *max_idx as usize + 1,
+                            AccountMeta::new_readonly(Pubkey::default(), false),
+                        );
                     }
                     if Self::should_handle(protocols, event_type_filter, &program_id) {
                         Self::parse_events_from_grpc_instruction(
@@ -251,6 +270,7 @@ impl EventParser {
                             event_type_filter,
                             instruction,
                             &accounts,
+                            &tx_account_metas,
                             signature,
                             slot.unwrap_or(0),
                             block_time,
@@ -282,6 +302,7 @@ impl EventParser {
                                 event_type_filter,
                                 &instruction,
                                 &accounts,
+                                &tx_account_metas,
                                 signature,
                                 slot.unwrap_or(0),
                                 block_time,
@@ -312,6 +333,7 @@ impl EventParser {
         event_type_filter: Option<&EventTypeFilter>,
         instruction: &yellowstone_grpc_proto::prelude::CompiledInstruction,
         accounts: &[Pubkey],
+        tx_account_metas: &[AccountMeta],
         signature: Signature,
         slot: u64,
         block_time: Option<Timestamp>,
@@ -384,19 +406,16 @@ impl EventParser {
         let instruction_discriminator = &instruction.data[..disc_len];
         let instruction_data = &instruction.data[disc_len..];
 
-        // 构建账户公钥列表
-        let account_pubkeys: Vec<Pubkey> = instruction
-            .accounts
-            .iter()
-            .filter_map(|&idx| accounts.get(idx as usize).copied())
-            .collect();
+        // 还原每条指令的 AccountMeta，后续由 dispatcher 复用缓存提取 Pubkey。
+        let instruction_account_metas =
+            Self::restore_instruction_account_metas(&instruction.accounts, tx_account_metas);
 
         // 使用 EventDispatcher 解析 instruction 事件
         let mut event = match EventDispatcher::dispatch_instruction(
             protocol.clone(),
             instruction_discriminator,
             instruction_data,
-            &account_pubkeys,
+            &instruction_account_metas,
             metadata.clone(),
         ) {
             Some(e) => e,
@@ -481,6 +500,101 @@ impl EventParser {
         callback(&event);
 
         Ok(())
+    }
+
+    #[inline]
+    fn build_grpc_tx_account_metas(
+        all_accounts: &[Pubkey],
+        static_account_len: usize,
+        header: Option<&yellowstone_grpc_proto::solana::storage::confirmed_block::MessageHeader>,
+        loaded_writable_len: usize,
+        loaded_readonly_len: usize,
+    ) -> Vec<AccountMeta> {
+        let mut metas = Vec::with_capacity(all_accounts.len());
+        let total_accounts = all_accounts.len();
+        let static_len = static_account_len.min(total_accounts);
+
+        let signed_total = header.map_or(0usize, |h| h.num_required_signatures as usize);
+        let readonly_signed = header.map_or(0usize, |h| h.num_readonly_signed_accounts as usize);
+        let readonly_unsigned =
+            header.map_or(0usize, |h| h.num_readonly_unsigned_accounts as usize);
+
+        for idx in 0..static_len {
+            let pubkey = all_accounts[idx];
+            let is_signer = idx < signed_total;
+
+            let is_writable = if is_signer {
+                idx < signed_total.saturating_sub(readonly_signed)
+            } else {
+                let unsigned_idx = idx - signed_total;
+                let unsigned_total = static_len.saturating_sub(signed_total);
+                unsigned_idx < unsigned_total.saturating_sub(readonly_unsigned)
+            };
+
+            metas.push(AccountMeta {
+                pubkey,
+                is_signer,
+                is_writable,
+            });
+        }
+
+        let loaded_writable_start = static_len;
+        let loaded_writable_end = loaded_writable_start
+            .saturating_add(loaded_writable_len)
+            .min(total_accounts);
+        for &pubkey in &all_accounts[loaded_writable_start..loaded_writable_end] {
+            metas.push(AccountMeta {
+                pubkey,
+                is_signer: false,
+                is_writable: true,
+            });
+        }
+
+        let loaded_readonly_end = loaded_writable_end
+            .saturating_add(loaded_readonly_len)
+            .min(total_accounts);
+        for &pubkey in &all_accounts[loaded_writable_end..loaded_readonly_end] {
+            metas.push(AccountMeta {
+                pubkey,
+                is_signer: false,
+                is_writable: false,
+            });
+        }
+
+        if metas.len() < total_accounts {
+            for &pubkey in &all_accounts[metas.len()..] {
+                metas.push(AccountMeta {
+                    pubkey,
+                    is_signer: false,
+                    is_writable: false,
+                });
+            }
+        }
+
+        metas
+    }
+
+    #[inline]
+    fn restore_instruction_account_metas(
+        instruction_accounts: &[u8],
+        tx_account_metas: &[AccountMeta],
+    ) -> Vec<AccountMeta> {
+        let mut account_metas = Vec::with_capacity(instruction_accounts.len());
+
+        for &idx in instruction_accounts {
+            let idx = idx as usize;
+            if idx >= tx_account_metas.len() {
+                continue;
+            }
+            let meta = &tx_account_metas[idx];
+            account_metas.push(AccountMeta {
+                pubkey: meta.pubkey,
+                is_signer: meta.is_signer,
+                is_writable: meta.is_writable,
+            });
+        }
+
+        account_metas
     }
 
     // ================================================================================================
@@ -578,7 +692,7 @@ impl EventParser {
             .collect();
 
         // 使用 EventDispatcher 解析 instruction 事件
-        let mut event = match EventDispatcher::dispatch_instruction(
+        let mut event = match EventDispatcher::dispatch_instruction_with_pubkeys(
             protocol.clone(),
             instruction_discriminator,
             instruction_data,

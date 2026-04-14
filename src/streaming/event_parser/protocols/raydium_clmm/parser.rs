@@ -11,7 +11,7 @@ use crate::streaming::event_parser::{
     },
     DexEvent,
 };
-use solana_sdk::pubkey::Pubkey;
+use solana_sdk::instruction::AccountMeta;
 use crate::streaming::event_parser::protocols::raydium_clmm::types::{amm_config_parser, pool_state_parser, tick_array_bitmap_extension_parser, tick_array_state_parser};
 
 /// 解析 Raydium CLMM instruction data
@@ -20,7 +20,7 @@ use crate::streaming::event_parser::protocols::raydium_clmm::types::{amm_config_
 pub fn parse_raydium_clmm_instruction_data(
     discriminator: &[u8],
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     metadata: EventMetadata,
 ) -> Option<DexEvent> {
     match discriminator {
@@ -86,7 +86,7 @@ pub fn parse_raydium_clmm_account_data(
 /// 解析打开仓位V2指令事件
 fn parse_open_position_v2_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumClmmOpenPositionV2;
@@ -105,36 +105,36 @@ fn parse_open_position_v2_instruction(
         amount1_max: read_u64_le(data, 40)?,
         with_metadata: read_u8_le(data, 48)? == 1,
         base_flag: read_option_bool(data, &mut 49)?,
-        payer: accounts[0],
-        position_nft_owner: accounts[1],
-        position_nft_mint: accounts[2],
-        position_nft_account: accounts[3],
-        metadata_account: accounts[4],
-        pool_state: accounts[5],
-        protocol_position: accounts[6],
-        tick_array_lower: accounts[7],
-        tick_array_upper: accounts[8],
-        personal_position: accounts[9],
-        token_account0: accounts[10],
-        token_account1: accounts[11],
-        token_vault0: accounts[12],
-        token_vault1: accounts[13],
-        rent: accounts[14],
-        system_program: accounts[15],
-        token_program: accounts[16],
-        associated_token_program: accounts[17],
-        metadata_program: accounts[18],
-        token_program2022: accounts[19],
-        vault0_mint: accounts[20],
-        vault1_mint: accounts[21],
-        remaining_accounts: accounts[22..].to_vec(),
+        payer: accounts[0].pubkey,
+        position_nft_owner: accounts[1].pubkey,
+        position_nft_mint: accounts[2].pubkey,
+        position_nft_account: accounts[3].pubkey,
+        metadata_account: accounts[4].pubkey,
+        pool_state: accounts[5].pubkey,
+        protocol_position: accounts[6].pubkey,
+        tick_array_lower: accounts[7].pubkey,
+        tick_array_upper: accounts[8].pubkey,
+        personal_position: accounts[9].pubkey,
+        token_account0: accounts[10].pubkey,
+        token_account1: accounts[11].pubkey,
+        token_vault0: accounts[12].pubkey,
+        token_vault1: accounts[13].pubkey,
+        rent: accounts[14].pubkey,
+        system_program: accounts[15].pubkey,
+        token_program: accounts[16].pubkey,
+        associated_token_program: accounts[17].pubkey,
+        metadata_program: accounts[18].pubkey,
+        token_program2022: accounts[19].pubkey,
+        vault0_mint: accounts[20].pubkey,
+        vault1_mint: accounts[21].pubkey,
+        remaining_accounts: accounts[22..].iter().map(|m| m.pubkey).collect(),
     }))
 }
 
 /// 解析打开仓位v2指令事件
 fn parse_open_position_with_token_22_nft_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumClmmOpenPositionWithToken22Nft;
@@ -154,26 +154,26 @@ fn parse_open_position_with_token_22_nft_instruction(
             amount1_max: read_u64_le(data, 40)?,
             with_metadata: read_u8_le(data, 48)? == 1,
             base_flag: read_option_bool(data, &mut 49)?,
-            payer: accounts[0],
-            position_nft_owner: accounts[1],
-            position_nft_mint: accounts[2],
-            position_nft_account: accounts[3],
-            pool_state: accounts[4],
-            protocol_position: accounts[5],
-            tick_array_lower: accounts[6],
-            tick_array_upper: accounts[7],
-            personal_position: accounts[8],
-            token_account0: accounts[9],
-            token_account1: accounts[10],
-            token_vault0: accounts[11],
-            token_vault1: accounts[12],
-            rent: accounts[13],
-            system_program: accounts[14],
-            token_program: accounts[15],
-            associated_token_program: accounts[16],
-            token_program2022: accounts[17],
-            vault0_mint: accounts[18],
-            vault1_mint: accounts[19],
+            payer: accounts[0].pubkey,
+            position_nft_owner: accounts[1].pubkey,
+            position_nft_mint: accounts[2].pubkey,
+            position_nft_account: accounts[3].pubkey,
+            pool_state: accounts[4].pubkey,
+            protocol_position: accounts[5].pubkey,
+            tick_array_lower: accounts[6].pubkey,
+            tick_array_upper: accounts[7].pubkey,
+            personal_position: accounts[8].pubkey,
+            token_account0: accounts[9].pubkey,
+            token_account1: accounts[10].pubkey,
+            token_vault0: accounts[11].pubkey,
+            token_vault1: accounts[12].pubkey,
+            rent: accounts[13].pubkey,
+            system_program: accounts[14].pubkey,
+            token_program: accounts[15].pubkey,
+            associated_token_program: accounts[16].pubkey,
+            token_program2022: accounts[17].pubkey,
+            vault0_mint: accounts[18].pubkey,
+            vault1_mint: accounts[19].pubkey,
         },
     ))
 }
@@ -181,7 +181,7 @@ fn parse_open_position_with_token_22_nft_instruction(
 /// 解析增加流动性v2指令事件
 fn parse_increase_liquidity_v2_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumClmmIncreaseLiquidityV2;
@@ -195,28 +195,28 @@ fn parse_increase_liquidity_v2_instruction(
         amount0_max: read_u64_le(data, 16)?,
         amount1_max: read_u64_le(data, 24)?,
         base_flag: read_option_bool(data, &mut 32)?,
-        nft_owner: accounts[0],
-        nft_account: accounts[1],
-        pool_state: accounts[2],
-        protocol_position: accounts[3],
-        personal_position: accounts[4],
-        tick_array_lower: accounts[5],
-        tick_array_upper: accounts[6],
-        token_account0: accounts[7],
-        token_account1: accounts[8],
-        token_vault0: accounts[9],
-        token_vault1: accounts[10],
-        token_program: accounts[11],
-        token_program2022: accounts[12],
-        vault0_mint: accounts[13],
-        vault1_mint: accounts[14],
+        nft_owner: accounts[0].pubkey,
+        nft_account: accounts[1].pubkey,
+        pool_state: accounts[2].pubkey,
+        protocol_position: accounts[3].pubkey,
+        personal_position: accounts[4].pubkey,
+        tick_array_lower: accounts[5].pubkey,
+        tick_array_upper: accounts[6].pubkey,
+        token_account0: accounts[7].pubkey,
+        token_account1: accounts[8].pubkey,
+        token_vault0: accounts[9].pubkey,
+        token_vault1: accounts[10].pubkey,
+        token_program: accounts[11].pubkey,
+        token_program2022: accounts[12].pubkey,
+        vault0_mint: accounts[13].pubkey,
+        vault1_mint: accounts[14].pubkey,
     }))
 }
 
 /// 解析创建池指令事件
 fn parse_create_pool_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumClmmCreatePool;
@@ -228,26 +228,26 @@ fn parse_create_pool_instruction(
         metadata,
         sqrt_price_x64: read_u128_le(data, 0)?,
         open_time: read_u64_le(data, 16)?,
-        pool_creator: accounts[0],
-        amm_config: accounts[1],
-        pool_state: accounts[2],
-        token_mint0: accounts[3],
-        token_mint1: accounts[4],
-        token_vault0: accounts[5],
-        token_vault1: accounts[6],
-        observation_state: accounts[7],
-        tick_array_bitmap: accounts[8],
-        token_program0: accounts[9],
-        token_program1: accounts[10],
-        system_program: accounts[11],
-        rent: accounts[12],
+        pool_creator: accounts[0].pubkey,
+        amm_config: accounts[1].pubkey,
+        pool_state: accounts[2].pubkey,
+        token_mint0: accounts[3].pubkey,
+        token_mint1: accounts[4].pubkey,
+        token_vault0: accounts[5].pubkey,
+        token_vault1: accounts[6].pubkey,
+        observation_state: accounts[7].pubkey,
+        tick_array_bitmap: accounts[8].pubkey,
+        token_program0: accounts[9].pubkey,
+        token_program1: accounts[10].pubkey,
+        system_program: accounts[11].pubkey,
+        rent: accounts[12].pubkey,
     }))
 }
 
 /// 解析减少流动性v2指令事件
 fn parse_decrease_liquidity_v2_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumClmmDecreaseLiquidityV2;
@@ -260,30 +260,30 @@ fn parse_decrease_liquidity_v2_instruction(
         liquidity: read_u128_le(data, 0)?,
         amount0_min: read_u64_le(data, 16)?,
         amount1_min: read_u64_le(data, 24)?,
-        nft_owner: accounts[0],
-        nft_account: accounts[1],
-        personal_position: accounts[2],
-        pool_state: accounts[3],
-        protocol_position: accounts[4],
-        token_vault0: accounts[5],
-        token_vault1: accounts[6],
-        tick_array_lower: accounts[7],
-        tick_array_upper: accounts[8],
-        recipient_token_account0: accounts[9],
-        recipient_token_account1: accounts[10],
-        token_program: accounts[11],
-        token_program2022: accounts[12],
-        memo_program: accounts[13],
-        vault0_mint: accounts[14],
-        vault1_mint: accounts[15],
-        remaining_accounts: accounts[16..].to_vec(),
+        nft_owner: accounts[0].pubkey,
+        nft_account: accounts[1].pubkey,
+        personal_position: accounts[2].pubkey,
+        pool_state: accounts[3].pubkey,
+        protocol_position: accounts[4].pubkey,
+        token_vault0: accounts[5].pubkey,
+        token_vault1: accounts[6].pubkey,
+        tick_array_lower: accounts[7].pubkey,
+        tick_array_upper: accounts[8].pubkey,
+        recipient_token_account0: accounts[9].pubkey,
+        recipient_token_account1: accounts[10].pubkey,
+        token_program: accounts[11].pubkey,
+        token_program2022: accounts[12].pubkey,
+        memo_program: accounts[13].pubkey,
+        vault0_mint: accounts[14].pubkey,
+        vault1_mint: accounts[15].pubkey,
+        remaining_accounts: accounts[16..].iter().map(|m| m.pubkey).collect(),
     }))
 }
 
 /// 解析关闭仓位指令事件
 fn parse_close_position_instruction(
     _data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumClmmClosePosition;
@@ -293,19 +293,19 @@ fn parse_close_position_instruction(
     }
     Some(DexEvent::RaydiumClmmClosePositionEvent(RaydiumClmmClosePositionEvent {
         metadata,
-        nft_owner: accounts[0],
-        position_nft_mint: accounts[1],
-        position_nft_account: accounts[2],
-        personal_position: accounts[3],
-        system_program: accounts[4],
-        token_program: accounts[5],
+        nft_owner: accounts[0].pubkey,
+        position_nft_mint: accounts[1].pubkey,
+        position_nft_account: accounts[2].pubkey,
+        personal_position: accounts[3].pubkey,
+        system_program: accounts[4].pubkey,
+        token_program: accounts[5].pubkey,
     }))
 }
 
 /// 解析交易指令事件
 fn parse_swap_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumClmmSwap;
@@ -325,23 +325,23 @@ fn parse_swap_instruction(
         other_amount_threshold,
         sqrt_price_limit_x64,
         is_base_input: is_base_input == 1,
-        payer: accounts[0],
-        amm_config: accounts[1],
-        pool_state: accounts[2],
-        input_token_account: accounts[3],
-        output_token_account: accounts[4],
-        input_vault: accounts[5],
-        output_vault: accounts[6],
-        observation_state: accounts[7],
-        token_program: accounts[8],
-        tick_array: accounts[9],
-        remaining_accounts: accounts[10..].to_vec(),
+        payer: accounts[0].pubkey,
+        amm_config: accounts[1].pubkey,
+        pool_state: accounts[2].pubkey,
+        input_token_account: accounts[3].pubkey,
+        output_token_account: accounts[4].pubkey,
+        input_vault: accounts[5].pubkey,
+        output_vault: accounts[6].pubkey,
+        observation_state: accounts[7].pubkey,
+        token_program: accounts[8].pubkey,
+        tick_array: accounts[9].pubkey,
+        remaining_accounts: accounts[10..].iter().map(|m| m.pubkey).collect(),
     }))
 }
 
 fn parse_swap_v2_instruction(
     data: &[u8],
-    accounts: &[Pubkey],
+    accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::RaydiumClmmSwapV2;
@@ -361,19 +361,19 @@ fn parse_swap_v2_instruction(
         other_amount_threshold,
         sqrt_price_limit_x64,
         is_base_input: is_base_input == 1,
-        payer: accounts[0],
-        amm_config: accounts[1],
-        pool_state: accounts[2],
-        input_token_account: accounts[3],
-        output_token_account: accounts[4],
-        input_vault: accounts[5],
-        output_vault: accounts[6],
-        observation_state: accounts[7],
-        token_program: accounts[8],
-        token_program2022: accounts[9],
-        memo_program: accounts[10],
-        input_vault_mint: accounts[11],
-        output_vault_mint: accounts[12],
-        remaining_accounts: accounts[13..].to_vec(),
+        payer: accounts[0].pubkey,
+        amm_config: accounts[1].pubkey,
+        pool_state: accounts[2].pubkey,
+        input_token_account: accounts[3].pubkey,
+        output_token_account: accounts[4].pubkey,
+        input_vault: accounts[5].pubkey,
+        output_vault: accounts[6].pubkey,
+        observation_state: accounts[7].pubkey,
+        token_program: accounts[8].pubkey,
+        token_program2022: accounts[9].pubkey,
+        memo_program: accounts[10].pubkey,
+        input_vault_mint: accounts[11].pubkey,
+        output_vault_mint: accounts[12].pubkey,
+        remaining_accounts: accounts[13..].iter().map(|m| m.pubkey).collect(),
     }))
 }
