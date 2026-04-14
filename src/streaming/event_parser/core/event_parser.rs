@@ -149,6 +149,7 @@ impl EventParser {
         // 获取交易的指令和账户
         let compiled_instructions = transaction.message.instructions();
         let mut accounts: Vec<Pubkey> = accounts.to_vec();
+        let mut tx_account_metas = Self::build_versioned_tx_account_metas(transaction, &accounts);
         // 检查交易中是否包含程序
         let has_program = accounts
             .iter()
@@ -166,12 +167,17 @@ impl EventParser {
                         // 补齐accounts(使用Pubkey::default())
                         if *max_idx as usize >= accounts.len() {
                             accounts.resize(*max_idx as usize + 1, Pubkey::default());
+                            tx_account_metas.resize(
+                                *max_idx as usize + 1,
+                                AccountMeta::new_readonly(Pubkey::default(), false),
+                            );
                         }
                         Self::parse_events_from_instruction(
                             protocols,
                             event_type_filter,
                             instruction,
                             &accounts,
+                            &tx_account_metas,
                             signature,
                             slot.unwrap_or(0),
                             block_time,
@@ -195,6 +201,7 @@ impl EventParser {
                                 event_type_filter,
                                 &inner_instruction.instruction,
                                 &accounts,
+                                &tx_account_metas,
                                 signature,
                                 slot.unwrap_or(0),
                                 block_time,
@@ -575,6 +582,22 @@ impl EventParser {
     }
 
     #[inline]
+    fn build_versioned_tx_account_metas(
+        transaction: &VersionedTransaction,
+        all_accounts: &[Pubkey],
+    ) -> Vec<AccountMeta> {
+        let mut metas = Vec::with_capacity(all_accounts.len());
+        for (idx, &pubkey) in all_accounts.iter().enumerate() {
+            metas.push(AccountMeta {
+                pubkey,
+                is_signer: transaction.message.is_signer(idx),
+                is_writable: transaction.message.is_maybe_writable(idx, None),
+            });
+        }
+        metas
+    }
+
+    #[inline]
     fn restore_instruction_account_metas(
         instruction_accounts: &[u8],
         tx_account_metas: &[AccountMeta],
@@ -611,6 +634,7 @@ impl EventParser {
         event_type_filter: Option<&EventTypeFilter>,
         instruction: &CompiledInstruction,
         accounts: &[Pubkey],
+        tx_account_metas: &[AccountMeta],
         signature: Signature,
         slot: u64,
         block_time: Option<Timestamp>,
@@ -684,19 +708,15 @@ impl EventParser {
         let instruction_discriminator = &instruction.data[..disc_len];
         let instruction_data = &instruction.data[disc_len..];
 
-        // 构建账户公钥列表
-        let account_pubkeys: Vec<Pubkey> = instruction
-            .accounts
-            .iter()
-            .filter_map(|&idx| accounts.get(idx as usize).copied())
-            .collect();
+        let instruction_account_metas =
+            Self::restore_instruction_account_metas(&instruction.accounts, tx_account_metas);
 
         // 使用 EventDispatcher 解析 instruction 事件
-        let mut event = match EventDispatcher::dispatch_instruction_with_pubkeys(
+        let mut event = match EventDispatcher::dispatch_instruction(
             protocol.clone(),
             instruction_discriminator,
             instruction_data,
-            &account_pubkeys,
+            &instruction_account_metas,
             metadata.clone(),
         ) {
             Some(e) => e,
