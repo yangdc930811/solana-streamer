@@ -167,6 +167,7 @@ impl_dex_event_metadata!(
     RaydiumClmmAmmConfigAccountEvent,
     RaydiumClmmPoolStateAccountEvent,
     RaydiumClmmTickArrayStateAccountEvent,
+    RaydiumClmmTickArrayBitmapExtensionAccountEvent,
     // Raydium CPMM events
     RaydiumCpmmSwapEvent,
     RaydiumCpmmDepositEvent,
@@ -180,6 +181,15 @@ impl_dex_event_metadata!(
     MeteoraDammV2InitializePoolEvent,
     MeteoraDammV2InitializeCustomizablePoolEvent,
     MeteoraDammV2InitializePoolWithDynamicConfigEvent,
+    MeteoraDammV2PoolAccountEvent,
+    // Meteora Dlmm Events
+    MeteoraDlmmSwapEvent,
+    MeteoraDlmmPoolAccountEvent,
+    MeteoraDlmmBinArrayBitmapExtensionAccountEvent,
+    MeteoraDlmmBinArrayAccountEvent,
+    // Orca Events
+    OrcaSwapEvent,
+    OrcaPoolAccountEvent,
     // Common events
     TokenAccountEvent,
     NonceAccountEvent,
