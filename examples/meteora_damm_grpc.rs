@@ -2,10 +2,10 @@
 //!
 //! Usage: cargo run --example meteora_damm_grpc --release
 
-use solana_streamer_sdk::streaming::event_parser::{DexEvent, Protocol};
-use solana_streamer_sdk::streaming::event_parser::protocols::meteora_damm_v2::parser::METEORA_DAMM_V2_PROGRAM_ID;
-use solana_streamer_sdk::streaming::grpc::ClientConfig;
-use solana_streamer_sdk::streaming::yellowstone_grpc::{AccountFilter, TransactionFilter, YellowstoneGrpc};
+use sol_common::common::constants::METEORA_DAMM_V2_PROGRAM_ID;
+use solana_streamer::streaming::event_parser::{DexEvent, Protocol};
+use solana_streamer::streaming::grpc::ClientConfig;
+use solana_streamer::streaming::yellowstone_grpc::{AccountFilter, TransactionFilter, YellowstoneGrpc};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -42,6 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         None,
         None,
         callback,
+        false
     )
     .await?;
 
