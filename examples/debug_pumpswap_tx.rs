@@ -4,8 +4,8 @@
 
 use anyhow::Result;
 use solana_commitment_config::CommitmentConfig;
-use solana_streamer_sdk::streaming::event_parser::core::event_parser::EventParser;
-use solana_streamer_sdk::streaming::event_parser::{DexEvent, Protocol};
+use solana_streamer::streaming::event_parser::core::event_parser::EventParser;
+use solana_streamer::streaming::event_parser::{DexEvent, Protocol};
 use std::str::FromStr;
 use std::sync::Arc;
 

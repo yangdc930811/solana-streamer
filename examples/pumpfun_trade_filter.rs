@@ -2,14 +2,14 @@
 //!
 //! Usage: cargo run --example pumpfun_trade_filter --release
 
-use solana_streamer_sdk::streaming::event_parser::common::types::EventType;
-use solana_streamer_sdk::streaming::event_parser::protocols::pumpfun::events::{PumpFunCreateTokenEvent, PumpFunCreateV2TokenEvent, PumpFunTradeEvent};
-use solana_streamer_sdk::streaming::event_parser::DexEvent;
-use solana_streamer_sdk::streaming::grpc::ClientConfig;
-use solana_streamer_sdk::streaming::yellowstone_grpc::{AccountFilter, TransactionFilter, YellowstoneGrpc};
-use solana_streamer_sdk::streaming::event_parser::Protocol;
-use solana_streamer_sdk::streaming::event_parser::common::filter::EventTypeFilter;
-use solana_streamer_sdk::streaming::event_parser::protocols::pumpfun::parser::PUMPFUN_PROGRAM_ID;
+use sol_common::common::constants::PUMPFUN_PROGRAM_ID;
+use solana_streamer::streaming::event_parser::common::types::EventType;
+use solana_streamer::streaming::event_parser::protocols::pumpfun::events::{PumpFunCreateTokenEvent, PumpFunCreateV2TokenEvent, PumpFunTradeEvent};
+use solana_streamer::streaming::event_parser::DexEvent;
+use solana_streamer::streaming::grpc::ClientConfig;
+use solana_streamer::streaming::yellowstone_grpc::{AccountFilter, TransactionFilter, YellowstoneGrpc};
+use solana_streamer::streaming::event_parser::Protocol;
+use solana_streamer::streaming::event_parser::common::filter::EventTypeFilter;
 
 fn now_micros() -> i64 {
     std::time::SystemTime::now()
@@ -70,6 +70,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         event_filter,
         None,
         callback,
+        false
     )
     .await?;
 
