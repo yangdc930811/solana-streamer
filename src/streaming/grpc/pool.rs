@@ -276,7 +276,7 @@ impl PooledTransactionPretty {
         let tx = tx_update.transaction.expect("should be defined");
 
         self.transaction.slot = tx_update.slot;
-        self.transaction.transaction_index = Some(tx.index);
+        self.transaction.tx_index = Some(tx.index);
         self.transaction.block_time = block_time;
         self.transaction.block_hash.clear(); // 重置 block_hash
         self.transaction.signature =
@@ -406,9 +406,8 @@ impl EventPrettyPool {
 }
 
 // 全局池管理器实例
-lazy_static::lazy_static! {
-    pub static ref GLOBAL_POOL_MANAGER: PoolManager = PoolManager::new();
-}
+pub static GLOBAL_POOL_MANAGER: std::sync::LazyLock<PoolManager> =
+    std::sync::LazyLock::new(PoolManager::new);
 
 /// 便捷的全局工厂函数
 pub mod factory {

@@ -40,7 +40,7 @@ impl EventParser {
         block_time: Option<Timestamp>,
         recv_us: i64,
         bot_wallet: Option<Pubkey>,
-        transaction_index: Option<u64>,
+        tx_index: Option<u64>,
         callback: Arc<dyn Fn(DexEvent) + Send + Sync>,
         is_log: bool,
     ) -> anyhow::Result<()> {
@@ -88,6 +88,11 @@ impl EventParser {
                     .collect();
                 // 解析指令事件
                 let instructions = &message.instructions;
+                let recent_blockhash = if message.recent_blockhash.len() != 32 {
+                    None
+                } else {
+                    Some(solana_sdk::bs58::encode(&message.recent_blockhash).into_string())
+                };
                 Self::parse_instruction_events_from_grpc_transaction(
                     protocols,
                     event_type_filter,
@@ -99,7 +104,8 @@ impl EventParser {
                     &accounts,
                     &inner_instructions,
                     bot_wallet,
-                    transaction_index,
+                    tx_index,
+                    recent_blockhash,
                     adapter_callback,
                     logs,
                 )
@@ -126,7 +132,7 @@ impl EventParser {
         accounts: &[Pubkey],
         inner_instructions: &[InnerInstructions],
         bot_wallet: Option<Pubkey>,
-        transaction_index: Option<u64>,
+        tx_index: Option<u64>,
         callback: Arc<dyn Fn(DexEvent) + Send + Sync>,
     ) -> anyhow::Result<()> {
         // 创建适配器回调，将所有权回调转换为引用回调
@@ -135,6 +141,7 @@ impl EventParser {
         });
         // 获取交易的指令和账户
         let compiled_instructions = transaction.message.instructions();
+        let recent_blockhash = Some(transaction.message.recent_blockhash().to_string());
         let mut accounts: Vec<Pubkey> = accounts.to_vec();
         // 检查交易中是否包含程序
         let has_program = accounts
@@ -166,7 +173,8 @@ impl EventParser {
                             index as i64,
                             None,
                             bot_wallet,
-                            transaction_index,
+                            tx_index,
+                            recent_blockhash.as_deref(),
                             inner_instructions,
                             adapter_callback.clone(),
                             None
@@ -189,7 +197,8 @@ impl EventParser {
                                 index as i64,
                                 Some(inner_index as i64),
                                 bot_wallet,
-                                transaction_index,
+                                tx_index,
+                                recent_blockhash.as_deref(),
                                 Some(&inner_instructions),
                                 adapter_callback.clone(),
                                 None
@@ -222,7 +231,8 @@ impl EventParser {
         accounts: &[Pubkey],
         inner_instructions: &[yellowstone_grpc_proto::prelude::InnerInstructions],
         bot_wallet: Option<Pubkey>,
-        transaction_index: Option<u64>,
+        tx_index: Option<u64>,
+        recent_blockhash: Option<String>,
         callback: Arc<dyn for<'a> Fn(&'a DexEvent) + Send + Sync>,
         logs: Option<Arc<Vec<String>>>,
     ) -> anyhow::Result<()> {
@@ -258,7 +268,8 @@ impl EventParser {
                             index as i64,
                             None,
                             bot_wallet,
-                            transaction_index,
+                            tx_index,
+                            recent_blockhash.as_deref(),
                             inner_instructions,
                             callback.clone(),
                             logs.clone(),
@@ -289,7 +300,8 @@ impl EventParser {
                                 inner_instructions.index as i64,
                                 Some(inner_index as i64),
                                 bot_wallet,
-                                transaction_index,
+                                tx_index,
+                                recent_blockhash.as_deref(),
                                 Some(&inner_instructions),
                                 callback.clone(),
                                 logs.clone(),
@@ -319,7 +331,8 @@ impl EventParser {
         outer_index: i64,
         inner_index: Option<i64>,
         bot_wallet: Option<Pubkey>,
-        transaction_index: Option<u64>,
+        tx_index: Option<u64>,
+        recent_blockhash: Option<&str>,
         inner_instructions: Option<&yellowstone_grpc_proto::prelude::InnerInstructions>,
         callback: Arc<dyn for<'a> Fn(&'a DexEvent) + Send + Sync>,
         logs: Option<Arc<Vec<String>>>,
@@ -359,9 +372,10 @@ impl EventParser {
             outer_index,
             inner_index,
             recv_us,
-            transaction_index,
+            tx_index,
             logs,
-            Some(accounts[0])
+            Some(accounts[0]),
+            recent_blockhash.map(|s| s.to_string()),
         );
 
         if is_cu_program {
@@ -405,70 +419,46 @@ impl EventParser {
 
         // 处理 inner instructions - 查找对应的 CPI log 进行 merge
         // 当 inner_index 有值时，只查找索引大于当前 inner_index 的 CPI log
+        // 超低延迟：顺序执行，避免 thread::scope 的 spawn/join 开销
         let mut inner_instruction_event: Option<DexEvent> = None;
         if let Some(inner_instructions_ref) = inner_instructions {
-            let current_inner_idx = inner_index.unwrap_or(-1) as i32;
+            let raw = inner_index.unwrap_or(-1);
+            let current_inner_idx = raw.clamp(i32::MIN as i64, i32::MAX as i64) as i32;
 
-            // 并行执行两个任务: 解析 inner event 和提取 swap_data
-            let (inner_event_result, swap_data_result) = std::thread::scope(|s| {
-                let inner_event_handle = s.spawn(|| {
-                    for (idx, inner_instruction) in inner_instructions_ref.instructions.iter().enumerate() {
-                        // 只查找索引大于当前 inner_index 的 CPI log
-                        if (idx as i32) <= current_inner_idx {
-                            continue;
-                        }
+            for (idx, inner_instruction) in inner_instructions_ref.instructions.iter().enumerate() {
+                if (idx as i32) <= current_inner_idx {
+                    continue;
+                }
+                let inner_data = &inner_instruction.data;
+                if inner_data.len() < 16 {
+                    continue;
+                }
+                let inner_discriminator = &inner_data[..16];
+                let inner_instruction_data = &inner_data[16..];
+                if let Some(inner_event) = EventDispatcher::dispatch_inner_instruction(
+                    protocol.clone(),
+                    inner_discriminator,
+                    inner_instruction_data,
+                    metadata.clone(),
+                ) {
+                    inner_instruction_event = Some(inner_event);
+                    break;
+                }
+            }
 
-                        let inner_data = &inner_instruction.data;
-                        // 检查长度（需要 16 字节的 discriminator）
-                        if inner_data.len() < 16 {
-                            continue;
-                        }
-                        let inner_discriminator = &inner_data[..16];
-                        let inner_instruction_data = &inner_data[16..];
-
-                        if let Some(inner_event) = EventDispatcher::dispatch_inner_instruction(
-                            protocol.clone(),
-                            inner_discriminator,
-                            inner_instruction_data,
-                            metadata.clone(),
-                        ) {
-                            return Some(inner_event);
-                        }
-                    }
-                    None
-                });
-
-                let swap_data_handle = s.spawn(|| {
-                    if event.metadata().swap_data.is_none() {
-                        parse_swap_data_from_next_grpc_instructions(
-                            &event,
-                            inner_instructions_ref,
-                            current_inner_idx as i8,
-                            accounts,
-                        )
-                    } else {
-                        None
-                    }
-                });
-
-                // 等待两个任务完成
-                (inner_event_handle.join().unwrap(), swap_data_handle.join().unwrap())
-            });
-
-            inner_instruction_event = inner_event_result;
-            if let Some(swap_data) = swap_data_result {
-                event.metadata_mut().set_swap_data(swap_data);
+            if event.metadata().swap_data.is_none() {
+                if let Some(swap_data) = parse_swap_data_from_next_grpc_instructions(
+                    &event,
+                    inner_instructions_ref,
+                    current_inner_idx,
+                    accounts,
+                ) {
+                    event.metadata_mut().set_swap_data(swap_data);
+                }
             }
         }
 
-        // 特殊处理: PumpFun MIGRATE 指令需要 inner instruction data
-        if matches!(protocol, Protocol::PumpFun) {
-            const PUMPFUN_MIGRATE_IX: &[u8] = &[155, 234, 231, 146, 236, 158, 162, 30];
-            if instruction_discriminator == PUMPFUN_MIGRATE_IX && inner_instruction_event.is_none()
-            {
-                return Ok(());
-            }
-        }
+        // PumpFun MIGRATE: 有 CPI 时合并 log；无 CPI 时仍发出仅含指令数据的事件。
 
         // 合并事件
         if let Some(inner_instruction_event) = inner_instruction_event {
@@ -504,7 +494,8 @@ impl EventParser {
         outer_index: i64,
         inner_index: Option<i64>,
         bot_wallet: Option<Pubkey>,
-        transaction_index: Option<u64>,
+        tx_index: Option<u64>,
+        recent_blockhash: Option<&str>,
         inner_instructions: Option<&InnerInstructions>,
         callback: Arc<dyn for<'a> Fn(&'a DexEvent) + Send + Sync>,
         logs: Option<Arc<Vec<String>>>,
@@ -545,9 +536,10 @@ impl EventParser {
             outer_index,
             inner_index,
             recv_us,
-            transaction_index,
+            tx_index,
             logs,
-            Some(accounts[0])
+            Some(accounts[0]),
+            recent_blockhash.map(|s| s.to_string()),
         );
 
         if is_cu_program {
@@ -593,7 +585,8 @@ impl EventParser {
         // 当 inner_index 有值时，只查找索引大于当前 inner_index 的 CPI log
         let mut inner_instruction_event: Option<DexEvent> = None;
         if let Some(inner_instructions_ref) = inner_instructions {
-            let current_inner_idx = inner_index.unwrap_or(-1) as i32;
+            let raw = inner_index.unwrap_or(-1);
+            let current_inner_idx = raw.clamp(i32::MIN as i64, i32::MAX as i64) as i32;
 
             // 并行执行两个任务: 解析 inner event 和提取 swap_data
             let (inner_event_result, swap_data_result) = std::thread::scope(|s| {
@@ -629,7 +622,7 @@ impl EventParser {
                         parse_swap_data_from_next_instructions(
                             &event,
                             inner_instructions_ref,
-                            current_inner_idx as i8,
+                            current_inner_idx,
                             accounts,
                         )
                     } else {
@@ -647,14 +640,7 @@ impl EventParser {
             }
         }
 
-        // 特殊处理: PumpFun MIGRATE 指令需要 inner instruction data
-        if matches!(protocol, Protocol::PumpFun) {
-            const PUMPFUN_MIGRATE_IX: &[u8] = &[155, 234, 231, 146, 236, 158, 162, 30];
-            if instruction_discriminator == PUMPFUN_MIGRATE_IX && inner_instruction_event.is_none()
-            {
-                return Ok(());
-            }
-        }
+        // PumpFun MIGRATE: 有 CPI 时合并 log；无 CPI（如 shred）仍发出仅含指令数据的事件。
 
         // 合并事件
         if let Some(inner_instruction_event) = inner_instruction_event {

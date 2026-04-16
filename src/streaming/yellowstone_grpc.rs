@@ -8,7 +8,7 @@ use crate::streaming::event_parser::{Protocol, DexEvent};
 use crate::streaming::grpc::pool::factory;
 use crate::streaming::grpc::{EventPretty, SubscriptionManager};
 use anyhow::anyhow;
-use chrono::Local;
+use std::time::{SystemTime, UNIX_EPOCH};
 use futures::channel::mpsc;
 use futures::{SinkExt, StreamExt};
 use log::error;
@@ -251,10 +251,12 @@ impl YellowstoneGrpc {
                                                 })
                                                 .await;
                                         }
-                                        log::debug!("service is ping: {}", Local::now());
+                                        let ts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+                                        log::debug!("service is ping: {}", ts);
                                     }
                                     Some(UpdateOneof::Pong(_)) => {
-                                        log::debug!("service is pong: {}", Local::now());
+                                        let ts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+                                        log::debug!("service is pong: {}", ts);
                                     }
                                     _ => {
                                         log::debug!("Received other message type");

@@ -1,5 +1,5 @@
 use std::fmt::Debug;
-use std::time::Instant;
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 /// 高性能时钟管理器，减少系统调用开销并最小化延迟
 #[derive(Debug)]
@@ -25,12 +25,12 @@ impl HighPerformanceClock {
         // 通过多次采样来减少初始化误差
         let mut best_offset = i64::MAX;
         let mut best_instant = Instant::now();
-        let mut best_timestamp = chrono::Utc::now().timestamp_micros();
+        let mut best_timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() as i64;
 
         // 进行3次采样，选择延迟最小的
         for _ in 0..3 {
             let instant_before = Instant::now();
-            let timestamp = chrono::Utc::now().timestamp_micros();
+            let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() as i64;
             let instant_after = Instant::now();
 
             let sample_latency = instant_after.duration_since(instant_before).as_nanos() as i64;
@@ -69,7 +69,7 @@ impl HighPerformanceClock {
     /// 重新校准时钟，减少累积漂移
     fn recalibrate(&mut self) {
         let current_monotonic = Instant::now();
-        let current_utc = chrono::Utc::now().timestamp_micros();
+        let current_utc = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() as i64;
 
         // 计算预期的UTC时间戳（基于单调时钟）
         let expected_utc = self.base_timestamp_us
@@ -113,8 +113,8 @@ impl Default for HighPerformanceClock {
 }
 
 /// 全局高性能时钟实例
-static HIGH_PERF_CLOCK: once_cell::sync::OnceCell<HighPerformanceClock> =
-    once_cell::sync::OnceCell::new();
+static HIGH_PERF_CLOCK: std::sync::OnceLock<HighPerformanceClock> =
+    std::sync::OnceLock::new();
 
 /// 获取全局高性能时钟实例（最简单的实现）
 #[inline(always)]

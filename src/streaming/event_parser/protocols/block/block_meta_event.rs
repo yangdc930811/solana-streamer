@@ -33,6 +33,7 @@ impl BlockMetaEvent {
             None,
             None,
             None,
+            None, // recent_blockhash not applicable for block meta
         );
         Self { metadata, slot, block_hash }
     }

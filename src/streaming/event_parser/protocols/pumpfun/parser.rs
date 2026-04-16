@@ -107,6 +107,10 @@ fn parse_trade_inner_instruction(data: &[u8], metadata: EventMetadata) -> Option
 }
 
 /// 解析创建代币指令事件
+/// 账户: 0: mint, 1: mint_authority, 2: bonding_curve, 3: associated_bonding_curve, 4: global,
+/// 5: mpl_token_metadata, 6: metadata_account, 7: user, 8: system_program, 9: token_program,
+/// 10: associated_token_program, 11: rent, 12: event_authority, 13: program.
+/// 共 14 个固定账户，不足时返回 None 避免越界。
 fn parse_create_token_instruction(
     data: &[u8],
     accounts: &[Pubkey],
@@ -114,7 +118,8 @@ fn parse_create_token_instruction(
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::PumpFunCreateToken;
 
-    if data.len() < 16 || accounts.len() < 11 {
+    const CREATE_TOKEN_MIN_ACCOUNTS: usize = 14;
+    if data.len() < 16 || accounts.len() < CREATE_TOKEN_MIN_ACCOUNTS {
         return None;
     }
     let mut offset = 0;
@@ -179,16 +184,25 @@ fn parse_create_token_instruction(
 }
 
 /// 解析创建 V2 代币指令事件 (SPL-22 Token, Mayhem Mode)
+/// 与 IDL create_v2 及区块浏览器一致，共 16 个固定账户：
+///   0: mint, 1: mint_authority, 2: bonding_curve, 3: associated_bonding_curve, 4: global,
+///   5: user, 6: system_program, 7: token_program, 8: associated_token_program, 9: mayhem_program_id,
+///  10: global_params, 11: sol_vault, 12: mayhem_state, 13: mayhem_token_vault, 14: event_authority, 15: program.
+/// 不足 16 个账户时返回 None 避免越界。
+/// 注意：shredstream 路径仅传入 static_account_keys，若交易使用 Address Lookup Tables，
+/// 无法解析 loaded_addresses，部分账户会以 default 填充，导致 token_program/global 等错误。
 fn parse_create_v2_token_instruction(
     data: &[u8],
     accounts: &[Pubkey],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
-    metadata.event_type = EventType::PumpFunCreateV2Token;
-
-    if data.len() < 16 || accounts.len() < 11 {
+    const CREATE_V2_MIN_ACCOUNTS: usize = 16;
+    // Guard: avoid index out of bounds (e.g. ALT-loaded tx with fewer static accounts). See issue #63.
+    if accounts.len() < CREATE_V2_MIN_ACCOUNTS || data.len() < 16 {
         return None;
     }
+    metadata.event_type = EventType::PumpFunCreateV2Token;
+
     let mut offset = 0;
     if offset + 4 > data.len() {
         return None;
@@ -226,33 +240,40 @@ fn parse_create_v2_token_instruction(
         Pubkey::default()
     };
 
+    // Safe slice: already guaranteed accounts.len() >= 16 above; avoid any index panic (issue #63).
+    let acc = &accounts[0..CREATE_V2_MIN_ACCOUNTS];
     Some(DexEvent::PumpFunCreateV2TokenEvent(PumpFunCreateV2TokenEvent {
         metadata,
         name: name.to_string(),
         symbol: symbol.to_string(),
         uri: uri.to_string(),
         creator,
-        mint: accounts[0],
-        mint_authority: accounts[1],
-        bonding_curve: accounts[2],
-        associated_bonding_curve: accounts[3],
-        global: accounts[4],
-        user: accounts[5],
-        system_program: accounts[6],
-        token_program: accounts[7],
-        associated_token_program: accounts[8],
-        mayhem_program_id: accounts[9],
-        global_params: accounts[10],
-        sol_vault: accounts[11],
-        mayhem_state: accounts[12],
-        mayhem_token_vault: accounts[13],
-        event_authority: accounts[14],
-        program: accounts[15],
+        mint: acc[0],
+        mint_authority: acc[1],
+        bonding_curve: acc[2],
+        associated_bonding_curve: acc[3],
+        global: acc[4],
+        user: acc[5],
+        system_program: acc[6],
+        token_program: acc[7],
+        associated_token_program: acc[8],
+        mayhem_program_id: acc[9],
+        global_params: acc[10],
+        sol_vault: acc[11],
+        mayhem_state: acc[12],
+        mayhem_token_vault: acc[13],
+        event_authority: acc[14],
+        program: acc[15],
         ..Default::default()
     }))
 }
 
-// 解析买入指令事件
+/// Parse buy instruction event.
+/// Buy has 16 fixed accounts + optional 17th (index 16, "Account" on block explorers):
+/// 0: global, 1: fee_recipient, 2: mint, 3: bonding_curve, 4: associated_bonding_curve,
+/// 5: associated_user, 6: user, 7: system_program, 8: token_program, 9: creator_vault,
+/// 10: event_authority, 11: program, 12: global_volume_accumulator, 13: user_volume_accumulator,
+/// 14: fee_config, 15: fee_program, 16 (optional): account.
 fn parse_buy_instruction(
     data: &[u8],
     accounts: &[Pubkey],
@@ -283,6 +304,7 @@ fn parse_buy_instruction(
         user_volume_accumulator: accounts[13],
         fee_config: accounts[14],
         fee_program: accounts[15],
+        account: accounts.get(16).copied(),
         max_sol_cost,
         amount,
         is_buy: true,
@@ -290,10 +312,9 @@ fn parse_buy_instruction(
     }))
 }
 
-/// 解析 buy_exact_sol_in 指令事件
-/// 注意：参数顺序与 buy 指令不同
-/// buy_exact_sol_in: spendable_sol_in (SOL), min_tokens_out (token)
-/// buy: amount (token), max_sol_cost (SOL)
+/// Parse buy_exact_sol_in instruction event.
+/// Same account layout as buy: 16 fixed + optional 17th (index 16).
+/// Args: spendable_sol_in (SOL), min_tokens_out (token).
 fn parse_buy_exact_sol_in_instruction(
     data: &[u8], accounts: &[Pubkey],
     mut metadata: EventMetadata,
@@ -304,7 +325,6 @@ fn parse_buy_exact_sol_in_instruction(
         return None;
     }
 
-    // 注意：buy_exact_sol_in 的参数顺序是先 SOL 再 token
     let spendable_sol_in = u64::from_le_bytes(data[0..8].try_into().unwrap());
     let min_tokens_out = u64::from_le_bytes(data[8..16].try_into().unwrap());
 
@@ -326,14 +346,16 @@ fn parse_buy_exact_sol_in_instruction(
         user_volume_accumulator: accounts[13],
         fee_config: accounts[14],
         fee_program: accounts[15],
-        max_sol_cost: spendable_sol_in,  // Map spendable_sol_in to max_sol_cost
-        amount: min_tokens_out,           // Map min_tokens_out to amount
+        account: accounts.get(16).copied(),
+        max_sol_cost: spendable_sol_in,
+        amount: min_tokens_out,
         is_buy: true,
         ..Default::default()
     }))
 }
 
-// 解析卖出指令事件
+/// Parse sell instruction event.
+/// Sell has 14 fixed accounts; some versions pass 17 accounts, index 16 = "Account" on block explorers.
 fn parse_sell_instruction(
     data: &[u8],
     accounts: &[Pubkey],
@@ -364,6 +386,7 @@ fn parse_sell_instruction(
         user_volume_accumulator: Pubkey::default(),
         fee_config: accounts[12],
         fee_program: accounts[13],
+        account: accounts.get(16).copied(),
         min_sol_output,
         amount,
         is_buy: false,
@@ -372,6 +395,11 @@ fn parse_sell_instruction(
 }
 
 /// 解析迁移指令事件
+/// 共 24 个固定账户: 0: global, 1: withdraw_authority, 2: mint, 3: bonding_curve, 4: associated_bonding_curve,
+/// 5: user, 6: system_program, 7: token_program, 8: pump_amm, 9: pool, 10: pool_authority,
+/// 11: pool_authority_mint_account, 12: pool_authority_wsol_account, 13: amm_global_config, 14: wsol_mint,
+/// 15: lp_mint, 16: user_pool_token_account, 17: pool_base_token_account, 18: pool_quote_token_account,
+/// 19: token_2022_program, 20: associated_token_program, 21: pump_amm_event_authority, 22: event_authority, 23: program.
 fn parse_migrate_instruction(
     _data: &[u8],
     accounts: &[Pubkey],

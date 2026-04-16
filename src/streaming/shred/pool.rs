@@ -49,14 +49,16 @@ pub struct PooledTransactionWithSlot {
 impl PooledTransactionWithSlot {
     /// 从原始数据重置
     pub fn reset_from_data(
-        &mut self, 
-        transaction: VersionedTransaction, 
-        slot: u64, 
-        recv_us: i64
+        &mut self,
+        transaction: VersionedTransaction,
+        slot: u64,
+        recv_us: i64,
+        tx_index: Option<u64>,
     ) {
         self.transaction.transaction = transaction;
         self.transaction.slot = slot;
         self.transaction.recv_us = recv_us;
+        self.transaction.tx_index = tx_index;
     }
 
     /// 使用优化的工厂方法创建 TransactionWithSlot（移动数据而不是克隆）
@@ -73,6 +75,7 @@ impl Drop for PooledTransactionWithSlot {
             // 清理敏感数据
             self.transaction.slot = 0;
             self.transaction.recv_us = 0;
+            self.transaction.tx_index = None;
             // 重置交易为默认值以清理敏感数据
             self.transaction.transaction = VersionedTransaction::default();
             pool.push_back(std::mem::take(&mut self.transaction));
@@ -119,9 +122,10 @@ impl ShredPoolManager {
         transaction: VersionedTransaction,
         slot: u64,
         recv_us: i64,
+        tx_index: Option<u64>,
     ) -> TransactionWithSlot {
         let mut pooled_tx = self.transaction_pool.acquire();
-        pooled_tx.reset_from_data(transaction, slot, recv_us);
+        pooled_tx.reset_from_data(transaction, slot, recv_us, tx_index);
         pooled_tx.into_transaction_with_slot()
     }
 }
@@ -133,9 +137,8 @@ impl Default for ShredPoolManager {
 }
 
 // 全局 Shred 池管理器实例
-lazy_static::lazy_static! {
-    pub static ref GLOBAL_SHRED_POOL_MANAGER: ShredPoolManager = ShredPoolManager::new();
-}
+pub static GLOBAL_SHRED_POOL_MANAGER: std::sync::LazyLock<ShredPoolManager> =
+    std::sync::LazyLock::new(ShredPoolManager::new);
 
 /// 便捷的全局工厂函数
 pub mod factory {
@@ -146,11 +149,13 @@ pub mod factory {
         transaction: VersionedTransaction,
         slot: u64,
         recv_us: i64,
+        tx_index: Option<u64>,
     ) -> TransactionWithSlot {
         GLOBAL_SHRED_POOL_MANAGER.create_transaction_with_slot_optimized(
-            transaction, 
-            slot, 
-            recv_us
+            transaction,
+            slot,
+            recv_us,
+            tx_index,
         )
     }
 }

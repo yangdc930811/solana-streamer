@@ -7,7 +7,7 @@ use crate::{
 };
 use futures::{SinkExt, StreamExt};
 use log::error;
-use solana_program::pubkey;
+use solana_sdk::pubkey;
 use solana_sdk::pubkey::Pubkey;
 use yellowstone_grpc_proto::geyser::SubscribeUpdateTransactionInfo;
 use yellowstone_grpc_proto::geyser::{

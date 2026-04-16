@@ -54,8 +54,8 @@ impl CacheKey {
 
 /// 全局程序ID缓存（使用读写锁保护）
 static GLOBAL_PROGRAM_IDS_CACHE: LazyLock<
-    parking_lot::RwLock<HashMap<CacheKey, Arc<Vec<Pubkey>>>>,
-> = LazyLock::new(|| parking_lot::RwLock::new(HashMap::new()));
+    std::sync::RwLock<HashMap<CacheKey, Arc<Vec<Pubkey>>>>,
+> = LazyLock::new(|| std::sync::RwLock::new(HashMap::new()));
 
 /// 获取指定协议的程序ID列表
 ///
@@ -68,7 +68,7 @@ pub fn get_global_program_ids(
 
     // 快速路径：尝试读取缓存
     {
-        let cache = GLOBAL_PROGRAM_IDS_CACHE.read();
+        let cache = GLOBAL_PROGRAM_IDS_CACHE.read().unwrap();
         if let Some(program_ids) = cache.get(&cache_key) {
             return program_ids.clone();
         }
@@ -78,7 +78,7 @@ pub fn get_global_program_ids(
     let program_ids = Arc::new(EventDispatcher::get_program_ids(protocols));
 
     // 缓存结果（写锁）
-    GLOBAL_PROGRAM_IDS_CACHE.write().insert(cache_key, program_ids.clone());
+    GLOBAL_PROGRAM_IDS_CACHE.write().unwrap().insert(cache_key, program_ids.clone());
 
     program_ids
 }

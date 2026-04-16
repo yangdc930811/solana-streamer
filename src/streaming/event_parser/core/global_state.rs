@@ -49,21 +49,17 @@ impl GlobalState {
             return; // Another thread is cleaning up
         }
 
-        // Collect signatures to remove (random selection for simplicity)
-        let mut signatures_to_remove: Vec<Signature> = self.signature_data.iter()
+        // Collect only the batch we need to remove (avoid allocating full list)
+        let signatures_to_remove: Vec<Signature> = self.signature_data.iter()
+            .take(CLEANUP_BATCH_SIZE)
             .map(|entry| *entry.key())
             .collect();
-        
-        if signatures_to_remove.len() <= MAX_SIGNATURES {
-            return; // Race condition, already cleaned up
-        }
-        
-        signatures_to_remove.truncate(CLEANUP_BATCH_SIZE);
 
-        // Remove old signatures atomically
+        // Remove old signatures atomically; only decrement count when entry was present
         for signature in signatures_to_remove {
-            self.signature_data.remove(&signature);
-            self.signature_count.fetch_sub(1, Ordering::Relaxed);
+            if self.signature_data.remove(&signature).is_some() {
+                self.signature_count.fetch_sub(1, Ordering::Relaxed);
+            }
         }
     }
 
@@ -179,8 +175,8 @@ impl Default for GlobalState {
 }
 
 /// Global state instance
-static GLOBAL_STATE: once_cell::sync::Lazy<GlobalState> =
-    once_cell::sync::Lazy::new(GlobalState::new);
+static GLOBAL_STATE: std::sync::LazyLock<GlobalState> =
+    std::sync::LazyLock::new(GlobalState::new);
 
 /// Get global state instance
 pub fn get_global_state() -> &'static GlobalState {
