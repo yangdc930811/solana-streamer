@@ -24,6 +24,15 @@ pub fn extract_program_log<'a>(log: &'a str, prefix: &str) -> Option<&'a str> {
     log.strip_prefix(prefix)
 }
 
+/// 安全地从字节数组中读取 i64
+pub fn read_i64_le(data: &[u8], offset: usize) -> Option<i64> {
+    if data.len() < offset + 8 {
+        return None;
+    }
+    let bytes: [u8; 8] = data[offset..offset + 8].try_into().ok()?;
+    Some(i64::from_le_bytes(bytes))
+}
+
 /// 安全地从字节数组中读取u64
 pub fn read_u64_le(data: &[u8], offset: usize) -> Option<u64> {
     if data.len() < offset + 8 {
@@ -58,14 +67,14 @@ pub fn read_u8_le(data: &[u8], offset: usize) -> Option<u8> {
 }
 
 pub fn read_option_bool(data: &[u8], offset: &mut usize) -> Option<Option<bool>> {
-    let has_value = data.get(*offset)?.clone();
+    let has_value = data.get(*offset).copied()?;
     *offset += 1;
 
     if has_value == 0 {
         return Some(None);
     }
 
-    let value = data.get(*offset)?.clone();
+    let value = data.get(*offset).copied()?;
     *offset += 1;
 
     Some(Some(value != 0))

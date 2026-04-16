@@ -67,7 +67,7 @@ pub async fn process_grpc_transaction(
             let signature = transaction_pretty.signature;
             let block_time = transaction_pretty.block_time;
             let recv_us = transaction_pretty.recv_us;
-            let transaction_index = transaction_pretty.transaction_index;
+            let tx_index = transaction_pretty.tx_index;
             let grpc_tx = transaction_pretty.grpc_tx;
 
             let adapter_callback = create_metrics_callback(callback.clone());
@@ -81,7 +81,7 @@ pub async fn process_grpc_transaction(
                 block_time,
                 recv_us,
                 bot_wallet,
-                transaction_index,
+                tx_index,
                 adapter_callback,
                 is_log
             )
@@ -93,7 +93,12 @@ pub async fn process_grpc_transaction(
             let block_time_ms = block_meta_pretty
                 .block_time
                 .map(|ts| ts.seconds * 1000 + ts.nanos as i64 / 1_000_000)
-                .unwrap_or_else(|| chrono::Utc::now().timestamp_millis());
+                .unwrap_or_else(|| {
+                    std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .unwrap()
+                        .as_millis() as i64
+                });
 
             let block_meta_event = CommonEventParser::generate_block_meta_event(
                 block_meta_pretty.slot,
@@ -123,6 +128,7 @@ pub async fn process_shred_transaction(
 
     let tx = transaction_with_slot.transaction;
     let slot = transaction_with_slot.slot;
+    let tx_index = transaction_with_slot.tx_index;
 
     if tx.signatures.is_empty() {
         return Ok(());
@@ -132,6 +138,8 @@ pub async fn process_shred_transaction(
     let recv_us = transaction_with_slot.recv_us;
 
     let adapter_callback = create_metrics_callback(callback);
+    // Shred 路径仅能拿到 static_account_keys，且无 inner_instructions，解析限制见 docs/SHREDSTREAM_LIMITATIONS.md
+    // 若交易使用 ALT，账户可能为 default/错误；无 CPI 合并，timestamp/reserves 等多为 0。
     let accounts = tx.message.static_account_keys();
 
     EventParser::parse_instruction_events_from_versioned_transaction(
@@ -140,12 +148,12 @@ pub async fn process_shred_transaction(
         &tx,
         signature,
         Some(slot),
-        None,
+        None, // shred 无 block_time
         recv_us,
         accounts,
         &[],
         bot_wallet,
-        None,
+        tx_index,
         adapter_callback,
     )
     .await?;

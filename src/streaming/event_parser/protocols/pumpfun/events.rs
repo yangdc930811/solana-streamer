@@ -49,6 +49,7 @@ pub struct PumpFunCreateTokenEvent {
     pub program: Pubkey,
 }
 
+/// CreateV2 事件：与 create_v2 指令 16 个账户一致（见 parser 注释）。
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
 pub struct PumpFunCreateV2TokenEvent {
     #[borsh(skip)]
@@ -294,6 +295,9 @@ pub struct PumpFunTradeEvent {
     pub fee_config: Pubkey,
     #[borsh(skip)]
     pub fee_program: Pubkey,
+    /// 17th instruction account (index 16), shown as "Account" on block explorers; present on some buy/sell.
+    #[borsh(skip)]
+    pub account: Option<Pubkey>,
 
     // === IDL TradeEvent extension fields (aligned with sol-parser-sdk / pumpfun IDL) ===
     #[borsh(skip)]

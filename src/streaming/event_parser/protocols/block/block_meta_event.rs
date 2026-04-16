@@ -35,6 +35,7 @@ impl BlockMetaEvent {
             None,
             None,
             Arc::new(Vec::new()),
+            None, // recent_blockhash not applicable for block meta
         );
         Self { metadata, slot, block_hash }
     }
