@@ -196,7 +196,7 @@ impl EventParser {
                             recent_blockhash.as_deref(),
                             inner_instructions,
                             adapter_callback.clone(),
-                            None
+                            None,
                         )?;
                     }
                     // Immediately process inner instructions for correct ordering
@@ -221,7 +221,7 @@ impl EventParser {
                                 recent_blockhash.as_deref(),
                                 Some(&inner_instructions),
                                 adapter_callback.clone(),
-                                None
+                                None,
                             )?;
                         }
                     }
@@ -387,11 +387,7 @@ impl EventParser {
         if !is_cu_program && instruction.data.len() < disc_len {
             return Ok(());
         }
-        // 还原该指令对应的 AccountMeta 列表，写入 metadata。
-        let instruction_account_metas = Arc::new(Self::restore_instruction_account_metas(
-            &instruction.accounts,
-            tx_account_metas,
-        ));
+
         // 创建元数据
         let timestamp = block_time.unwrap_or(Timestamp { seconds: 0, nanos: 0 });
         let block_time_ms = timestamp.seconds * 1000 + (timestamp.nanos as i64) / 1_000_000;
@@ -409,7 +405,6 @@ impl EventParser {
             tx_index,
             logs,
             Some(accounts[0]),
-            instruction_account_metas.clone(),
             recent_blockhash.map(|s| s.to_string()),
         );
 
@@ -432,6 +427,12 @@ impl EventParser {
         // 提取 discriminator 和数据
         let instruction_discriminator = &instruction.data[..disc_len];
         let instruction_data = &instruction.data[disc_len..];
+
+        // 还原该指令对应的 AccountMeta 列表，写入 metadata。
+        let instruction_account_metas = Self::restore_instruction_account_metas(
+            &instruction.accounts,
+            tx_account_metas,
+        );
 
         // 使用 EventDispatcher 解析 instruction 事件
         let mut event = match EventDispatcher::dispatch_instruction(
@@ -661,11 +662,6 @@ impl EventParser {
         if !is_cu_program && instruction.data.len() < disc_len {
             return Ok(());
         }
-        // 还原该指令对应的 AccountMeta 列表，写入 metadata。
-        let instruction_account_metas = Arc::new(Self::restore_instruction_account_metas(
-            &instruction.accounts,
-            tx_account_metas,
-        ));
 
         // 创建元数据
         let timestamp = block_time.unwrap_or(Timestamp { seconds: 0, nanos: 0 });
@@ -684,7 +680,7 @@ impl EventParser {
             tx_index,
             logs,
             Some(accounts[0]),
-            instruction_account_metas.clone(),
+            None,
             recent_blockhash.map(|s| s.to_string()),
         );
 
@@ -703,6 +699,12 @@ impl EventParser {
             Some(p) => p,
             None => return Ok(()),
         };
+
+        // 还原该指令对应的 AccountMeta 列表，写入 metadata。
+        let instruction_account_metas = Self::restore_instruction_account_metas(
+            &instruction.accounts,
+            tx_account_metas,
+        );
 
         // 提取 discriminator 和数据
         let instruction_discriminator = &instruction.data[..disc_len];

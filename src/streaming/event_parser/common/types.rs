@@ -243,7 +243,7 @@ pub struct EventMetadata {
     #[serde(skip)]
     pub signer: Option<Pubkey>,
     #[serde(skip)]
-    pub instruction_account_metas: Arc<Vec<AccountMeta>>,
+    pub ix_account_metas: Option<Vec<AccountMeta>>,
     /// Transaction message recent blockhash as base58 string (same encoding as signature), when available.
     #[serde(default)]
     pub recent_blockhash: Option<String>,
@@ -265,7 +265,6 @@ impl EventMetadata {
         tx_index: Option<u64>,
         log: Option<Arc<Vec<String>>>,
         signer: Option<Pubkey>,
-        instruction_account_metas: Arc<Vec<AccountMeta>>,
         recent_blockhash: Option<String>,
     ) -> Self {
         Self {
@@ -285,7 +284,7 @@ impl EventMetadata {
             data: None,
             log,
             signer,
-            instruction_account_metas,
+            ix_account_metas: None,
             recent_blockhash,
         }
     }
@@ -413,7 +412,7 @@ fn extract_swap_context(event: &DexEvent) -> (
 /// Generic swap data extraction that works with any instruction type implementing InnerInstructionLike
 fn extract_swap_data_from_instructions<I: InnerInstructionLike>(
     event: &DexEvent,
-    instructions: impl Iterator<Item = I>,
+    instructions: impl Iterator<Item=I>,
     current_index: i32,
     accounts: &[Pubkey],
 ) -> Option<SwapData> {
