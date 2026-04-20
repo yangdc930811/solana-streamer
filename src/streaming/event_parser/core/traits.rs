@@ -120,6 +120,12 @@ macro_rules! impl_dex_event_metadata {
                     $(DexEvent::$variant(e) => &mut e.metadata,)*
                 }
             }
+
+            pub fn into_metadata(self) -> EventMetadata {
+                match self {
+                    $(DexEvent::$variant(e) => e.metadata,)*
+                }
+            }
         }
     };
 }

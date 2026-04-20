@@ -244,6 +244,8 @@ pub struct EventMetadata {
     pub signer: Option<Pubkey>,
     #[serde(skip)]
     pub ix_account_metas: Option<Vec<AccountMeta>>,
+    #[serde(skip)]
+    pub ix_data: Option<Vec<u8>>,
     /// Transaction message recent blockhash as base58 string (same encoding as signature), when available.
     #[serde(default)]
     pub recent_blockhash: Option<String>,
@@ -285,6 +287,7 @@ impl EventMetadata {
             log,
             signer,
             ix_account_metas: None,
+            ix_data: None,
             recent_blockhash,
         }
     }

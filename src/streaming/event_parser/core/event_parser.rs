@@ -157,6 +157,7 @@ impl EventParser {
         let recent_blockhash = Some(transaction.message.recent_blockhash().to_string());
         let mut accounts: Vec<Pubkey> = accounts.to_vec();
         let mut tx_account_metas = Self::build_versioned_tx_account_metas(transaction, &accounts);
+
         // 检查交易中是否包含程序
         let has_program = accounts
             .iter()
@@ -446,6 +447,10 @@ impl EventParser {
             None => return Ok(()),
         };
 
+        let metadata_mut = event.metadata_mut();
+        metadata_mut.ix_account_metas = Some(instruction_account_metas);
+        metadata_mut.ix_data = Some(instruction.data.clone());
+
         // 处理 inner instructions - 查找对应的 CPI log 进行 merge
         // 当 inner_index 有值时，只查找索引大于当前 inner_index 的 CPI log
         // 超低延迟：顺序执行，避免 thread::scope 的 spawn/join 开销
@@ -680,7 +685,6 @@ impl EventParser {
             tx_index,
             logs,
             Some(accounts[0]),
-            None,
             recent_blockhash.map(|s| s.to_string()),
         );
 
@@ -701,7 +705,7 @@ impl EventParser {
         };
 
         // 还原该指令对应的 AccountMeta 列表，写入 metadata。
-        let instruction_account_metas = Self::restore_instruction_account_metas(
+        let ix_account_metas = Self::restore_instruction_account_metas(
             &instruction.accounts,
             tx_account_metas,
         );
@@ -715,12 +719,16 @@ impl EventParser {
             protocol.clone(),
             instruction_discriminator,
             instruction_data,
-            &instruction_account_metas,
+            &ix_account_metas,
             metadata.clone(),
         ) {
             Some(e) => e,
             None => return Ok(()),
         };
+
+        let metadata_mut = event.metadata_mut();
+        metadata_mut.ix_account_metas = Some(ix_account_metas);
+        metadata_mut.ix_data = Some(instruction.data.to_vec());
 
         // 处理 inner instructions - 查找对应的 CPI log 进行 merge
         // 当 inner_index 有值时，只查找索引大于当前 inner_index 的 CPI log

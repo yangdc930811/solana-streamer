@@ -67,8 +67,6 @@ impl EventDispatcher {
             Protocol::MeteoraDammV2 => ProtocolType::MeteoraDammV2,
         };
 
-        metadata.instruction_account_metas = Some(account_metas.to_vec());
-
         match protocol {
             Protocol::PumpFun => pumpfun::parse_pumpfun_instruction_data(
                 instruction_discriminator,
