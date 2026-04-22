@@ -85,7 +85,7 @@ impl AccountEventParser {
                     };
 
                     // 使用 dispatcher 解析
-                    if let Some(event) = EventDispatcher::dispatch_account(
+                    if let Some(mut event) = EventDispatcher::dispatch_account(
                         protocol,
                         discriminator,
                         &account,
@@ -94,10 +94,14 @@ impl AccountEventParser {
                         // 应用事件类型过滤
                         if let Some(filter) = event_type_filter {
                             if filter.include.contains(&event.metadata().event_type) {
+                                // 传回原始数据
+                                event.metadata_mut().data = Some(account.data);
                                 return Some(event);
                             }
                             // 不匹配过滤器，继续尝试其他解析方式
                         } else {
+                            // 传回原始数据
+                            event.metadata_mut().data = Some(account.data);
                             return Some(event);
                         }
                     }
