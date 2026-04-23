@@ -334,7 +334,7 @@ pub fn merge(instruction_event: &mut DexEvent, cpi_log_event: DexEvent) {
             _ => {}
         },
         DexEvent::MeteoraDammV2Swap2Event(e) => match cpi_log_event {
-            DexEvent::MeteoraDammV2SwapEvent(cpie) => {
+            DexEvent::MeteoraDammV2Swap2Event(cpie) => {
                 e.pool = cpie.pool;
                 e.trade_direction = cpie.trade_direction;
                 e.collect_fee_mode = cpie.collect_fee_mode;
@@ -441,6 +441,21 @@ pub fn merge(instruction_event: &mut DexEvent, cpi_log_event: DexEvent) {
         // Meteora Dlmm events
         DexEvent::MeteoraDlmmSwapEvent(e) => match cpi_log_event {
             DexEvent::MeteoraDlmmSwapEvent(cpie) => {
+                e.from = cpie.from;
+                e.start_bin_id = cpie.start_bin_id;
+                e.end_bin_id = cpie.end_bin_id;
+                e.amount_in = cpie.amount_in;
+                e.amount_out = cpie.amount_out;
+                e.swap_for_y = cpie.swap_for_y;
+                e.fee = cpie.fee;
+                e.protocol_fee = cpie.protocol_fee;
+                e.fee_bps = cpie.fee_bps;
+                e.host_fee = cpie.host_fee;
+            }
+            _ => {}
+        },
+        DexEvent::MeteoraDlmmSwap2Event(e) => match cpi_log_event {
+            DexEvent::MeteoraDlmmSwap2Event(cpie) => {
                 e.from = cpie.from;
                 e.start_bin_id = cpie.start_bin_id;
                 e.end_bin_id = cpie.end_bin_id;

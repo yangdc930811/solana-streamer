@@ -13,6 +13,7 @@ pub fn parse_meteora_dlmm_instruction_data(
 ) -> Option<DexEvent> {
     match discriminator {
         discriminators::SWAP => parse_swap_instruction(data, accounts, metadata),
+        discriminators::SWAP2 => parse_swap2_instruction(data, accounts, metadata),
         _ => None,
     }
 }
@@ -51,6 +52,32 @@ fn parse_swap_instruction(
         token_x_program: accounts[11].pubkey,
         token_y_program: accounts[12].pubkey,
         event_authority: accounts[13].pubkey,
+        ..Default::default()
+    }))
+}
+
+fn parse_swap2_instruction(
+    data: &[u8],
+    accounts: &[AccountMeta],
+    mut metadata: EventMetadata,
+) -> Option<DexEvent> {
+    metadata.event_type = EventType::MeteoraDlmmSwap2;
+
+    if data.len() < 16 || accounts.len() < 16 {
+        return None;
+    }
+
+    Some(DexEvent::MeteoraDlmmSwap2Event(MeteoraDlmmSwapEvent {
+        metadata,
+        lb_pair: accounts[0].pubkey,
+        reserve_x: accounts[2].pubkey,
+        reserve_y: accounts[3].pubkey,
+        token_x_mint: accounts[6].pubkey,
+        token_y_mint: accounts[7].pubkey,
+        oracle: accounts[8].pubkey,
+        token_x_program: accounts[11].pubkey,
+        token_y_program: accounts[12].pubkey,
+        event_authority: accounts[14].pubkey,
         ..Default::default()
     }))
 }

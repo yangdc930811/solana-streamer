@@ -134,6 +134,7 @@ pub enum EventType {
 
     // Meteora Dlmm events
     MeteoraDlmmSwap,
+    MeteoraDlmmSwap2,
 
     // Orca Events
     OrcaSwap,
