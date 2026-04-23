@@ -88,6 +88,7 @@ pub enum DexEvent {
 
     // Meteora Dlmm Events
     MeteoraDlmmSwapEvent(MeteoraDlmmSwapEvent),
+    MeteoraDlmmSwap2Event(MeteoraDlmmSwapEvent),
     MeteoraDlmmPoolAccountEvent(MeteoraDlmmPoolAccountEvent),
     MeteoraDlmmBinArrayBitmapExtensionAccountEvent(MeteoraDlmmBinArrayBitmapExtensionAccountEvent),
     MeteoraDlmmBinArrayAccountEvent(MeteoraDlmmBinArrayAccountEvent),
@@ -184,6 +185,7 @@ impl_dex_event_metadata!(
     MeteoraDammV2PoolAccountEvent,
     // Meteora Dlmm Events
     MeteoraDlmmSwapEvent,
+    MeteoraDlmmSwap2Event,
     MeteoraDlmmPoolAccountEvent,
     MeteoraDlmmBinArrayBitmapExtensionAccountEvent,
     MeteoraDlmmBinArrayAccountEvent,

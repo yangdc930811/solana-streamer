@@ -80,6 +80,7 @@ pub mod discriminators {
 
     // Instruction discriminators
     pub const SWAP: &[u8] = &[248, 198, 158, 145, 225, 117, 135, 200];
+    pub const SWAP2: &[u8] = &[65, 75, 63, 76, 235, 91, 91, 136];
 
     pub const POOL_ACCOUNT: &[u8] = &[33, 11, 49, 98, 181, 101, 177, 13];
 
