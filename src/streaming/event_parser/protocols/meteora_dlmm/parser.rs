@@ -58,7 +58,7 @@ fn parse_swap_instruction(
 
 fn parse_swap2_instruction(
     data: &[u8],
-    accounts: &[AccountMeta],
+    accounts: &[Pubkey],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::MeteoraDlmmSwap2;
@@ -69,15 +69,15 @@ fn parse_swap2_instruction(
 
     Some(DexEvent::MeteoraDlmmSwap2Event(MeteoraDlmmSwapEvent {
         metadata,
-        lb_pair: accounts[0].pubkey,
-        reserve_x: accounts[2].pubkey,
-        reserve_y: accounts[3].pubkey,
-        token_x_mint: accounts[6].pubkey,
-        token_y_mint: accounts[7].pubkey,
-        oracle: accounts[8].pubkey,
-        token_x_program: accounts[11].pubkey,
-        token_y_program: accounts[12].pubkey,
-        event_authority: accounts[14].pubkey,
+        lb_pair: accounts[0],
+        reserve_x: accounts[2],
+        reserve_y: accounts[3],
+        token_x_mint: accounts[6],
+        token_y_mint: accounts[7],
+        oracle: accounts[8],
+        token_x_program: accounts[11],
+        token_y_program: accounts[12],
+        event_authority: accounts[14],
         ..Default::default()
     }))
 }
