@@ -138,6 +138,7 @@ pub enum EventType {
 
     // Orca Events
     OrcaSwap,
+    OrcaSwapV2,
 
     // Meteora DAMM v2 events
     MeteoraDammV2Swap,

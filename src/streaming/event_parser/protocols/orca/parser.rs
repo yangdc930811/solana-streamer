@@ -13,6 +13,7 @@ pub fn parse_orca_instruction_data(
 ) -> Option<DexEvent> {
     match discriminator {
         discriminators::SWAP => parse_swap_instruction(data, accounts, metadata),
+        discriminators::SWAPV2 => parse_swap_v2_instruction(data, accounts, metadata),
         _ => None,
     }
 }
@@ -49,6 +50,41 @@ fn parse_swap_instruction(
         token_owner_account_b: accounts[5].pubkey,
         token_vault_b: accounts[6].pubkey,
         oracle: accounts[10].pubkey,
+    }))
+}
+
+fn parse_swap_v2_instruction(
+    data: &[u8],
+    accounts: &[AccountMeta],
+    mut metadata: EventMetadata,
+) -> Option<DexEvent> {
+    metadata.event_type = EventType::OrcaSwapV2;
+
+    if data.len() < 34 || accounts.len() < 15 {
+        return None;
+    }
+
+    let amount = read_u64_le(data, 0)?;
+    let other_amount_threshold = read_u64_le(data, 8)?;
+    let sqrt_price_limit = read_u128_le(data, 16)?;
+    let amount_specified_is_input = read_u8_le(data, 32)? != 0;
+    let a_to_b = read_u8_le(data, 33)? != 0;
+
+    Some(DexEvent::OrcaSwapV2Event(OrcaSwapEvent {
+        metadata,
+        amount,
+        other_amount_threshold,
+        sqrt_price_limit,
+        amount_specified_is_input,
+        a_to_b,
+        payer: accounts[3].pubkey,
+        whirlpool: accounts[4].pubkey,
+        token_owner_account_a: accounts[7].pubkey,
+        token_vault_a: accounts[8].pubkey,
+        token_owner_account_b: accounts[9].pubkey,
+        token_vault_b: accounts[10].pubkey,
+        oracle: accounts[14].pubkey,
+        ..Default::default()
     }))
 }
 

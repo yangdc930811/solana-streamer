@@ -95,6 +95,7 @@ pub enum DexEvent {
 
     // Orca Events
     OrcaSwapEvent(OrcaSwapEvent),
+    OrcaSwapV2Event(OrcaSwapEvent),
     OrcaPoolAccountEvent(OrcaPoolAccountEvent),
 
     // Common events
@@ -197,6 +198,7 @@ impl_dex_event_metadata!(
     MeteoraDlmmBinArrayAccountEvent,
     // Orca Events
     OrcaSwapEvent,
+    OrcaSwapV2Event,
     OrcaPoolAccountEvent,
     // Common events
     TokenAccountEvent,
