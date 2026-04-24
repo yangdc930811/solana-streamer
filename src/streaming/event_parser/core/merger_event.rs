@@ -334,7 +334,7 @@ pub fn merge(instruction_event: &mut DexEvent, cpi_log_event: DexEvent) {
             _ => {}
         },
         DexEvent::MeteoraDammV2Swap2Event(e) => match cpi_log_event {
-            DexEvent::MeteoraDammV2Swap2Event(cpie) => {
+            DexEvent::MeteoraDammV2SwapEvent(cpie) => {
                 e.pool = cpie.pool;
                 e.trade_direction = cpie.trade_direction;
                 e.collect_fee_mode = cpie.collect_fee_mode;
@@ -455,7 +455,7 @@ pub fn merge(instruction_event: &mut DexEvent, cpi_log_event: DexEvent) {
             _ => {}
         },
         DexEvent::MeteoraDlmmSwap2Event(e) => match cpi_log_event {
-            DexEvent::MeteoraDlmmSwap2Event(cpie) => {
+            DexEvent::MeteoraDlmmSwapEvent(cpie) => {
                 e.from = cpie.from;
                 e.start_bin_id = cpie.start_bin_id;
                 e.end_bin_id = cpie.end_bin_id;

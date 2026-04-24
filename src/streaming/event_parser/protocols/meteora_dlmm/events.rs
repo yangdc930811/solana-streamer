@@ -21,6 +21,10 @@ pub struct MeteoraDlmmSwapEvent {
     pub fee_bps: u128,
     pub host_fee: u64,
     #[borsh(skip)]
+    pub param_amount_in: u64,
+    #[borsh(skip)]
+    pub param_min_amount_out: u64,
+    #[borsh(skip)]
     pub reserve_x: Pubkey,
     #[borsh(skip)]
     pub reserve_y: Pubkey,

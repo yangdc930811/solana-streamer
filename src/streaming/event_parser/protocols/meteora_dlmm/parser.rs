@@ -41,8 +41,14 @@ fn parse_swap_instruction(
         return None;
     }
 
+    // 跳过 discriminator (8 bytes)
+    let amount_in = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let min_amount_out = u64::from_le_bytes(data[8..16].try_into().unwrap());
+
     Some(DexEvent::MeteoraDlmmSwapEvent(MeteoraDlmmSwapEvent {
         metadata,
+        param_amount_in: amount_in,
+        param_min_amount_out: min_amount_out,
         lb_pair: accounts[0].pubkey,
         reserve_x: accounts[2].pubkey,
         reserve_y: accounts[3].pubkey,
@@ -67,8 +73,14 @@ fn parse_swap2_instruction(
         return None;
     }
 
+    // 跳过 discriminator (8 bytes)
+    let amount_in = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let min_amount_out = u64::from_le_bytes(data[8..16].try_into().unwrap());
+
     Some(DexEvent::MeteoraDlmmSwap2Event(MeteoraDlmmSwapEvent {
         metadata,
+        param_amount_in: amount_in,
+        param_min_amount_out: min_amount_out,
         lb_pair: accounts[0].pubkey,
         reserve_x: accounts[2].pubkey,
         reserve_y: accounts[3].pubkey,
