@@ -50,6 +50,7 @@ pub enum DexEvent {
 
     // Raydium AMM V4 events
     RaydiumAmmV4SwapEvent(RaydiumAmmV4SwapEvent),
+    RaydiumAmmV4SwapV2Event(RaydiumAmmV4SwapV2Event),
     RaydiumAmmV4DepositEvent(RaydiumAmmV4DepositEvent),
     RaydiumAmmV4WithdrawEvent(RaydiumAmmV4WithdrawEvent),
     RaydiumAmmV4WithdrawPnlEvent(RaydiumAmmV4WithdrawPnlEvent),
@@ -158,6 +159,7 @@ impl_dex_event_metadata!(
     PumpSwapPoolAccountEvent,
     // Raydium AMM V4 events
     RaydiumAmmV4SwapEvent,
+    RaydiumAmmV4SwapV2Event,
     RaydiumAmmV4DepositEvent,
     RaydiumAmmV4WithdrawEvent,
     RaydiumAmmV4WithdrawPnlEvent,

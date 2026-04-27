@@ -36,6 +36,18 @@ pub struct RaydiumAmmV4SwapEvent {
     pub user_source_owner: Pubkey,
 }
 
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
+pub struct RaydiumAmmV4SwapV2Event {
+    #[borsh(skip)]
+    pub metadata: EventMetadata,
+    // base in
+    pub amount_in: u64,
+    pub minimum_amount_out: u64,
+    // base out
+    pub max_amount_in: u64,
+    pub amount_out: u64,
+}
+
 /// 添加流动性
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, BorshDeserialize)]
 pub struct RaydiumAmmV4DepositEvent {
@@ -168,6 +180,8 @@ pub mod discriminators {
     // 指令鉴别器
     pub const SWAP_BASE_IN: &[u8] = &[9];
     pub const SWAP_BASE_OUT: &[u8] = &[11];
+    pub const SWAP_BASE_IN_V2: &[u8] = &[16];
+    pub const SWAP_BASE_OUT_V2: &[u8] = &[17];
     pub const DEPOSIT: &[u8] = &[03];
     pub const INITIALIZE2: &[u8] = &[01];
     pub const WITHDRAW: &[u8] = &[04];

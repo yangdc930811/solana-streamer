@@ -127,6 +127,8 @@ pub enum EventType {
     // Raydium AMM V4 events
     RaydiumAmmV4SwapBaseIn,
     RaydiumAmmV4SwapBaseOut,
+    RaydiumAmmV4SwapBaseInV2,
+    RaydiumAmmV4SwapBaseOutV2,
     RaydiumAmmV4Deposit,
     RaydiumAmmV4Initialize2,
     RaydiumAmmV4Withdraw,

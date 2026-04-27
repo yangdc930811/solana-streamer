@@ -7,6 +7,7 @@ use crate::streaming::event_parser::{
     DexEvent,
 };
 use solana_sdk::{instruction::AccountMeta, pubkey::Pubkey};
+use crate::streaming::event_parser::protocols::raydium_amm_v4::RaydiumAmmV4SwapV2Event;
 
 /// 解析 Raydium AMM V4 instruction data
 ///
@@ -29,6 +30,12 @@ pub fn parse_raydium_amm_v4_instruction_data(
         discriminators::WITHDRAW => parse_withdraw_instruction(data, accounts, metadata),
         discriminators::WITHDRAW_PNL => {
             parse_withdraw_pnl_instruction(data, accounts, metadata)
+        }
+        discriminators::SWAP_BASE_IN_V2 => {
+            parse_swap_base_input_v2_instruction(data, accounts, metadata)
+        }
+        discriminators::SWAP_BASE_OUT_V2 => {
+            parse_swap_base_output_v2_instruction(data, accounts, metadata)
         }
         _ => None,
     }
@@ -318,6 +325,48 @@ fn parse_swap_base_input_instruction(
         user_destination_token_account: accounts[16].pubkey,
         user_source_owner: accounts[17].pubkey,
 
+        ..Default::default()
+    }))
+}
+
+fn parse_swap_base_input_v2_instruction(
+    data: &[u8],
+    accounts: &[AccountMeta],
+    mut metadata: EventMetadata,
+) -> Option<DexEvent> {
+    metadata.event_type = EventType::RaydiumAmmV4SwapBaseInV2;
+
+    if data.len() < 16 || accounts.len() < 8 {
+        return None;
+    }
+    let amount_in = read_u64_le(data, 0)?;
+    let minimum_amount_out = read_u64_le(data, 8)?;
+
+    Some(DexEvent::RaydiumAmmV4SwapV2Event(RaydiumAmmV4SwapV2Event {
+        metadata,
+        amount_in,
+        minimum_amount_out,
+        ..Default::default()
+    }))
+}
+
+fn parse_swap_base_output_v2_instruction(
+    data: &[u8],
+    accounts: &[AccountMeta],
+    mut metadata: EventMetadata,
+) -> Option<DexEvent> {
+    metadata.event_type = EventType::RaydiumAmmV4SwapBaseOutV2;
+
+    if data.len() < 16 || accounts.len() < 8 {
+        return None;
+    }
+    let max_amount_in = read_u64_le(data, 0)?;
+    let amount_out = read_u64_le(data, 8)?;
+
+    Some(DexEvent::RaydiumAmmV4SwapV2Event(RaydiumAmmV4SwapV2Event {
+        metadata,
+        max_amount_in,
+        amount_out,
         ..Default::default()
     }))
 }
