@@ -346,6 +346,7 @@ fn parse_swap_base_input_v2_instruction(
         metadata,
         amount_in,
         minimum_amount_out,
+        amm: accounts[1].pubkey,
         ..Default::default()
     }))
 }
@@ -367,6 +368,7 @@ fn parse_swap_base_output_v2_instruction(
         metadata,
         max_amount_in,
         amount_out,
+        amm: accounts[1].pubkey,
         ..Default::default()
     }))
 }

@@ -46,6 +46,7 @@ pub struct RaydiumAmmV4SwapV2Event {
     // base out
     pub max_amount_in: u64,
     pub amount_out: u64,
+    pub amm: Pubkey,
 }
 
 /// 添加流动性
