@@ -84,6 +84,7 @@ pub enum EventType {
     // PumpSwap events
     #[default]
     PumpSwapBuy,
+    PumpSwapBuyExactQuoteIn,
     PumpSwapSell,
     PumpSwapCreatePool,
     PumpSwapDeposit,

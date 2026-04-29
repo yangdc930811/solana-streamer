@@ -178,7 +178,7 @@ fn parse_buy_exact_quote_in_instruction(
     accounts: &[AccountMeta],
     mut metadata: EventMetadata,
 ) -> Option<DexEvent> {
-    metadata.event_type = EventType::PumpSwapBuy;
+    metadata.event_type = EventType::PumpSwapBuyExactQuoteIn;
 
     if data.len() < 16 || accounts.len() < 13 {
         return None;
