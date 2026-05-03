@@ -22,6 +22,13 @@ pub fn amm_config_decode(data: &[u8]) -> Option<AmmConfig> {
     borsh::from_slice::<AmmConfig>(&data[..AMM_CONFIG_SIZE]).ok()
 }
 
+pub fn direct_amm_config_decode(data: &[u8]) -> Option<AmmConfig> {
+    if data.len() < AMM_CONFIG_SIZE + 8 {
+        return None;
+    }
+    borsh::from_slice::<AmmConfig>(&data[8..AMM_CONFIG_SIZE + 8]).ok()
+}
+
 pub fn amm_config_parser(account: &AccountPretty, mut metadata: EventMetadata) -> Option<DexEvent> {
     metadata.event_type = EventType::AccountRaydiumCpmmAmmConfig;
 
