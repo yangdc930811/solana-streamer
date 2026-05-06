@@ -66,10 +66,9 @@ impl AccountEventParser {
 
         // 1. 尝试从账户 discriminator 解析（协议特定账户）
         if account.data.len() >= 8 {
-            let discriminator = &account.data[0..8];
-
             // 尝试识别协议类型
             if let Some(protocol) = EventDispatcher::match_protocol_by_program_id(&account.owner) {
+                let discriminator = if protocol == Protocol::RaydiumAmmV4 { &account.data[0..1] } else { &account.data[0..8] };
                 // 检查是否在请求的协议列表中
                 if protocols.contains(&protocol) {
                     // 构建临时元数据（protocol会被dispatcher设置，event_type会在parser中设置）
