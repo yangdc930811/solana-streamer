@@ -127,6 +127,13 @@ pub fn tick_array_state_decode(data: &[u8]) -> Option<TickArrayState> {
     borsh::from_slice::<TickArrayState>(&data[..TICK_ARRAY_STATE_SIZE]).ok()
 }
 
+pub fn direct_tick_array_state_decode(data: &[u8]) -> Option<TickArrayState> {
+    if data.len() < TICK_ARRAY_STATE_SIZE + 8 {
+        return None;
+    }
+    borsh::from_slice::<TickArrayState>(&data[8..TICK_ARRAY_STATE_SIZE + 8]).ok()
+}
+
 pub fn tick_array_state_parser(
     account: &AccountPretty,
     mut metadata: EventMetadata,
