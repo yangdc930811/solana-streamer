@@ -94,7 +94,7 @@ fn parse_swap2_instruction(
 ) -> Option<DexEvent> {
     metadata.event_type = EventType::MeteoraDammV2Swap2;
 
-    if data.len() < 16 || accounts.len() < 13 {
+    if data.len() < 16 || accounts.len() < 14 {
         return None;
     }
 
