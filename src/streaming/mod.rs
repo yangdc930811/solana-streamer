@@ -5,6 +5,7 @@ pub mod shred;
 pub mod shred_stream;
 pub mod yellowstone_grpc;
 pub mod yellowstone_sub_system;
+pub mod binary;
 
 pub use shred::ShredStreamGrpc;
 pub use yellowstone_grpc::YellowstoneGrpc;
