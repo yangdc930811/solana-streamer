@@ -68,12 +68,13 @@ impl BinaryStreamGrpc {
 
         let mut stream = response.into_inner();
 
-        let _ = subscribe_tx.send(request).await;
-
         // Wrap callback once before the async block
         let callback = Arc::new(callback);
 
         let stream_task = tokio::spawn(async move {
+            // 保持 subscribe_tx 存活，防止 request stream 被提前关闭
+            let _ = subscribe_tx.send(request).await;
+
             while let Some(response) = stream.message().await.unwrap() {
                 let update = response.transaction.expect("transaction must be present");
                 let tx = update.transaction.expect("transaction must be present");
