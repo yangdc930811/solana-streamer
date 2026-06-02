@@ -81,34 +81,25 @@ impl BinaryStreamGrpc {
 
                 match bincode::deserialize::<VersionedTransaction>(&tx.binary_transaction) {
                     Ok(vt) => {
-                        let instruction_count = vt.message.instructions().len();
-                        println!(
-                            "filters: {:?}, slot {}, signatures: {}, instructions: {}",
-                            response.filters,
-                            update.slot,
-                            tx.signatures.len(),
-                            instruction_count,
-                        );
-
-                        // let transaction_with_slot =
-                        //     factory::create_transaction_with_slot_pooled(
-                        //         vt,
-                        //         update.slot,
-                        //         get_high_perf_clock(),
-                        //         None,
-                        //     );
-                        // // Process transaction - clone Arc and Vec for each call
-                        // if let Err(e) = process_shred_transaction(
-                        //     transaction_with_slot,
-                        //     &protocols,
-                        //     event_type_filter.as_ref(),
-                        //     callback.clone(),
-                        //     bot_wallet,
-                        // )
-                        //     .await
-                        // {
-                        //     error!("Error handling message: {e:?}");
-                        // }
+                        let transaction_with_slot =
+                            factory::create_transaction_with_slot_pooled(
+                                vt,
+                                update.slot,
+                                get_high_perf_clock(),
+                                None,
+                            );
+                        // Process transaction - clone Arc and Vec for each call
+                        if let Err(e) = process_shred_transaction(
+                            transaction_with_slot,
+                            &protocols,
+                            event_type_filter.as_ref(),
+                            callback.clone(),
+                            bot_wallet,
+                        )
+                            .await
+                        {
+                            error!("Error handling message: {e:?}");
+                        }
                     }
                     Err(e) => {
                         println!("Failed to deserialize VersionedTransaction: {e}");
